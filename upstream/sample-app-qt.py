@@ -19,11 +19,11 @@
 import os
 import pprint
 
-from Lens import LensAppGTK
+from Lens import LensAppQt
 
-class MyApp(LensAppGTK.LensAppGTK):
+class MyApp(LensAppQt.LensAppQt):
   def __init__(self):
-    LensAppGTK.LensAppGTK.__init__(self)
+    LensAppQt.LensAppQt.__init__(self)
 
     self.app_name = 'MyApp'
 
@@ -38,7 +38,7 @@ class MyApp(LensAppGTK.LensAppGTK):
     self.close()
 
   def _get_hostname_cb(self, *args):
-    self.emit('update-config', {'hostname': os.uname()[1]})
+    self.emit('update-config', os.uname()[1])
 
   def _update_hostname_cb(self, message):
     pp = pprint.PrettyPrinter(indent=2)

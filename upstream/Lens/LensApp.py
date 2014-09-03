@@ -154,6 +154,12 @@ class LensApp():
   def on(self, name, callback):
     self._lv.on(name, callback)
 
+  def set_title(self, title):
+    self._lv._window.set_title(title)
+
+  def set_size(self, width, height):
+    self._lv._window.set_size_request(1024, 768)
+
   def run(self):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     Gtk.main()

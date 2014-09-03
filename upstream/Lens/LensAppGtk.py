@@ -16,7 +16,6 @@
 #
 
 import json
-import pprint
 import signal
 import threading
 
@@ -130,8 +129,7 @@ class ThreadManager():
 
 
 
-class LensViewWebKit2GTK(WebKit2.WebView):
-
+class LensViewWebKit2Gtk(WebKit2.WebView):
 
 
   __gsignals__ = {
@@ -209,13 +207,11 @@ class LensViewWebKit2GTK(WebKit2.WebView):
 
 
 
-class LensViewGTK(LensView.LensView):
+class LensViewGtk(LensView.LensView):
 
 
   def __init__(self, *args, **kwargs):
     LensView.LensView.__init__(self, *args, **kwargs)
-
-    self._app_name = kwargs.get('name', 'Unknown')
 
     self._build_app()
 
@@ -228,7 +224,7 @@ class LensViewGTK(LensView.LensView):
     w.set_size_request(792, 496)
 
     # build webkit container
-    lv = LensViewWebKit2GTK()
+    lv = LensViewWebKit2Gtk()
 
     # XXX: Move to AppView
     lv.connect('on-js', self._on_js)
@@ -283,9 +279,9 @@ class LensViewGTK(LensView.LensView):
 
 
 
-class LensAppGTK(LensApp.LensApp):
+class LensAppGtk(LensApp.LensApp):
   def __init__(self, *args, **kwargs):
 
     # TODO: remove dependency on GTK
-    self._lv = LensViewGTK()
+    self._lv = LensViewGtk()
 

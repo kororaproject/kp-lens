@@ -266,10 +266,8 @@ class LensViewGtk(LensView.LensView):
   def set_size(self, width, height):
     self._lv._window.set_size_request(width, height)
 
-  def emit_js(self, signal, message={}):
-  #
-  # emitJS and onJS are the primary entry and exit points for the python/javascript bridge
-    self._lensview.run_javascript("var _rs = angular.element(document).scope(); _rs.$apply( function() { _rs.$broadcast('%s', %s) });" % (signal, json.dumps(message)), None, None, None)
+  def emit_js(self, name, *args):
+    self._lensview.run_javascript("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast('%s',%s)});" % (name, json.dumps(args)), None, None, None)
 
   def load_uri(self, uri):
     print("Opening: %s" % uri)

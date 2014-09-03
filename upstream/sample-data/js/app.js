@@ -16,7 +16,19 @@ app.run(function($rootScope) {
       document.title = '_BR::' + angular.toJson(_command, false);
       document.title = _title;
     }
-  }
+  };
+
+  $rootScope.safeApply = function(fn) {
+    var phase = this.$root.$$phase;
+    if(phase == '$apply' || phase == '$digest') {
+      if(fn && (typeof(fn) === 'function')) {
+        fn();
+      }
+    }
+    else {
+      this.$apply(fn);
+    }
+  };
 });
 
 function AppCtrl($scope) {
@@ -24,9 +36,9 @@ function AppCtrl($scope) {
 
   /* SIGNALS */
 
-  $scope.$on('update-config', function(e, data) {
-    console.log(data.hostname);
-    $scope.hostname = data.hostname;
+  $scope.$on('update-config', function(e, hostname) {
+    console.log(hostname);
+    $scope.hostname = hostname;
   });
 
   $scope.updateHostname = function() {

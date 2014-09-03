@@ -40,10 +40,29 @@ class LensViewWebKitGTK(WebKit2.WebView):
     self.l_uri = None
 
     # disable right-click context menu
-    self.get_settings().set_property('enable-accelerated-2d-canvas', True)
-    self.get_settings().set_property('enable-smooth-scrolling', True)
-    self.get_settings().set_property('enable_write_console_messages_to_stdout', True)
-    self.get_settings().set_property('javascript-can-access-clipboard', True)
+    try:
+        self.get_settings().set_property('enable-accelerated-2d-canvas', True)
+    except:
+        pass
+        # TODO: log failure to set
+
+    try:
+        self.get_settings().set_property('enable-smooth-scrolling', True)
+    except:
+        pass
+        # TODO: log failure to set
+
+    try:
+        self.get_settings().set_property('enable_write_console_messages_to_stdout', True)
+    except:
+        pass
+        # TODO: log failure to set
+
+    try:
+        self.get_settings().set_property('javascript-can-access-clipboard', True)
+    except:
+        pass
+        # TODO: log failure to set
 
   def _context_menu_cb(self, view, context_menu, event, hit_test_result):
     return True

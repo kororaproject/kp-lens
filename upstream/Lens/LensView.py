@@ -73,18 +73,20 @@ class EventEmitter():
       self._events.pop(name, None)
 
 
+
 class LensView(EventEmitter):
+
+
   def close(self, *args, **kwargs):
     self.emit('__close_app')
 
-  def emitJS(self, name, message):
+  def _on_js(self, thread, name, args):
+    self.emit(name, *args)
+
+  def emit_js(self, name, message):
     raise NotImplementedError('This needs to be subclassed: emitJS')
     pass
 
-  def loadURI(self, uri):
+  def load_uri(self, uri):
     raise NotImplementedError('This needs to be subclassed: loadURI')
     pass
-
-  def _onJS(self, thread, name, args):
-    self.emit(name, *args)
-

@@ -19,11 +19,11 @@
 import os
 import pprint
 
-from Lens import LensApp
+from Lens import LensAppGTK
 
-class MyApp(LensApp.LensApp):
+class MyApp(LensAppGTK.LensAppGTK):
   def __init__(self):
-    LensApp.LensApp.__init__(self)
+    LensAppGTK.LensAppGTK.__init__(self)
 
     self.app_name = 'MyApp'
 

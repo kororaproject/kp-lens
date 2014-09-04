@@ -19,19 +19,33 @@ import os
 
 from Lens import LensView
 
+
+
 class LensApp():
 
+  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
+    self._app_name = name
+    self._app_width = width
+    self._app_height = height
 
-  def __init__(self, *args, **kwargs):
-    self._app_name = "App"
+    self._lv = LensView.LensView(name=name, width=width, height=height)
 
-    self._lv = LensView.LensView()
+  @property
+  def app_name(self):
+    return self._app_name
+
+  @app_name.setter
+  def app_name(self, name):
+    self._app_name = name
+
+    # update window title on app name change
+    self._lv.set_title(self._app_name)
 
   def close(self):
     self._lv.close()
 
-  def emit(self, name, message):
-    self._lv.emit_js(name, message)
+  def emit(self, name, *args):
+    self._lv.emit_js(name, *args)
 
   def load_app(self, uri):
     uri = 'file://' +  os.path.abspath( uri )
@@ -44,8 +58,9 @@ class LensApp():
   def run(self):
     self._lv._run()
 
+  def set_size(self, width, height):
+    self._lv.set_size(width, height)
+
   def set_title(self, title):
     self._lv.set_title(title)
 
-  def set_size(self, width, height):
-    self._lv.set_size(1024, 768)

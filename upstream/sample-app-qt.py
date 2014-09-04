@@ -23,9 +23,7 @@ from Lens import LensAppQt
 
 class MyApp(LensAppQt.LensAppQt):
   def __init__(self):
-    LensAppQt.LensAppQt.__init__(self)
-
-    self.app_name = 'MyApp'
+    LensAppQt.LensAppQt.__init__(self, name="SampleQtApp")
 
     # load the app entry page
     self.load_app('./sample-data/app.html')

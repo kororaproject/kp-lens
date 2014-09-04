@@ -15,18 +15,16 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import pprint
-
 class EventEmitter():
   def __init__(self):
-    self._events = {}
+    self.__events = {}
 
   def catch(self, callback=None):
     if self.on('error', callback) is not None:
       return self
 
   def emit(self, name, *args, **kwargs):
-    s = self._events.get(name, [])
+    s = self.__events.get(name, [])
 
     if not s:
       # TODO: debug print only
@@ -48,8 +46,7 @@ class EventEmitter():
   def on(self, name, callback):
     print('-- Subscribing %s on %s' % (name, callback))
 
-    self._events.setdefault(name, []).append(callback)
-
+    self.__events.setdefault(name, []).append(callback)
 
     return callback
 
@@ -57,36 +54,50 @@ class EventEmitter():
     pass
 
   def subscribers(self, name):
-    return self._events.get(name, [])
-
+    return self.__events.get(name, [])
 
   def unsubscribe(self, name, callback=None):
     # remove only the specified callback
     if callback is not None:
-      self._events[name] = [e for e in self._events.get(name, []) if e != callback]
+      self.__events[name] = [e for e in self.__events.get(name, []) if e != callback]
 
-      if not self._events[name]:
-        self._events.pop(name, None)
+      if not self.__events[name]:
+        self.__events.pop(name, None)
 
     # remove all subscriptions
     else:
-      self._events.pop(name, None)
+      self.__events.pop(name, None)
 
 
 
 class LensView(EventEmitter):
 
 
-  def close(self, *args, **kwargs):
-    self.emit('__close_app')
+  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
+    EventEmitter.__init__(self)
+
+    self._app_name = name
+    self._app_width = width
+    self._app_height = height
+
+  def _build_app(self):
+    raise NotImplementedError('Method "_build_app" needs to be subclassed.')
 
   def _on_js(self, thread, name, args):
     self.emit(name, *args)
 
-  def emit_js(self, name, message):
-    raise NotImplementedError('This needs to be subclassed: emitJS')
-    pass
+  def close(self, *args, **kwargs):
+    self.emit('__close_app')
+
+  def emit_js(self, name, *args):
+    raise NotImplementedError('Method "emit_js" needs to be subclassed.')
 
   def load_uri(self, uri):
-    raise NotImplementedError('This needs to be subclassed: loadURI')
-    pass
+    raise NotImplementedError('Method "load_uri" needs to be subclassed.')
+
+  def set_size(self, name, message):
+    raise NotImplementedError('Method "set_size" needs to be subclassed.')
+
+  def set_title(self, name, message):
+    raise NotImplementedError('Method "set_title" needs to be subclassed.')
+

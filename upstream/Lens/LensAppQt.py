@@ -61,22 +61,29 @@ class LensViewQt(LensView.LensView):
 
   def _build_app(self):
     # build webkit container
-    lv = _QWebView() #LensViewWebKitQt()
-    lv.show()
-
+    self._lensview = lv = _QWebView()
     lv.setPage(_QWebPage())
 
-    self._lensview = lv
     self._frame = lv.page().mainFrame()
 
-    # connect to the "titleChanged" signal
+    # connect to Qt signals
     lv.titleChanged.connect(self._title_changed_cb)
-
-    # connect to the "titleChanged" signal
     self._app.lastWindowClosed.connect(self._last_window_closed_cb)
 
-    # connect the Lens specific close event
+    # connect to Lens signals
     self.on('__close_app', self._close_cb)
+
+    self.set_title(self._app_name)
+    self.set_size(self._app_width, self._app_height)
+
+    # center on screen
+    _frame_geometry = lv.frameGeometry()
+    _active_screen = self._app.desktop().screenNumber(self._app.desktop().cursor().pos())
+    _center = self._app.desktop().screenGeometry(_active_screen).center()
+    _frame_geometry.moveCenter(_center)
+    lv.move(_frame_geometry.topLeft())
+
+    lv.show()
 
   def _close_cb(self):
     self._app.exit()
@@ -117,11 +124,17 @@ class LensViewQt(LensView.LensView):
     # load our index file
     self._lensview.load(QUrl(uri))
 
+  def set_size(self, width, height):
+    self._lensview.setFixedSize(width, height)
+
+  def set_title(self, title):
+    self._lensview.setWindowTitle(QString(title))
 
 
 class LensAppQt(LensApp.LensApp):
 
 
-  def __init__(self, *args, **kwargs):
+  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
 
-    self._lv = LensViewQt()
+    self._lv = LensViewQt(name=name, width=width, height=height, *args, **kwargs)
+

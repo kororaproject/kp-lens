@@ -129,7 +129,7 @@ class ThreadManager():
 
 
 
-class LensViewWebKit2Gtk(WebKit2.WebView):
+class _WebView(WebKit2.WebView):
 
 
   __gsignals__ = {
@@ -210,24 +210,20 @@ class LensViewWebKit2Gtk(WebKit2.WebView):
 class LensViewGtk(LensView.LensView):
 
 
-  def __init__(self, *args, **kwargs):
-    LensView.LensView.__init__(self, *args, **kwargs)
+  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
+    LensView.LensView.__init__(self, name=name, width=width,height=height, *args, **kwargs)
+
+    print(name)
 
     self._build_app()
 
   def _build_app(self):
-    # build window
-    w = Gtk.Window()
+    # build window and position in center of screen
+    self._window = w = Gtk.Window()
     w.set_position(Gtk.WindowPosition.CENTER)
-    w.set_wmclass(self._app_name, self._app_name)
-    w.set_title(self._app_name)
-    w.set_size_request(792, 496)
 
     # build webkit container
-    lv = LensViewWebKit2Gtk()
-
-    # XXX: Move to AppView
-    lv.connect('on-js', self._on_js)
+    self._lensview = lv = _WebView()
 
     # build scrolled window widget and add our appview container
     sw = Gtk.ScrolledWindow()
@@ -240,15 +236,18 @@ class LensViewGtk(LensView.LensView):
 
     # add the box to the parent window and show
     w.add(b)
+
+    # connect to Gtk signals
+    lv.connect('on-js', self._on_js)
     w.connect('delete-event', self._delete_event_cb)
-    w.show_all()
 
-    self._window = w
-    self._lensview = lv
-
-
-    # connect the Lens specific close event
+    # connect to Lens signals
     self.on('__close_app', self._close_cb)
+
+    self.set_title(self._app_name)
+    self.set_size(self._app_width, self._app_height)
+
+    w.show_all()
 
   def _close_cb(self, *args):
     Gtk.main_quit(*args)
@@ -259,13 +258,6 @@ class LensViewGtk(LensView.LensView):
   def _run(self):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     Gtk.main()
-
-  def set_title(self, title):
-    self._lv._window.set_title(title)
-
-  def set_size(self, width, height):
-    self._lv._window.set_size_request(width, height)
-
   def emit_js(self, name, *args):
     self._lensview.run_javascript("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast('%s',%s)});" % (name, json.dumps(args)), None, None, None)
 
@@ -275,11 +267,19 @@ class LensViewGtk(LensView.LensView):
     # load our index file
     self._lensview.load_uri(uri)
 
+  def set_size(self, width, height):
+    self._window.set_size_request(width, height)
+
+  def set_title(self, title):
+    self._window.set_title(title)
+    self._window.set_wmclass(title, title)
+
 
 
 class LensAppGtk(LensApp.LensApp):
-  def __init__(self, *args, **kwargs):
 
-    # TODO: remove dependency on GTK
-    self._lv = LensViewGtk()
+
+  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
+
+    self._lv = LensViewGtk(name=name, width=width, height=height, *args, **kwargs)
 

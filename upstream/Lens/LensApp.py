@@ -44,6 +44,22 @@ class LensApp():
   def close(self):
     self._lv.close()
 
+  def connect(self, name):
+    """A decorator that is used to register a callback for
+       a given signal. Example usage::
+
+         @app.connect('hello')
+         def hello_cb():
+           print("Hi!")
+
+    :param name: the name of the signal to subscribe to
+    """
+    def decorator(f):
+      self.on(name, f)
+      return f
+
+    return decorator
+
   def emit(self, name, *args):
     self._lv.emit_js(name, *args)
 

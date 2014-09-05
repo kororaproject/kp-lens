@@ -2,12 +2,26 @@
 <html lang="en" ng-app="lens-app">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    table { width: 100%; }
+  </style>
 </head>
 <body class="unselectable" ng-controller="AppCtrl">
   <input type="text" ng-model="hostname"></input>
   <button ng-click="updateHostname()">Update</button>
   <button ng-click="startLongTask()">Start Long Task</button>
   <button ng-click="closeApp()">Close</button>
+
+  <table>
+    <tr>
+      <th>Task ID</th>
+      <th>Progress</th>
+    </tr>
+    <tr ng-repeat="(id, progress) in long_tasks">
+      <td>{{id}}</td>
+      <td>{{progress}}</td>
+    </tr>
+  </table>
 
   <script src="js/angular.min.js"></script>
   <script src="js/app-threads.js"></script>

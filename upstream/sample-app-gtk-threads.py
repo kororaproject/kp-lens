@@ -31,10 +31,9 @@ class LongTaskThread(LensThread):
     self.emit('started', self.uuid)
     for i in range(100):
       time.sleep(.05)
-      print('progress: %d / 100' % (i))
       self.emit('progress', self.uuid, i)
 
-    self.emit('complete', self.uuid)
+    self.emit('complete', self.uuid, 'YAY')
 
 
 app = LensAppGtk()
@@ -57,19 +56,17 @@ def _update_hostname_cb(message):
 
 @app.connect('start-long-task')
 def _long_task_cb():
-  #app.manager.create(_post_init_finished_cb, _null_cb, None, config.post_init)
   t = LongTaskThread()
   app.manager.add_thread(t)
   app.manager.on_thread(t, 'progress', _longtask_progress_cb)
   app.manager.on_thread(t, 'complete', _longtask_complete_cb)
 
 
-def _longtask_progress_cb(uuid, progress):
-  app.emit('long-task-progress', uuid, progress)
+def _longtask_progress_cb(thread, *args):
+  app.emit('long-task-progress', *args)
 
-def _longtask_complete_cb(t, *args):
-  print(list(args))
-  app.emit('long-task-complete', 'Yay! FINISHED!')
+def _longtask_complete_cb(thread, *args):
+  app.emit('long-task-complete', *args)
 
 app.run()
 

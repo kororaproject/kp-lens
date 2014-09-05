@@ -33,17 +33,16 @@ app.run(function($rootScope) {
 
 function AppCtrl($scope) {
   $scope.hostname = 'unknown';
+  $scope.long_tasks = {};
 
   /* SIGNALS */
-
   $scope.$on('long-task-progress', function(e, uuid, p) {
-    console.log(uuid);
+    $scope.long_tasks[uuid] = p;
   });
 
-  $scope.$on('long-task-complete', function(e, uuid, m) {
-    console.log(uuid, m);
+  $scope.$on('long-task-complete', function(e, uuid, p) {
+    $scope.long_tasks[uuid] = p;
   });
-
 
   $scope.$on('update-config', function(e, hostname) {
     console.log(hostname);

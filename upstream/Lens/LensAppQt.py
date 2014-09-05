@@ -116,7 +116,7 @@ class LensViewQt(LensView.LensView):
     self._app.exec_()
 
   def emit_js(self, name, *args):
-    self._frame.evaluateJavaScript(QString("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast('%s',%s)});" % (name, json.dumps(list(args)))))
+    self._frame.evaluateJavaScript(QString("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});" % json.dumps([name] + list(args))))
 
   def load_uri(self, uri):
     print("Opening: %s" % uri)

@@ -77,6 +77,7 @@ class LensThreadGtk(threading.Thread, GObject.GObject):
     self.emit('__lens', '__complete', [])
 
 
+
 class LensThreadManagerGtk(LensThreadManager):
   """
   Manages many _GThreads. This involves starting and stopping
@@ -108,11 +109,11 @@ class LensThreadManagerGtk(LensThreadManager):
 
 
   def __lens_cb(self, thread, name, args):
-    if name == 'complete':
+    if name == '__complete':
       self._thread_completed_cb(thread, *args)
 
     else:
-      self.emit('__thread_%s_%s' % (name, thread.uuid), *args)
+      self.emit('__thread_%s_%s' % (name, thread.uuid), thread._lens_thread, *args)
 
 
 
@@ -246,8 +247,9 @@ class LensViewGtk(LensView):
   def _run(self):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     Gtk.main()
+
   def emit_js(self, name, *args):
-    self._lensview.run_javascript("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast('%s',%s)});" % (name, json.dumps(args)), None, None, None)
+    self._lensview.run_javascript("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});" % json.dumps([name] + list(args)), None, None, None)
 
   def load_uri(self, uri):
     print("Opening: %s" % uri)

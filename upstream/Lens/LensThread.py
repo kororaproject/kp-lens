@@ -24,7 +24,9 @@ __counter = 0
 def _new_name():
   global __counter
   __counter += 1
-  return "LensThread-{}".format(__counter)
+  return "LensThread-{}-{}".format(__counter, time.time())
+
+
 
 class LensThread(EventEmitter):
 
@@ -42,6 +44,7 @@ class LensThread(EventEmitter):
 
   def run(self):
     pass
+
 
 
 class LensThreadManager(EventEmitter):

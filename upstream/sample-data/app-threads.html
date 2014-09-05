@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="lens-app">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="unselectable" ng-controller="AppCtrl">
+  <input type="text" ng-model="hostname"></input>
+  <button ng-click="updateHostname()">Update</button>
+  <button ng-click="startLongTask()">Start Long Task</button>
+  <button ng-click="closeApp()">Close</button>
+
+  <script src="js/angular.min.js"></script>
+  <script src="js/app-threads.js"></script>
+</body>
+</html>

@@ -20,6 +20,12 @@ import time
 
 from Lens.LensView import EventEmitter
 
+__counter = 0
+def _new_name():
+  global __counter
+  __counter += 1
+  return "LensThread-{}".format(__counter)
+
 class LensThread(EventEmitter):
 
 
@@ -27,7 +33,7 @@ class LensThread(EventEmitter):
     EventEmitter.__init__(self)
 
     # the ID won't change when the name changes
-    self._uuid = 'LensThread' + str(time.monotonic())
+    self._uuid = _new_name()
 
   @property
   def uuid(self):

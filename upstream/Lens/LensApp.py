@@ -17,7 +17,8 @@
 
 import os
 
-from Lens import LensView
+from Lens.LensView import LensView
+from Lens.LensThread import LensThread, LensThreadManager
 
 
 
@@ -28,7 +29,7 @@ class LensApp():
     self._app_width = width
     self._app_height = height
 
-    self._lv = LensView.LensView(name=name, width=width, height=height)
+    self._lv = LensView(name=name, width=width, height=height)
 
   @property
   def app_name(self):

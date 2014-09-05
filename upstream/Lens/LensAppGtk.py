@@ -18,119 +18,107 @@
 import json
 import signal
 import threading
+import time
 
-from Lens import LensApp, LensView
+from Lens.LensApp import LensApp
+from Lens.LensView import LensView
+from Lens.LensThread import LensThread, LensThreadManager
 
 # GTK
 from gi.repository import WebKit2, Gtk, GObject
 
 
 class _GIdleObject(GObject.GObject):
-  '''
+  """
   Override gobject.GObject to always emit signals in the main thread
   by emmitting on an idle handler
-  '''
+  """
   def __init__(self):
     GObject.GObject.__init__(self)
 
   def emit(self, *args):
     GObject.idle_add(GObject.GObject.emit, self, *args)
 
-class _GThread(threading.Thread, _GIdleObject):
-  '''
+class LensThreadGtk(threading.Thread, GObject.GObject):
+  """
   Thread which uses GObject signals to return information
   to the GUI.
-  '''
+  """
   __gsignals__ = {
-    "completed": (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, ()),
-    "progress":  (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (GObject.TYPE_FLOAT,))
+    "__lens":    (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (
+      GObject.TYPE_STRING,
+      GObject.TYPE_PYOBJECT,
+    ))
   }
 
-  def __init__(self, target=None, args=(), kwargs={}):
-    threading.Thread.__init__(self, target=target, *args, **kwargs)
-    _GIdleObject.__init__(self)
+  def __init__(self, thread=None):
+    threading.Thread.__init__(self)
+    GObject.GObject.__init__(self)
 
-    self.daemon = True
+    #TODO: type check
+    self._uuid = thread.uuid
+    self._lens_thread = thread
+
+    self._lens_thread.on_any(self._thread_signal_cb)
+
+  @property
+  def uuid(self):
+    return self._uuid
+
+  def _thread_signal_cb(self, name, *args):
+    self.emit('__lens', name, list(args))
 
   def run(self):
-    threading.Thread.run(self)
+    if self._lens_thread is None:
+      threading.Thread.run(self)
+    else:
+      self._lens_thread.run()
 
-    self.emit("completed")
+    self.emit('__lens', '__complete', [])
 
-class ThreadManager():
-  '''
+
+class LensThreadManagerGtk(LensThreadManager):
+  """
   Manages many _GThreads. This involves starting and stopping
   said threads, and respecting a maximum num of concurrent threads limit
-  '''
-  def __init__(self, maxConcurrentThreads):
-    self.maxConcurrentThreads = maxConcurrentThreads
+  """
+  def __init__(self, maxConcurrentThreads=10):
+    LensThreadManager.__init__(self, maxConcurrentThreads)
 
-    #stores all threads, running or stopped
-    self.threads = {}
+  def _add_thread(self, thread):
+    _thread_gtk = LensThreadGtk(thread=thread)
 
-    #the pending thread args are used as an index for the stopped threads
-    self.pendingThreadArgs = []
+    _thread_gtk.connect("__lens", self.__lens_cb)
 
-  def _register_thread_completed(self, thread, *args):
-    '''
-    Decrements the count of concurrent threads and starts any
-    pending threads if there is space
-    '''
-    del(self.threads[args])
-    running = len(self.threads) - len(self.pendingThreadArgs)
+    return _thread_gtk
 
-    print("%s completed. %s running, %s pending" % (thread, running, len(self.pendingThreadArgs)))
+  def _create_thread(self, completed_cb, progress_cb, user_data, target=None, *args, **kwargs):
+    if isinstance(target, LensThread):
+      thread = LensThreadGtk.fromLensThread(target)
+    else:
+      thread = LensThreadGtk(target=target, *args, **kwargs)
 
-    if running < self.maxConcurrentThreads:
-      try:
-        args = self.pendingThreadArgs.pop()
-        print("Starting pending %s" % self.threads[args])
-        self.threads[args].start()
-      except IndexError: pass
+    # signals run in the order connected. Connect the user completed
+    # callback first incase they wish to do something
+    # before we delete the thread
 
-  def create(self, completedCb, progressCb, userData, target, *args, **kwargs):
-    '''
-    Makes a thread with args. The thread will be started when there is
-    a free slot
-    '''
-    running = len(self.threads) - len(self.pendingThreadArgs)
+    thread.connect("__lens", self.__lens_cb)
 
-    if args not in self.threads:
-      thread = _GThread(target=target, *args, **kwargs)
+    return thread
 
-      #signals run in the order connected. Connect the user completed
-      #callback first incase they wish to do something
-      #before we delete the thread
-      thread.connect("completed", completedCb, userData)
-      thread.connect("completed", self._register_thread_completed, *args)
-      thread.connect("progress", progressCb, userData)
 
-      #This is why we use args, not kwargs, because args are hashable
-      self.threads[args] = thread
+  def __lens_cb(self, thread, name, args):
+    if name == 'complete':
+      self._thread_completed_cb(thread, *args)
 
-      if running < self.maxConcurrentThreads:
-        print("Starting %s" % thread)
-        self.threads[args].start()
-
-      else:
-        print("Queing %s" % thread)
-        self.pendingThreadArgs.append(args)
-
-  def stop_all(self, block=False):
-    '''
-    Stops all threads. If block is True then actually wait for the thread
-    to finish (may block the UI)
-    '''
-    for thread in self.threads.values():
-      thread.cancel()
-      if block:
-        if thread.isAlive():
-          thread.join()
+    else:
+      self.emit('__thread_%s_%s' % (name, thread.uuid), *args)
 
 
 
 class _WebView(WebKit2.WebView):
-
+  """
+  """
 
   __gsignals__ = {
     'on-js': (GObject.SIGNAL_RUN_LAST, None, (GObject.TYPE_STRING,GObject.TYPE_PYOBJECT,))
@@ -207,11 +195,11 @@ class _WebView(WebKit2.WebView):
 
 
 
-class LensViewGtk(LensView.LensView):
+class LensViewGtk(LensView):
 
 
   def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
-    LensView.LensView.__init__(self, name=name, width=width,height=height, *args, **kwargs)
+    LensView.__init__(self, name=name, width=width,height=height, *args, **kwargs)
 
     print(name)
 
@@ -276,10 +264,12 @@ class LensViewGtk(LensView.LensView):
 
 
 
-class LensAppGtk(LensApp.LensApp):
+class LensAppGtk(LensApp):
 
 
   def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
 
     self._lv = LensViewGtk(name=name, width=width, height=height, *args, **kwargs)
+
+    self.manager = LensThreadManagerGtk()
 

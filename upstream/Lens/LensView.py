@@ -25,6 +25,7 @@ class EventEmitter():
 
   def emit(self, name, *args, **kwargs):
     s = self.__events.get(name, [])
+    gs = self.__events.get('__*', [])
 
     if not s:
       # TODO: debug print only
@@ -37,6 +38,12 @@ class EventEmitter():
       for cb in s:
         cb(*args, **kwargs)
 
+    # global subscribers
+    if len(gs):
+      for cb in gs:
+        cb(name, *args, **kwargs)
+
+
   def emit_safe(self, name):
     pass
 
@@ -47,6 +54,13 @@ class EventEmitter():
     print('-- Subscribing %s on %s' % (name, callback))
 
     self.__events.setdefault(name, []).append(callback)
+
+    return callback
+
+  def on_any(self, callback):
+    print('-- Subscribing %s on any signal' % (callback))
+
+    self.__events.setdefault('__*', []).append(callback)
 
     return callback
 

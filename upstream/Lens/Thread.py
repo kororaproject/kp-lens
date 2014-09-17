@@ -29,11 +29,22 @@ def _new_name():
 
 
 class Thread(EventEmitter):
-  def __init__(self):
+  def __init__(self, daemon=False):
     EventEmitter.__init__(self)
+
+    self._daemon = daemon
 
     # the ID won't change when the name changes
     self._uuid = _new_name()
+
+
+  @property
+  def daemon(self):
+    return self._daemon
+
+  @daemon.setter
+  def daemon(self, state):
+    self._daemon = bool(state)
 
   @property
   def uuid(self):
@@ -50,8 +61,7 @@ class ThreadProcess(multiprocessing.Process):
 
     self._thread = thread
     self._uuid = thread.uuid
-
-    self.daemon = True
+    self.daemon = thread.daemon
 
     self._thread.on_any(self._thread_signal_cb)
 

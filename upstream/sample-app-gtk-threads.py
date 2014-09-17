@@ -29,6 +29,7 @@ class LongTaskThread(LensThread):
 
   def run(self):
     self.emit('started', self.uuid)
+
     for i in range(100):
       time.sleep(.05)
       self.emit('progress', self.uuid, i)
@@ -36,37 +37,38 @@ class LongTaskThread(LensThread):
     self.emit('complete', self.uuid, 'YAY')
 
 
-app = LensAppGtk()
+if __name__ == '__main__':
+  app = LensAppGtk()
 
 # load the app entry page
-app.load_app('./sample-data/app-threads.html')
+  app.load_app('./sample-data/app-threads.html')
 
-@app.connect('close')
-def _close_app_cb(*args):
-  app.close()
+  @app.connect('close')
+  def _close_app_cb(*args):
+    app.close()
 
-@app.connect('get-hostname')
-def _get_hostname_cb(*args):
-  app.emit('update-config', os.uname()[1])
+  @app.connect('get-hostname')
+  def _get_hostname_cb(*args):
+    app.emit('update-config', os.uname()[1])
 
-@app.connect('update-hostname')
-def _update_hostname_cb(message):
-  pp = pprint.PrettyPrinter(indent=2)
-  pp.pprint(message)
+  @app.connect('update-hostname')
+  def _update_hostname_cb(message):
+    pp = pprint.PrettyPrinter(indent=2)
+    pp.pprint(message)
 
-@app.connect('start-long-task')
-def _long_task_cb():
-  t = LongTaskThread()
-  app.manager.add_thread(t)
-  app.manager.on_thread(t, 'progress', _longtask_progress_cb)
-  app.manager.on_thread(t, 'complete', _longtask_complete_cb)
+  @app.connect('start-long-task')
+  def _long_task_cb():
+    t = LongTaskThread()
+    app.manager.add_thread(t)
+    app.manager.on_thread(t, 'progress', _longtask_progress_cb)
+    app.manager.on_thread(t, 'complete', _longtask_complete_cb)
 
 
-def _longtask_progress_cb(thread, *args):
-  app.emit('long-task-progress', *args)
+  def _longtask_progress_cb(thread, *args):
+    app.emit('long-task-progress', *args)
 
-def _longtask_complete_cb(thread, *args):
-  app.emit('long-task-complete', *args)
+  def _longtask_complete_cb(thread, *args):
+    app.emit('long-task-complete', *args)
 
-app.run()
+  app.run()
 

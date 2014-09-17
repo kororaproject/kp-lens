@@ -15,7 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import threading
+import multiprocessing
 import time
 
 from Lens.LensView import EventEmitter
@@ -29,8 +29,6 @@ def _new_name():
 
 
 class LensThread(EventEmitter):
-
-
   def __init__(self):
     EventEmitter.__init__(self)
 
@@ -41,9 +39,44 @@ class LensThread(EventEmitter):
   def uuid(self):
     return self._uuid
 
-
   def run(self):
     pass
+
+
+
+class LensThreadProcess(multiprocessing.Process):
+  def __init__(self, thread, pipe_in, queue_out):
+    multiprocessing.Process.__init__(self)
+
+    self._thread = thread
+    self._uuid = thread.uuid
+
+    self.daemon = True
+
+    self._thread.on_any(self._thread_signal_cb)
+
+    self._pipe_in = pipe_in
+    self._queue_out = queue_out
+
+  def _thread_signal_cb(self, name, *args):
+    self._queue_out.put({
+      'uuid': self.uuid,
+      'name': name,
+      'args': list(args)
+    })
+
+  @property
+  def uuid(self):
+    return self._uuid
+
+  def run(self):
+
+    self._thread.run()
+
+    self._queue_out.put({
+      'uuid': self.uuid,
+      'name': '__completed'
+    })
 
 
 
@@ -55,18 +88,15 @@ class LensThreadManager(EventEmitter):
   def __init__(self, maxConcurrentThreads=5):
     EventEmitter.__init__(self)
 
-    self.maxConcurrentThreads = maxConcurrentThreads
-
     #stores all threads, running or stopped
     self.threads = {}
-
-    #the pending thread args are used as an index for the stopped threads
     self.pendingThreadArgs = []
+    self.maxConcurrentThreads = maxConcurrentThreads
 
-  def _create_thread(self, complete_cb, progress_cb, target=None, *args, **kwargs):
-    return LensThread(target=target, *args, **kwargs)
+    self.queue_in = multiprocessing.Queue()
 
-  def _thread_completed_cb(self, thread, *args):
+
+  def _thread_completed(self, thread):
     """
     Decrements the count of concurrent threads and starts any
     pending threads if there is space
@@ -80,7 +110,7 @@ class LensThreadManager(EventEmitter):
       try:
         uuid = self.pendingThreadArgs.pop()
         print("Starting pending %s" % self.threads[uuid])
-        self.threads[uuid].start()
+        self.threads[uuid]['t'].start()
       except IndexError:
         pass
 
@@ -90,59 +120,31 @@ class LensThreadManager(EventEmitter):
   def add_thread(self, thread):
     # TODO: be nicer
     if not isinstance(thread, LensThread):
-      raise TypeError("not a LensThread stupdiD!")
+      raise TypeError("not a LensThread stupiD!")
 
     running = len(self.threads) - len(self.pendingThreadArgs)
 
-    _thread = self._add_thread(thread)
+    _pipe = None
+    _thread = LensThreadProcess(thread, _pipe, self.queue_in)
+
     uuid = _thread.uuid
 
     if uuid not in self.threads:
-      self.threads[uuid] = _thread
+      self.threads[uuid] = {
+        't': _thread,
+        'p': _pipe
+      }
 
       self._register_thread_signals(_thread)
 
       if running < self.maxConcurrentThreads:
         print("Starting %s" % _thread)
-        self.threads[uuid].start()
+        self.threads[uuid]['t'].start()
 
       else:
         print("Queing %s" % thread)
         self.pendingThreadArgs.append(uuid)
 
-  def create(self, completed_cb, progress_cb, user_data, target, *args, **kwargs):
-    """
-    Makes a thread with args. The thread will be started when there is
-    a free slot
-    """
-    running = len(self.threads) - len(self.pendingThreadArgs)
-
-    if args not in self.threads:
-      thread = self._create_thread(completed_cb, progress_cb, user_data, target=target, *args, **kwargs)
-
-      #This is why we use args, not kwargs, because args are hashable
-      self.threads[args] = thread
-
-      if running < self.maxConcurrentThreads:
-        print("Starting %s" % thread)
-        self.threads[args].start()
-
-      else:
-        print("Queing %s" % thread)
-        self.pendingThreadArgs.append(args)
-
-    return thread
-
-  def stop_all(self, block=False):
-    '''
-    Stops all threads. If block is True then actually wait for the thread
-    to finish (may block the UI)
-    '''
-    for thread in self.threads.values():
-      thread.cancel()
-      if block:
-        if thread.isAlive():
-          thread.join()
 
   def on_thread(self, thread, name, callback):
     self.on('__thread_%s_%s' % (name, thread.uuid), callback)

@@ -16,8 +16,8 @@
 #
 
 import json
+import multiprocessing
 import signal
-import threading
 import time
 
 from Lens.LensApp import LensApp
@@ -28,53 +28,6 @@ from Lens.LensThread import LensThread, LensThreadManager
 from gi.repository import WebKit2, Gtk, GObject
 
 
-class _GIdleObject(GObject.GObject):
-  """
-  Override gobject.GObject to always emit signals in the main thread
-  by emmitting on an idle handler
-  """
-  def __init__(self):
-    GObject.GObject.__init__(self)
-
-  def emit(self, *args):
-    GObject.idle_add(GObject.GObject.emit, self, *args)
-
-class LensThreadGtk(threading.Thread, GObject.GObject):
-  """
-  Thread which uses GObject signals to return information
-  to the GUI.
-  """
-  __gsignals__ = {
-    "__lens":    (GObject.SIGNAL_RUN_LAST, GObject.TYPE_NONE, (
-      GObject.TYPE_STRING,
-      GObject.TYPE_PYOBJECT,
-    ))
-  }
-
-  def __init__(self, thread=None):
-    threading.Thread.__init__(self)
-    GObject.GObject.__init__(self)
-
-    #TODO: type check
-    self._uuid = thread.uuid
-    self._lens_thread = thread
-
-    self._lens_thread.on_any(self._thread_signal_cb)
-
-  @property
-  def uuid(self):
-    return self._uuid
-
-  def _thread_signal_cb(self, name, *args):
-    self.emit('__lens', name, list(args))
-
-  def run(self):
-    if self._lens_thread is None:
-      threading.Thread.run(self)
-    else:
-      self._lens_thread.run()
-
-    self.emit('__lens', '__complete', [])
 
 
 
@@ -86,35 +39,22 @@ class LensThreadManagerGtk(LensThreadManager):
   def __init__(self, maxConcurrentThreads=10):
     LensThreadManager.__init__(self, maxConcurrentThreads)
 
-  def _add_thread(self, thread):
-    _thread_gtk = LensThreadGtk(thread=thread)
+    # watch the queue for updates
+    _fd = self.queue_in._reader.fileno()
 
-    _thread_gtk.connect("__lens", self.__lens_cb)
+    GObject.io_add_watch(_fd, GObject.IO_IN, self._on_cb)
 
-    return _thread_gtk
+  def _on_cb(self, fd, cond):
+    while not self.queue_in.empty():
+      data = self.queue_in.get()
 
-  def _create_thread(self, completed_cb, progress_cb, user_data, target=None, *args, **kwargs):
-    if isinstance(target, LensThread):
-      thread = LensThreadGtk.fromLensThread(target)
-    else:
-      thread = LensThreadGtk(target=target, *args, **kwargs)
+      if data['name'] == '__completed':
+        self._thread_completed(self.threads[data['uuid']]['t'])
 
-    # signals run in the order connected. Connect the user completed
-    # callback first incase they wish to do something
-    # before we delete the thread
+      else:
+        self.emit('__thread_%s_%s' % (data['name'], data['uuid']), self.threads[data['uuid']], *data['args'])
 
-    thread.connect("__lens", self.__lens_cb)
-
-    return thread
-
-
-  def __lens_cb(self, thread, name, args):
-    if name == '__complete':
-      self._thread_completed_cb(thread, *args)
-
-    else:
-      self.emit('__thread_%s_%s' % (name, thread.uuid), thread._lens_thread, *args)
-
+    return True
 
 
 class _WebView(WebKit2.WebView):

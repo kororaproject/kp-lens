@@ -20,7 +20,6 @@ import multiprocessing
 import signal
 import time
 
-from Lens.LensApp import LensApp
 from Lens.LensView import LensView
 from Lens.LensThread import LensThread, LensThreadManager
 
@@ -29,13 +28,7 @@ from gi.repository import WebKit2, Gtk, GObject
 
 
 
-
-
 class LensThreadManagerGtk(LensThreadManager):
-  """
-  Manages many _GThreads. This involves starting and stopping
-  said threads, and respecting a maximum num of concurrent threads limit
-  """
   def __init__(self, maxConcurrentThreads=10):
     LensThreadManager.__init__(self, maxConcurrentThreads)
 
@@ -142,7 +135,7 @@ class LensViewGtk(LensView):
   def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
     LensView.__init__(self, name=name, width=width,height=height, *args, **kwargs)
 
-    print(name)
+    self._manager = LensThreadManagerGtk()
 
     self._build_app()
 
@@ -203,15 +196,4 @@ class LensViewGtk(LensView):
   def set_title(self, title):
     self._window.set_title(title)
     self._window.set_wmclass(title, title)
-
-
-
-class LensAppGtk(LensApp):
-
-
-  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
-
-    self._lv = LensViewGtk(name=name, width=width, height=height, *args, **kwargs)
-
-    self.manager = LensThreadManagerGtk()
 

@@ -20,16 +20,87 @@ import os
 from Lens.LensView import LensView
 from Lens.LensThread import LensThread, LensThreadManager
 
+__toolkits = []
+
+# find Gtk
+try:
+  from LensAppGtk import LensViewGtk
+  __toolkits.append('gtk')
+
+except:
+  pass
+
+# load Qt
+try:
+  from LensAppQt import LensViewQt
+  __toolkits.append('qt')
+
+except:
+  pass
+
+
+def available_toolkits():
+  global __toolkits
+  return __toolkits
+
 
 
 class LensApp():
-
-  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
+  def __init__(self, name="MyLensApp", toolkit=None, toolkit_hint='gtk', width=640, height=480, *args, **kwargs):
     self._app_name = name
     self._app_width = width
     self._app_height = height
 
-    self._lv = LensView(name=name, width=width, height=height)
+    # validate toolkit availability
+    print(available_toolkits())
+
+    if toolkit is None:
+      toolkit = self.__get_desktop_toolkit_hint(toolkit_hint)
+
+    if toolkit not in available_toolkits():
+      raise Exception('Toolkit %s is not available: %s' % (toolkit, available_toolkits))
+
+    if toolkit == 'gtk':
+      self._lv = LensViewGtk(name=name, width=width, height=height)
+    elif toolkit == 'qt':
+      self._lv = LensViewQt(name=name, width=width, height=height)
+    else:
+      raise Exception('Toolkit %s is not implemented' % toolkit)
+
+
+
+    self.manager = self._lv._manager
+
+  def __get_desktop_toolkit_hint(self, hint):
+
+    toolkit = hint
+
+    if os.environ.get('KDE_FULL_SESSION') == 'true':
+      toolkit = 'qt'
+
+    elif os.environ.get('GNOME_DESKTOP_SESSION_ID'):
+      toolkit = 'gtk'
+
+    elif __is_running("xfce-mcs-manage"):
+      toolkit = "gtk2"
+
+    elif __is_running("ksmserver"):
+      toolkit = 'qt'
+
+    return toolkit
+
+  def __is_running(self, process):
+    try:
+      # Linux/Unix
+      s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
+    except:
+      # Windows
+      s.Popen(["tasklist", "/v"], stdout=subprocess.PIPE)
+
+    for x in s.stdout:
+      if re.search(process, x):
+        return True
+    return False
 
   @property
   def app_name(self):

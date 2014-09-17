@@ -18,12 +18,41 @@
 import json
 import signal
 
-from Lens import LensApp, LensView
+from Lens.LensView import LensView
+from Lens.LensThread import LensThread, LensThreadManager
 
 # Qt4
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
+
+
+
+class LensThreadManagerQt(LensThreadManager):
+  def __init__(self, app=None, maxConcurrentThreads=10):
+    LensThreadManager.__init__(self, maxConcurrentThreads)
+
+    self._app = app
+
+    if self._app is not None:
+
+      # watch the queue for updates
+      _fd = self.queue_in._reader.fileno()
+
+      _notifier = QSocketNotifier(_fd, QSocketNotifier.Read, self._app)
+      _notifier.activated.connect(self._on_cb)
+
+  def _on_cb(self, fd):
+    while not self.queue_in.empty():
+      data = self.queue_in.get()
+
+      if data['name'] == '__completed':
+        self._thread_completed(self.threads[data['uuid']]['t'])
+
+      else:
+        self.emit('__thread_%s_%s' % (data['name'], data['uuid']), self.threads[data['uuid']], *data['args'])
+
+    return True
 
 
 
@@ -49,13 +78,14 @@ class _QWebPage(QWebPage):
 
 
 
-class LensViewQt(LensView.LensView):
+class LensViewQt(LensView):
 
 
   def __init__(self, *args, **kwargs):
-    LensView.LensView.__init__(self, *args, **kwargs)
+    LensView.__init__(self, *args, **kwargs)
 
     self._app = QApplication([])
+    self._manager = LensThreadManagerQt(app=self._app)
 
     self._build_app()
 
@@ -129,12 +159,4 @@ class LensViewQt(LensView.LensView):
 
   def set_title(self, title):
     self._lensview.setWindowTitle(QString(title))
-
-
-class LensAppQt(LensApp.LensApp):
-
-
-  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
-
-    self._lv = LensViewQt(name=name, width=width, height=height, *args, **kwargs)
 

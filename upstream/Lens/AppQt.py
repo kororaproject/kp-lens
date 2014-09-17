@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import logger
 import json
 import signal
 
@@ -85,6 +86,7 @@ class ViewQt(View):
     View.__init__(self, *args, **kwargs)
 
     self._app = QApplication([])
+    self._logger = logging.getLogger('Lens.ViewQt')
     self._manager = ThreadManagerQt(app=self._app)
 
     self._build_app()
@@ -149,7 +151,7 @@ class ViewQt(View):
     self._frame.evaluateJavaScript(QString("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});" % json.dumps([name] + list(args))))
 
   def load_uri(self, uri):
-    print("Opening: %s" % uri)
+    self._logger.debug("Loading URI: %s" % uri)
 
     # load our index file
     self._lensview.load(QUrl(uri))

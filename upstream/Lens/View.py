@@ -15,9 +15,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import logging
+
 class EventEmitter():
   def __init__(self):
     self.__events = {}
+
+    self._logger = logging.getLogger('Lens.EventEmitter')
 
   def catch(self, callback=None):
     if self.on('error', callback) is not None:
@@ -28,12 +32,10 @@ class EventEmitter():
     gs = self.__events.get('__*', [])
 
     if not s:
-      # TODO: debug print only
-      print('-- Emit %s in %s (0)' % (name, self))
+      self._logger.debug('Emit %s in %s (0)' % (name, self))
 
     else:
-      # TODO: debug print only
-      print('-- Emit %s in %s (%d)' % (name, self, len(s)))
+      self._logger.debug('Emit %s in %s (%d)' % (name, self, len(s)))
 
       for cb in s:
         cb(*args, **kwargs)
@@ -51,14 +53,14 @@ class EventEmitter():
     return len(self.subscribers) > 0
 
   def on(self, name, callback):
-    print('-- Subscribing %s on %s' % (name, callback))
+    self._logger.debug('Subscribing %s on %s' % (name, callback))
 
     self.__events.setdefault(name, []).append(callback)
 
     return callback
 
   def on_any(self, callback):
-    print('-- Subscribing %s on any signal' % (callback))
+    self._logger.debug('Subscribing %s on any signal' % (callback))
 
     self.__events.setdefault('__*', []).append(callback)
 

@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import logging
 import json
 import multiprocessing
 import signal
@@ -135,6 +136,7 @@ class ViewGtk(View):
   def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
 
+    self._logger = logging.getLogger('Lens.ViewGtk')
     self._manager = ThreadManagerGtk()
 
     self._build_app()
@@ -185,7 +187,7 @@ class ViewGtk(View):
     self._lensview.run_javascript("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});" % json.dumps([name] + list(args)), None, None, None)
 
   def load_uri(self, uri):
-    print("Opening: %s" % uri)
+    self._logger.debug("Loading URI: %s" % uri)
 
     # load our index file
     self._lensview.load_uri(uri)

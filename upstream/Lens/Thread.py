@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import logging
 import multiprocessing
 import time
 
@@ -98,6 +99,8 @@ class ThreadManager(EventEmitter):
   def __init__(self, maxConcurrentThreads=5):
     EventEmitter.__init__(self)
 
+    self._logger = logging.getLogger('Lens.ThreadManager')
+
     #stores all threads, running or stopped
     self.threads = {}
     self.pendingThreadArgs = []
@@ -114,12 +117,12 @@ class ThreadManager(EventEmitter):
     del(self.threads[thread.uuid])
     running = len(self.threads) - len(self.pendingThreadArgs)
 
-    print("%s completed. %s running, %s pending" % (thread, running, len(self.pendingThreadArgs)))
+    self._logger.debug("%s completed. %s running, %s pending" % (thread, running, len(self.pendingThreadArgs)))
 
     if running < self.maxConcurrentThreads:
       try:
         uuid = self.pendingThreadArgs.pop()
-        print("Starting pending %s" % self.threads[uuid])
+        self._logger.debug("Starting pending %s" % self.threads[uuid])
         self.threads[uuid]['t'].start()
       except IndexError:
         pass
@@ -148,11 +151,11 @@ class ThreadManager(EventEmitter):
       self._register_thread_signals(_thread)
 
       if running < self.maxConcurrentThreads:
-        print("Starting %s" % _thread)
+        self._logger.debug("Starting %s" % _thread)
         self.threads[uuid]['t'].start()
 
       else:
-        print("Queing %s" % thread)
+        self._logger.debug("Queing %s" % thread)
         self.pendingThreadArgs.append(uuid)
 
 

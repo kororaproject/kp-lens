@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import logging
 import os
 import pprint
 
@@ -41,6 +42,8 @@ class MyApp(App):
   def _update_hostname_cb(self, message):
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(message)
+
+logging.basicConfig(level=logging.DEBUG)
 
 app = MyApp()
 app.run()

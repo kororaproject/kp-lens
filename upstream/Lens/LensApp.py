@@ -25,7 +25,7 @@ __toolkits = []
 
 # find Gtk
 try:
-  from LensAppGtk import LensViewGtk
+  from Lens.LensAppGtk import LensViewGtk
   __toolkits.append('gtk')
 
 except:
@@ -33,7 +33,7 @@ except:
 
 # load Qt
 try:
-  from LensAppQt import LensViewQt
+  from Lens.LensAppQt import LensViewQt
   __toolkits.append('qt')
 
 except:
@@ -57,7 +57,7 @@ class LensApp():
 
     # validate toolkit availability
     if toolkit not in available_toolkits():
-      raise Exception('Toolkit %s is not available: %s' % (toolkit, available_toolkits))
+      raise Exception('Toolkit %s is not available: %s' % (toolkit, available_toolkits()))
 
     if toolkit == 'gtk':
       self._lv = LensViewGtk(name=name, width=width, height=height)

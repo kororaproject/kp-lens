@@ -16,6 +16,7 @@
 #
 
 import os
+import subprocess
 
 from Lens.LensView import LensView
 from Lens.LensThread import LensThread, LensThreadManager
@@ -46,17 +47,15 @@ def available_toolkits():
 
 
 class LensApp():
-  def __init__(self, name="MyLensApp", toolkit=None, toolkit_hint='gtk', width=640, height=480, *args, **kwargs):
+  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, *args, **kwargs):
     self._app_name = name
     self._app_width = width
     self._app_height = height
 
-    # validate toolkit availability
-    print(available_toolkits())
-
     if toolkit is None:
       toolkit = self.__get_desktop_toolkit_hint(toolkit_hint)
 
+    # validate toolkit availability
     if toolkit not in available_toolkits():
       raise Exception('Toolkit %s is not available: %s' % (toolkit, available_toolkits))
 

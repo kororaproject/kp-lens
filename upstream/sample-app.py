@@ -19,11 +19,11 @@
 import os
 import pprint
 
-from Lens import LensAppGtk
+from Lens.LensApp import LensApp
 
-class MyApp(LensAppGtk.LensAppGtk):
+class MyApp(LensApp):
   def __init__(self):
-    LensAppGtk.LensAppGtk.__init__(self, name="SampleGtkApp")
+    LensApp.__init__(self, name="SampleApp")
 
     # load the app entry page
     self.load_app('./sample-data/app.html')

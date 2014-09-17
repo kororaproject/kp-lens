@@ -18,8 +18,8 @@
 import json
 import signal
 
-from Lens.LensView import LensView
-from Lens.LensThread import LensThread, LensThreadManager
+from Lens.View import View
+from Lens.Thread import Thread, ThreadManager
 
 # Qt4
 from PyQt4.QtCore import *
@@ -28,9 +28,9 @@ from PyQt4.QtWebKit import *
 
 
 
-class LensThreadManagerQt(LensThreadManager):
+class ThreadManagerQt(ThreadManager):
   def __init__(self, app=None, maxConcurrentThreads=10):
-    LensThreadManager.__init__(self, maxConcurrentThreads)
+    ThreadManager.__init__(self, maxConcurrentThreads)
 
     self._app = app
 
@@ -78,14 +78,14 @@ class _QWebPage(QWebPage):
 
 
 
-class LensViewQt(LensView):
+class ViewQt(View):
 
 
   def __init__(self, *args, **kwargs):
-    LensView.__init__(self, *args, **kwargs)
+    View.__init__(self, *args, **kwargs)
 
     self._app = QApplication([])
-    self._manager = LensThreadManagerQt(app=self._app)
+    self._manager = ThreadManagerQt(app=self._app)
 
     self._build_app()
 

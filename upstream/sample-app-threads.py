@@ -20,12 +20,12 @@ import os
 import pprint
 import time
 
-from Lens.LensApp import LensApp
-from Lens.LensThread import LensThread
+from Lens.App import App
+from Lens.Thread import Thread
 
-class LongTaskThread(LensThread):
+class LongTaskThread(Thread):
   def __init__(self):
-    LensThread.__init__(self)
+    Thread.__init__(self)
 
   def run(self):
     self.emit('started', self.uuid)
@@ -37,7 +37,7 @@ class LongTaskThread(LensThread):
     self.emit('complete', self.uuid, 'YAY')
 
 
-app = LensApp()
+app = App()
 
 # load the app entry page
 app.load_app('./sample-data/app-threads.html')

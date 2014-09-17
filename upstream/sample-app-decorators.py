@@ -19,9 +19,9 @@
 import os
 import pprint
 
-from Lens.LensApp import LensApp
+from Lens.App import App
 
-app = LensApp()
+app = App()
 
 # load the app entry page
 app.load_app('./sample-data/app.html')

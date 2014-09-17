@@ -18,14 +18,14 @@
 import os
 import subprocess
 
-from Lens.LensView import LensView
-from Lens.LensThread import LensThread, LensThreadManager
+from Lens.View import View
+from Lens.Thread import Thread, ThreadManager
 
 __toolkits = []
 
 # find Gtk
 try:
-  from Lens.LensAppGtk import LensViewGtk
+  from Lens.AppGtk import ViewGtk
   __toolkits.append('gtk')
 
 except:
@@ -33,7 +33,7 @@ except:
 
 # load Qt
 try:
-  from Lens.LensAppQt import LensViewQt
+  from Lens.AppQt import ViewQt
   __toolkits.append('qt')
 
 except:
@@ -46,7 +46,7 @@ def available_toolkits():
 
 
 
-class LensApp():
+class App():
   def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, *args, **kwargs):
     self._app_name = name
     self._app_width = width
@@ -60,9 +60,9 @@ class LensApp():
       raise Exception('Toolkit %s is not available: %s' % (toolkit, available_toolkits()))
 
     if toolkit == 'gtk':
-      self._lv = LensViewGtk(name=name, width=width, height=height)
+      self._lv = ViewGtk(name=name, width=width, height=height)
     elif toolkit == 'qt':
-      self._lv = LensViewQt(name=name, width=width, height=height)
+      self._lv = ViewQt(name=name, width=width, height=height)
     else:
       raise Exception('Toolkit %s is not implemented' % toolkit)
 

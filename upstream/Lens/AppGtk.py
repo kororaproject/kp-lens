@@ -20,17 +20,17 @@ import multiprocessing
 import signal
 import time
 
-from Lens.LensView import LensView
-from Lens.LensThread import LensThread, LensThreadManager
+from Lens.View import View
+from Lens.Thread import Thread, ThreadManager
 
 # GTK
 from gi.repository import WebKit2, Gtk, GObject
 
 
 
-class LensThreadManagerGtk(LensThreadManager):
+class ThreadManagerGtk(ThreadManager):
   def __init__(self, maxConcurrentThreads=10):
-    LensThreadManager.__init__(self, maxConcurrentThreads)
+    ThreadManager.__init__(self, maxConcurrentThreads)
 
     # watch the queue for updates
     _fd = self.queue_in._reader.fileno()
@@ -129,13 +129,13 @@ class _WebView(WebKit2.WebView):
 
 
 
-class LensViewGtk(LensView):
+class ViewGtk(View):
 
 
   def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
-    LensView.__init__(self, name=name, width=width,height=height, *args, **kwargs)
+    View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
 
-    self._manager = LensThreadManagerGtk()
+    self._manager = ThreadManagerGtk()
 
     self._build_app()
 

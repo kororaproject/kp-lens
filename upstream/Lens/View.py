@@ -84,7 +84,7 @@ class EventEmitter():
 
 
 
-class LensView(EventEmitter):
+class View(EventEmitter):
 
 
   def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):

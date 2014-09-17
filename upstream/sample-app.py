@@ -19,11 +19,11 @@
 import os
 import pprint
 
-from Lens.LensApp import LensApp
+from Lens.App import App
 
-class MyApp(LensApp):
+class MyApp(App):
   def __init__(self):
-    LensApp.__init__(self, name="SampleApp")
+    App.__init__(self, name="SampleApp")
 
     # load the app entry page
     self.load_app('./sample-data/app.html')

@@ -18,7 +18,7 @@
 import multiprocessing
 import time
 
-from Lens.LensView import EventEmitter
+from Lens.View import EventEmitter
 
 __counter = 0
 def _new_name():
@@ -28,7 +28,7 @@ def _new_name():
 
 
 
-class LensThread(EventEmitter):
+class Thread(EventEmitter):
   def __init__(self):
     EventEmitter.__init__(self)
 
@@ -44,7 +44,7 @@ class LensThread(EventEmitter):
 
 
 
-class LensThreadProcess(multiprocessing.Process):
+class ThreadProcess(multiprocessing.Process):
   def __init__(self, thread, pipe_in, queue_out):
     multiprocessing.Process.__init__(self)
 
@@ -80,7 +80,7 @@ class LensThreadProcess(multiprocessing.Process):
 
 
 
-class LensThreadManager(EventEmitter):
+class ThreadManager(EventEmitter):
   """
   Manages many LensThreads. This involves starting and stopping
   said threads, and respecting a maximum num of concurrent threads limit
@@ -119,13 +119,13 @@ class LensThreadManager(EventEmitter):
 
   def add_thread(self, thread):
     # TODO: be nicer
-    if not isinstance(thread, LensThread):
+    if not isinstance(thread, Thread):
       raise TypeError("not a LensThread stupiD!")
 
     running = len(self.threads) - len(self.pendingThreadArgs)
 
     _pipe = None
-    _thread = LensThreadProcess(thread, _pipe, self.queue_in)
+    _thread = ThreadProcess(thread, _pipe, self.queue_in)
 
     uuid = _thread.uuid
 

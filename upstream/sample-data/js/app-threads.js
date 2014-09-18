@@ -19,16 +19,16 @@ function AppCtrl($scope) {
   });
 
   $scope.updateHostname = function() {
-    $scope.emitPYTHON('update-hostname', $scope.hostname);
+    $scope.emit('update-hostname', $scope.hostname);
   }
 
   $scope.startLongTask = function() {
-    $scope.emitPYTHON('start-long-task');
+    $scope.emit('start-long-task');
   }
 
   $scope.closeApp = function() {
-    $scope.emitPYTHON('close');
+    $scope.emit('close');
   }
 
-  $scope.emitPYTHON('get-hostname');
+  $scope.emit('get-hostname');
 }

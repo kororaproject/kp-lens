@@ -31,23 +31,19 @@ class EventEmitter():
     s = self.__events.get(name, [])
     gs = self.__events.get('__*', [])
 
-    if not s:
-      self._logger.debug('Emit %s in %s (0)' % (name, self))
+    if not s and not gs:
+      self._logger.debug('Emit %s in %s (0, 0)' % (name, self))
 
     else:
-      self._logger.debug('Emit %s in %s (%d)' % (name, self, len(s)))
+      self._logger.debug('Emit %s in %s (%d, %d)' % (name, self, len(s), len(gs)))
 
+      # specific subscribers
       for cb in s:
         cb(*args, **kwargs)
 
-    # global subscribers
-    if len(gs):
+      # global subscribers
       for cb in gs:
         cb(name, *args, **kwargs)
-
-
-  def emit_safe(self, name):
-    pass
 
   def has_subscribers(self, name):
     return len(self.subscribers) > 0
@@ -65,9 +61,6 @@ class EventEmitter():
     self.__events.setdefault('__*', []).append(callback)
 
     return callback
-
-  def once(self, name, callback):
-    pass
 
   def subscribers(self, name):
     return self.__events.get(name, [])

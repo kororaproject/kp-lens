@@ -71,30 +71,34 @@ class _QWebView(QWebView):
 class _QWebPage(QWebPage):
 
 
-  def __init__(self):
+  def __init__(self, debug=False):
     QWebView.__init__(self)
+    self._debug = debug
 
   def javaScriptConsoleMessage(self, message, line, source_id):
-    print("%s: %s (%s)" % (line, message, source_id))
+    if self._debug:
+      print("%s: CONSOLEAPI LOG: %s (%s)" % (line, message, source_id))
 
 
 
 class ViewQt(View):
 
 
-  def __init__(self, *args, **kwargs):
-    View.__init__(self, *args, **kwargs)
+  def __init__(self, name="MyLensApp", width=640, height=480, debug=False, *args, **kwargs):
+    View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
 
     self._app = QApplication([])
+
     self._logger = logging.getLogger('Lens.ViewQt')
     self._manager = ThreadManagerQt(app=self._app)
 
+    self._debug = debug
     self._build_app()
 
   def _build_app(self):
     # build webkit container
     self._lensview = lv = _QWebView()
-    lv.setPage(_QWebPage())
+    lv.setPage(_QWebPage(debug=self._debug))
 
     self._frame = lv.page().mainFrame()
 

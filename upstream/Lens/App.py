@@ -73,7 +73,7 @@ class App():
   :param width: the width of the Lens applciation window. Defaults to 640.
   :param height the height of the Lens applciation window. Defaults to 480.
   """
-  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, *args, **kwargs):
+  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, debug_javascript=False, *args, **kwargs):
     self._logger = logging.getLogger('Lens.App')
 
     self._app_name = name
@@ -85,7 +85,7 @@ class App():
       toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
 
     toolkit_klass = get_toolkit(toolkit.lower())
-    self._lv = toolkit_klass(name=name, width=width, height=height)
+    self._lv = toolkit_klass(name=name, width=width, height=height, debug=debug_javascript)
 
     #: store an app pointer to the thread manager
     self.manager = self._lv._manager

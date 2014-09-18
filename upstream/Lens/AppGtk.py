@@ -59,7 +59,7 @@ class _WebView(WebKit2.WebView):
     'on-js': (GObject.SIGNAL_RUN_LAST, None, (GObject.TYPE_STRING,GObject.TYPE_PYOBJECT,))
   }
 
-  def __init__(self):
+  def __init__(self, debug=False):
     WebKit2.WebView.__init__(self)
 
     # register signals
@@ -70,30 +70,19 @@ class _WebView(WebKit2.WebView):
 
     self.l_uri = None
 
-    # disable right-click context menu
-    try:
-        self.get_settings().set_property('enable-accelerated-2d-canvas', True)
-    except:
-        pass
-        # TODO: log failure to set
+    enable_settings = ['enable-accelerated-2d-canvas', 'enable-smooth-scrolling', 'javascript-can-access-clipboard']
 
-    try:
-        self.get_settings().set_property('enable-smooth-scrolling', True)
-    except:
+    for setting in enable_settings:
+      try:
+        self.get_settings().set_property(setting, True)
+      except:
         pass
-        # TODO: log failure to set
 
-    try:
+    if debug:
+      try:
         self.get_settings().set_property('enable_write_console_messages_to_stdout', True)
-    except:
+      except:
         pass
-        # TODO: log failure to set
-
-    try:
-        self.get_settings().set_property('javascript-can-access-clipboard', True)
-    except:
-        pass
-        # TODO: log failure to set
 
   def _context_menu_cb(self, view, context_menu, event, hit_test_result):
     return True
@@ -133,12 +122,13 @@ class _WebView(WebKit2.WebView):
 class ViewGtk(View):
 
 
-  def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
+  def __init__(self, name="MyLensApp", width=640, height=480, debug=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
 
     self._logger = logging.getLogger('Lens.ViewGtk')
     self._manager = ThreadManagerGtk()
 
+    self._debug = debug
     self._build_app()
 
   def _build_app(self):
@@ -147,7 +137,7 @@ class ViewGtk(View):
     w.set_position(Gtk.WindowPosition.CENTER)
 
     # build webkit container
-    self._lensview = lv = _WebView()
+    self._lensview = lv = _WebView(debug=self._debug)
 
     # build scrolled window widget and add our appview container
     sw = Gtk.ScrolledWindow()

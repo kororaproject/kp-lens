@@ -23,7 +23,7 @@ import time
 from Lens.App import App
 from Lens.Thread import Thread
 
-class LongTaskThread(Thread):
+class LongTask(Thread):
   def __init__(self):
     Thread.__init__(self)
 
@@ -40,7 +40,7 @@ class LongTaskThread(Thread):
 app = App()
 
 # load the app entry page
-app.load_app('./sample-data/app-threads.html')
+app.load_ui('./sample-data/app-threads.html')
 
 @app.connect('close')
 def _close_app_cb(*args):
@@ -57,7 +57,7 @@ def _update_hostname_cb(message):
 
 @app.connect('start-long-task')
 def _long_task_cb():
-  t = LongTaskThread()
+  t = LongTask()
   app.manager.add_thread(t)
   app.manager.on_thread(t, 'progress', _longtask_progress_cb)
   app.manager.on_thread(t, 'complete', _longtask_complete_cb)
@@ -69,5 +69,5 @@ def _longtask_progress_cb(thread, *args):
 def _longtask_complete_cb(thread, *args):
   app.emit('long-task-complete', *args)
 
-app.run()
+app.start()
 

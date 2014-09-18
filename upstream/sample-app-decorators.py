@@ -24,7 +24,7 @@ from Lens.App import App
 app = App()
 
 # load the app entry page
-app.load_app('./sample-data/app.html')
+app.load_ui('./sample-data/app.html')
 
 @app.connect('close')
 def _close_app_cb(*args):
@@ -40,5 +40,5 @@ def _update_hostname_cb(message):
   pp.pprint(message)
 
 
-app.run()
+app.start()
 

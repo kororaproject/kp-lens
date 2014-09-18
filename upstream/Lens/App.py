@@ -22,56 +22,88 @@ import subprocess
 from Lens.View import View
 from Lens.Thread import Thread, ThreadManager
 
-__toolkits = []
+#: defines the list of Lens backends to be preloaded for auto-detection
+__preload = {
+  'gtk':  ['Lens.AppGtk',  'ViewGtk' ],
+  'gtk2': ['Lens.AppGtk2', 'ViewGtk2'],
+  'qt':   ['Lens.AppQt',   'ViewQt'  ]
+}
 
-# find Gtk
-try:
-  from Lens.AppGtk import ViewGtk
-  __toolkits.append('gtk')
+__toolkits = {}
 
-except:
-  pass
+#: preload our toolkits and store class object to allow building
+for k in __preload:
+  try:
+    __tk = __preload[k]
+    __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
+    __toolkits[k] = getattr(__module, __tk[1], None)
 
-# load Qt
-try:
-  from Lens.AppQt import ViewQt
-  __toolkits.append('qt')
+  except:
+    pass
 
-except:
-  pass
-
-
-def available_toolkits():
+def get_toolkit(name, exact=False):
   global __toolkits
-  return __toolkits
+
+  if name in __toolkits:
+    return __toolkits[name]
+
+  elif exact:
+    raise Exception('Toolkit %s is not implemented or could not be loaded.' % name)
+
+  toolkits = __toolkits.keys()
+  if len(toolkits):
+    fallback = toolkits.pop()
+    return __toolkits[fallback]
+
+  raise Exception('No fallback toolkits implemented or loaded.')
 
 
 
 class App():
+  """The app object implements a Lens application and acts as the central
+  object. Once created it will act as a central registry for the view
+  toolkit abstraction, thread management, signal handling and much more.
+
+  :param toolkit: force the toolkit to use. If set to `None` the toolkit
+                  will be auto detected.
+  :param toolkit_hint: hint to the preferred toolkit if the auto detection
+                       fails to determine the active toolkit.
+  :param name: the name of the Lens application. Also shown in the Lens
+               application window's title bar.
+  :param width: the width of the Lens applciation window. Defaults to 640.
+  :param height the height of the Lens applciation window. Defaults to 480.
+  """
   def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, *args, **kwargs):
+    self._logger = logging.getLogger('Lens.App')
+
     self._app_name = name
     self._app_width = width
     self._app_height = height
 
+    #: determine the toolkit to use and build the appropiate LensView
     if toolkit is None:
-      toolkit = self.__get_desktop_toolkit_hint(toolkit_hint)
+      toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
 
-    # validate toolkit availability
-    if toolkit not in available_toolkits():
-      raise Exception('Toolkit %s is not available: %s' % (toolkit, available_toolkits()))
+    toolkit_klass = get_toolkit(toolkit.lower())
+    self._lv = toolkit_klass(name=name, width=width, height=height)
 
-    if toolkit == 'gtk':
-      self._lv = ViewGtk(name=name, width=width, height=height)
-    elif toolkit == 'qt':
-      self._lv = ViewQt(name=name, width=width, height=height)
-    else:
-      raise Exception('Toolkit %s is not implemented' % toolkit)
-
-
-
+    #: store an app pointer to the thread manager
     self.manager = self._lv._manager
 
   def __get_desktop_toolkit_hint(self, hint):
+    def __is_running(self, process):
+      try:
+        # Linux/Unix
+        s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
+      except:
+        # Windows
+        s.Popen(["tasklist", "/v"], stdout=subprocess.PIPE)
+
+      for x in s.stdout:
+        if re.search(process, x):
+          return True
+
+      return False
 
     toolkit = hint
 
@@ -89,25 +121,12 @@ class App():
 
     return toolkit
 
-  def __is_running(self, process):
-    try:
-      # Linux/Unix
-      s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
-    except:
-      # Windows
-      s.Popen(["tasklist", "/v"], stdout=subprocess.PIPE)
-
-    for x in s.stdout:
-      if re.search(process, x):
-        return True
-    return False
-
   @property
-  def app_name(self):
+  def name(self):
     return self._app_name
 
-  @app_name.setter
-  def app_name(self, name):
+  @name.setter
+  def name(self, name):
     self._app_name = name
 
     # update window title on app name change
@@ -135,7 +154,11 @@ class App():
   def emit(self, name, *args):
     self._lv.emit_js(name, *args)
 
-  def load_app(self, uri):
+  def load_ui(self, uri):
+    """Load the UI from the specified URI.
+
+    :param uri: the uri to the entry page of the UI.
+    """
     uri = 'file://' +  os.path.abspath( uri )
 
     self._lv.load_uri(uri)
@@ -143,12 +166,25 @@ class App():
   def on(self, name, callback):
     self._lv.on(name, callback)
 
-  def run(self):
-    self._lv._run()
+  def resize(self, width, height):
+    """Resizes the application window.
 
-  def set_size(self, width, height):
-    self._lv.set_size(width, height)
+    :param width: the requested width for the application window. If set to
+                  `None`, the width won't be changed.
+    :param height: the requested height for the application window. If set to
+                  `None`, the height won't be changed.
+    """
+    if width is not None:
+      self._app_width = width
+
+    if height is not None:
+      self._app_height = height
+
+    self._lv.set_size(self._app_width, self._app_height)
 
   def set_title(self, title):
     self._lv.set_title(title)
+
+  def start(self):
+    self._lv._run()
 

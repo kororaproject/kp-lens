@@ -27,7 +27,7 @@ class MyApp(App):
     App.__init__(self, name="SampleApp")
 
     # load the app entry page
-    self.load_app('./sample-data/app.html')
+    self.load_ui('./sample-data/app.html')
 
     self.on('close', self._close_app_cb)
     self.on('get-hostname', self._get_hostname_cb)
@@ -46,5 +46,5 @@ class MyApp(App):
 logging.basicConfig(level=logging.DEBUG)
 
 app = MyApp()
-app.run()
+app.start()
 

@@ -1,4 +1,4 @@
-var app = angular.module('lens-app', ['kp-lens']);
+var app = angular.module('lens-app', ['lens-core']);
 
 function AppCtrl($scope) {
   $scope.hostname = 'unknown';
@@ -10,11 +10,11 @@ function AppCtrl($scope) {
 
   $scope.updateHostname = function() {
     $scope.emit('update-hostname', $scope.hostname);
-  }
+  };
 
   $scope.closeApp = function() {
     $scope.emit('close');
-  }
+  };
 
   $scope.emit('get-hostname');
 }

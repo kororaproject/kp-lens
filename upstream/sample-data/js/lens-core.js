@@ -1,4 +1,4 @@
-angular.module('kp-lens', []).
+angular.module('lens-core', []).
   run(function($rootScope) {
     $rootScope.emit = function() {
       var _args = Array.prototype.slice.call(arguments);

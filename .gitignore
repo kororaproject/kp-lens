@@ -1,2 +1,7 @@
 *.pyc
 *.pyo
+
+*/lens-data/js/lens.js
+*/lens-data/js/lens.min.js
+*/lens-data/js/lens-core.js
+*/lens-data/js/lens-core.min.js

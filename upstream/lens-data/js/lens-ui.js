@@ -42,7 +42,7 @@ angular.module('lens-ui', [])
       template: function (elem, attrs) {
         var classes = attrs.class ? ' ' + attrs.class : '';
         var true_class = attrs.true ? attrs.true : 'fa-check-square-o';
-        var false_class = attrs.false ? attrs.false : 'fa-check-o';
+        var false_class = attrs.false ? attrs.false : 'fa-square-o';
 
         return '<div class="lens-checkbox"' + classes + '>' +
                  '<div ng-click="toggle()">' +

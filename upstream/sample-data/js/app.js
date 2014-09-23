@@ -1,7 +1,9 @@
-var app = angular.module('lens-app', ['lens-core']);
+var app = angular.module('lens-app', ['lens-core', 'lens-ui']);
 
 function AppCtrl($scope) {
   $scope.hostname = 'unknown';
+  $scope.foo = true;
+  $scope.bar = 're';
 
   /* SIGNALS */
   $scope.$on('update-config', function(e, hostname) {
@@ -14,6 +16,11 @@ function AppCtrl($scope) {
 
   $scope.closeApp = function() {
     $scope.emit('close');
+  };
+
+
+  $scope.debug = function() {
+    console.debug($scope.foo);
   };
 
   $scope.emit('get-hostname');

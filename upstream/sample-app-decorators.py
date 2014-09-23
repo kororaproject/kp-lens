@@ -24,7 +24,8 @@ from Lens.App import App
 app = App()
 
 # load the app entry page
-app.load_ui('./sample-data/app.html')
+app.namespaces.append('./sample-data')
+app.load_ui('app.html')
 
 @app.connect('close')
 def _close_app_cb(*args):

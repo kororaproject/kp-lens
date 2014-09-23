@@ -31,14 +31,31 @@ class ProcTask(Thread):
     while 1:
       pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 
-      proc = {}
+      loadavg = open('/proc/loadavg', 'rb').read().strip().split(' ')
+      meminfo = open('/proc/meminfo', 'rb').read().strip().split()
+
+      proc = []
 
       for pid in pids:
         try:
-          proc[pid] = {
-            'cmdline': open(os.path.join('/proc', pid, 'cmdline'), 'rb').read(),
-            'stats':   open(os.path.join('/proc', pid, 'stat'), 'rb').read().strip().split(' ')
-          }
+          stats = open(os.path.join('/proc', pid, 'stat'), 'rb').read().strip().split(' ')
+          statm = open(os.path.join('/proc', pid, 'statm'), 'rb').read().strip().split(' ')
+          cmdline = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
+
+          proc.append({
+            'cmdline': cmdline,
+            'pid': int(stats[0]),
+            'comm': stats[1],
+            'state': stats[2],
+            'ppid': int(stats[3]),
+            'priority': int(stats[17]),
+            'nice': int(stats[18]),
+            'vsize': int(stats[22]),
+            'mem-size': int(statm[0]),
+            'mem-resident': int(statm[1]),
+            'mem-shared': int(statm[2])
+          })
+
 
         except:
           # proc has already terminated
@@ -49,10 +66,11 @@ class ProcTask(Thread):
       time.sleep(3)
 
 
-app = App(debug_javascript=True)
+app = App(debug_javascript=True, name='LensTop')
 
 # load the app entry page
-app.load_ui('./sample-data/app-top.html')
+app.namespaces.append('./sample-data')
+app.load_ui('app-top.html')
 
 @app.connect('close')
 def _close_app_cb(*args):

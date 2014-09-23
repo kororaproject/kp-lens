@@ -24,10 +24,12 @@ from Lens.App import App
 
 class MyApp(App):
   def __init__(self):
-    App.__init__(self, name="SampleApp")
+    App.__init__(self, name="SampleApp", inspector=True)
+
+    self.namespaces = ['./sample-data']
 
     # load the app entry page
-    self.load_ui('./sample-data/app.html')
+    self.load_ui('app.html')
 
     self.on('close', self._close_app_cb)
     self.on('get-hostname', self._get_hostname_cb)
@@ -46,5 +48,6 @@ class MyApp(App):
 logging.basicConfig(level=logging.DEBUG)
 
 app = MyApp()
+
 app.start()
 

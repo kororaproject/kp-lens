@@ -1,4 +1,4 @@
-var app = angular.module('lens-app', ['kp-lens']);
+var app = angular.module('lens-app', ['lens-core']);
 
 function AppCtrl($scope) {
   $scope.hostname = 'unknown';

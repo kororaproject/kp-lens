@@ -18,6 +18,7 @@
 
 import os
 import pprint
+import random
 import time
 
 from Lens.App import App
@@ -28,13 +29,15 @@ class LongTask(Thread):
     Thread.__init__(self)
 
   def run(self):
-    self.emit('started', self.uuid)
+    delta = random.uniform(0.05, 0.5)
+
+    self.emit('started', self.uuid, time.time())
 
     for i in range(100):
-      time.sleep(.05)
+      time.sleep(delta)
       self.emit('progress', self.uuid, i)
 
-    self.emit('complete', self.uuid, 'YAY')
+    self.emit('complete', self.uuid, time.time())
 
 
 app = App()

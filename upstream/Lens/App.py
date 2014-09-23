@@ -109,6 +109,9 @@ class App():
     #: store an app pointer to the thread manager
     self.manager = self._lv._manager
 
+    #: manage directory namespaces for local app data
+    self.namespaces = []
+
   def __get_desktop_toolkit_hint(self, hint):
     def __is_running(self, process):
       try:
@@ -174,13 +177,17 @@ class App():
     self._lv.emit_js(name, *args)
 
   def load_ui(self, uri):
-    """Load the UI from the specified URI.
+    """Load the UI from the specified URI. The URI is a relative path within
+    the defined application namespace.
 
     :param uri: the uri to the entry page of the UI.
     """
-    uri = 'file://' +  os.path.abspath( uri )
+    for d in self.namespaces:
+      _uri = os.path.abspath(os.path.join(d, uri))
 
-    self._lv.load_uri(uri)
+      if os.path.exists(_uri):
+        self._lv.load_uri('file://' + _uri)
+        break
 
   def on(self, name, callback):
     self._lv.on(name, callback)

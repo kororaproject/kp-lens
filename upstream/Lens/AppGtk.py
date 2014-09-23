@@ -18,6 +18,7 @@
 import logging
 import json
 import multiprocessing
+import os
 import signal
 import time
 
@@ -59,14 +60,17 @@ class _WebView(WebKit2.WebView):
     'on-js': (GObject.SIGNAL_RUN_LAST, None, (GObject.TYPE_STRING,GObject.TYPE_PYOBJECT,))
   }
 
-  def __init__(self, debug=False):
+  def __init__(self, inspector=False):
     WebKit2.WebView.__init__(self)
 
     # register signals
-    self.connect('context-menu', self._context_menu_cb)
     self.connect('decide-policy', self._decide_policy_cb)
     self.connect('load-changed', self._load_changed_cb)
     self.connect('notify::title', self._title_changed_cb)
+
+    #: need access to the context menu to inspect the app
+    if not inspector:
+      self.connect('context-menu', self._context_menu_cb)
 
     self.l_uri = None
 
@@ -78,9 +82,9 @@ class _WebView(WebKit2.WebView):
       except:
         pass
 
-    if debug:
+    if inspector:
       try:
-        self.get_settings().set_property('enable_write_console_messages_to_stdout', True)
+        self.get_settings().set_property('enable-developer-extras', True)
       except:
         pass
 
@@ -122,13 +126,14 @@ class _WebView(WebKit2.WebView):
 class ViewGtk(View):
 
 
-  def __init__(self, name="MyLensApp", width=640, height=480, debug=False, *args, **kwargs):
-    View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
+  def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, *args, **kwargs):
+    View.__init__(self, name=name, width=width, height=height, *args, **kwargs)
 
     self._logger = logging.getLogger('Lens.ViewGtk')
     self._manager = ThreadManagerGtk()
+    self._uri_lens_base = None
 
-    self._debug = debug
+    self._inspector = inspector
     self._build_app()
 
   def _build_app(self):
@@ -137,19 +142,10 @@ class ViewGtk(View):
     w.set_position(Gtk.WindowPosition.CENTER)
 
     # build webkit container
-    self._lensview = lv = _WebView(debug=self._debug)
+    self._lensview = lv = _WebView(inspector=self._inspector)
 
-    # build scrolled window widget and add our appview container
-    sw = Gtk.ScrolledWindow()
-    sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-    sw.add(lv)
-
-    # build an autoexpanding box and add our scrolled window
-    b = Gtk.VBox(homogeneous=False, spacing=0)
-    b.pack_start(sw, expand=True, fill=True, padding=0)
-
-    # add the box to the parent window and show
-    w.add(b)
+    # add lensview to the parent window
+    w.add(lv)
 
     # connect to Gtk signals
     lv.connect('on-js', self._on_js)
@@ -174,13 +170,24 @@ class ViewGtk(View):
     Gtk.main()
 
   def emit_js(self, name, *args):
-    self._lensview.run_javascript("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});" % json.dumps([name] + list(args)), None, None, None)
+    self._lensview.run_javascript('var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});' % json.dumps([name] + list(args)), None, None, None)
 
   def load_uri(self, uri):
     self._logger.debug("Loading URI: %s" % uri)
 
-    # load our index file
-    self._lensview.load_uri(uri)
+    # FIXME
+    # improve resource handling of lens:// schemas by intercepting resources
+    # via WebKitWebPage (extensions) send-request(). Not yet exposed in python
+    #
+    # for now we emulate the effect with a replace
+    uri_base = os.path.dirname(uri) + '/'
+    html = open(uri.replace('file://',''), 'r').read()
+    html = html.replace('lens://', self._uri_lens_base)
+    html = html.replace('app://', uri_base)
+
+    self._lensview.load_html(html, uri_base)
+
+    #self._lensview.load_uri(uri)
 
   def set_size(self, width, height):
     self._window.set_size_request(width, height)

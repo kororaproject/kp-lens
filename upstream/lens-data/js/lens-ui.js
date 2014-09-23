@@ -13,10 +13,10 @@ angular.module('lens-ui', [])
         var true_class = attrs.true ? attrs.true : 'fa-dot-circle-o';
         var false_class = attrs.false ? attrs.false : 'fa-circle-o';
 
-        return '<div class="lens-radio">' +
+        return '<div class="lens-radio' + classes + '">' +
                  '<div ng-click="toggle()">' +
                    '<i class="lens-radio-icon fa fa-fw" ng-class="{\'' + true_class + '\': selected(), \'' + false_class + '\': !selected()}"></i>' +
-                   '<div class="lens-radio-label' + classes +'" ng-transclude></div>' +
+                   '<div class="lens-radio-label" ng-transclude></div>' +
                  '</div>' +
                '</div>';
       },
@@ -44,10 +44,10 @@ angular.module('lens-ui', [])
         var true_class = attrs.true ? attrs.true : 'fa-check-square-o';
         var false_class = attrs.false ? attrs.false : 'fa-check-o';
 
-        return '<div class="lens-checkbox">' +
+        return '<div class="lens-checkbox"' + classes + '>' +
                  '<div ng-click="toggle()">' +
                    '<i class="lens-checkbox-icon fa fa-fw" ng-class="{\'' + true_class + '\': ngModel, \'' + false_class + '\': !ngModel}"></i>' +
-                   '<div class="lens-checkbox-label' + classes +'" ng-transclude></div>' +
+                   '<div class="lens-checkbox-label" ng-transclude></div>' +
                  '</div>' +
                '</div>';
       },

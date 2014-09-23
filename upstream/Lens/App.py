@@ -18,6 +18,7 @@
 import logging
 import os
 import subprocess
+import traceback
 
 from Lens.View import View
 from Lens.Thread import Thread, ThreadManager
@@ -39,6 +40,7 @@ for k in __preload:
     __toolkits[k] = getattr(__module, __tk[1], None)
 
   except:
+    #traceback.print_exc()
     pass
 
 def get_toolkit(name, exact=False):
@@ -73,7 +75,7 @@ class App():
   :param width: the width of the Lens applciation window. Defaults to 640.
   :param height the height of the Lens applciation window. Defaults to 480.
   """
-  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, debug_javascript=False, *args, **kwargs):
+  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, inspector=False, *args, **kwargs):
     self._logger = logging.getLogger('Lens.App')
 
     self._app_name = name
@@ -85,7 +87,24 @@ class App():
       toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
 
     toolkit_klass = get_toolkit(toolkit.lower())
-    self._lv = toolkit_klass(name=name, width=width, height=height, debug=debug_javascript)
+    self._lv = toolkit_klass(name=name, width=width, height=height, inspector=inspector)
+
+    #: find lens data path
+    base = None
+    for d in ["/usr/share/lens", "lens", "lens-data"]:
+      if os.path.exists(d):
+        if d.startswith('/'):
+          base = d
+        else:
+          base = os.path.join(os.getcwd(), d)
+        break
+
+    if base is None:
+      raise Exception('Unable to locate lens base data for UI components.')
+
+    self._lv._uri_lens_base = 'file://' + base + '/'
+
+    self._logger.debug("Using lens data path: %s" % self._lv._uri_lens_base)
 
     #: store an app pointer to the thread manager
     self.manager = self._lv._manager

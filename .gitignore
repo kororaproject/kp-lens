@@ -1,7 +1,9 @@
-*.pyc
-*.pyo
+build/sources/*.tar.gz
 
-*/lens-data/js/lens.js
-*/lens-data/js/lens.min.js
-*/lens-data/js/lens-core.js
-*/lens-data/js/lens-core.min.js
+upstream/*/*.pyc
+upstream/*/*.pyo
+
+upstream/lens-data/js/lens.js
+upstream/lens-data/js/lens.min.js
+upstream/lens-data/js/lens-core.js
+upstream/lens-data/js/lens-core.min.js

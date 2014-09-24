@@ -196,7 +196,7 @@ class ViewGtk(View):
     # REALLY FIXME (work around early webkitgtk3 < 2.4 ie CentOS 7)
     if True:
       f = tempfile.NamedTemporaryFile(delete=False)
-      f.write(html)
+      f.write(html.encode('utf-8'))
       self._lensview.load_uri('file://' + f.name)
       f.close()
 

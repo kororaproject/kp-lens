@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.2.0
+Version:        0.3.0
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -25,11 +25,9 @@ mkdir -p %{buildroot}%{python3_sitelib}/Lens
 mkdir -p %{buildroot}%{python_sitelib}/Lens
 mkdir -p %{buildroot}%{_datadir}/%{name}
 
+./build-bundles.sh
 
 cp -a lens-data/*  %{buildroot}%{_datadir}/%{name}/
-
-cat lens-data/js/{jquery,angular,bootstrap,lens-bridge,lens-ui}.js > %{buildroot}%{_datadir}/%{name}/js/lens.js
-cat lens-data/js/{jquery,angular,bootstrap}.min.js lens-data/js/{lens-bridge,lens-ui}.js > %{buildroot}%{_datadir}/%{name}/js/lens.min.js
 
 install -m 0644 COPYING %{buildroot}%{_datadir}/%{name}/
 install -m 0644 README %{buildroot}%{_datadir}/%{name}/
@@ -72,6 +70,9 @@ Python 2 API for constructing LENS applications
 
 
 %changelog
+* Wed Sep 24 2014 Ian Firns <firnsy@kororaproject.org> 0.3.0-1
+- Updated to include latest upstream.
+
 * Tue Sep 23 2014 Ian Firns <firnsy@kororaproject.org> 0.2.0-1
 - Updated to include latest namespace changes for applications.
 

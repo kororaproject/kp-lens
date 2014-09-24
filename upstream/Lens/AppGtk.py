@@ -20,6 +20,7 @@ import json
 import multiprocessing
 import os
 import signal
+import tempfile
 import time
 
 from Lens.View import View
@@ -99,7 +100,14 @@ class _WebView(WebKit2.WebView):
 
   def _load_changed_cb(self, view, event):
     if event == WebKit2.LoadEvent.FINISHED:
-      pass
+      uri = view.get_uri()
+
+      # REALLY FIXME see load_uri comments below
+      if uri.startswith('file:///tmp/'):
+        try:
+          os.unlink(uri[7:])
+        except:
+          pass
 
   def _title_changed_cb(self, view, event):
     _in = view.get_title()
@@ -185,9 +193,15 @@ class ViewGtk(View):
     html = html.replace('lens://', self._uri_lens_base)
     html = html.replace('app://', uri_base)
 
-    self._lensview.load_html(html, uri_base)
+    # REALLY FIXME (work around early webkitgtk3 < 2.4 ie CentOS 7)
+    if True:
+      f = tempfile.NamedTemporaryFile(delete=False)
+      f.write(html)
+      self._lensview.load_uri('file://' + f.name)
+      f.close()
 
-    #self._lensview.load_uri(uri)
+    else:
+      self._lensview.load_html(html, uri_base)
 
   def set_size(self, width, height):
     self._window.set_size_request(width, height)

@@ -1,4 +1,4 @@
-angular.module('lens-core', []).
+angular.module('lens.bridge', []).
   run(function($rootScope) {
     $rootScope.emit = function() {
       var _args = Array.prototype.slice.call(arguments);

@@ -4115,7 +4115,7 @@ angular.module("template/typeahead/typeahead-popup.html", []).run(["$templateCac
     "        <div typeahead-match index=\"$index\" match=\"match\" query=\"query\" template-url=\"templateUrl\"></div>\n" +
     "    </li>\n" +
     "</ul>");
-}
+}]);
 
 /*
  * angular-lens-ui-bootstrap

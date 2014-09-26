@@ -20,6 +20,7 @@ import logging
 class EventEmitter():
   def __init__(self):
     self.__events = {}
+    self.__events_once = {}
 
     self._logger = logging.getLogger('Lens.EventEmitter')
 
@@ -29,6 +30,8 @@ class EventEmitter():
 
   def emit(self, name, *args, **kwargs):
     s = self.__events.get(name, [])
+    so = self.__events_once.pop(name, [])
+
     gs = self.__events.get('__*', [])
 
     if not s and not gs:
@@ -37,8 +40,8 @@ class EventEmitter():
     else:
       self._logger.debug('Emit %s in %s (%d, %d)' % (name, self, len(s), len(gs)))
 
-      # specific subscribers
-      for cb in s:
+      # specific (including once only) subscribers
+      for cb in s + so:
         cb(*args, **kwargs)
 
       # global subscribers
@@ -50,15 +53,19 @@ class EventEmitter():
 
   def on(self, name, callback):
     self._logger.debug('Subscribing %s on %s' % (name, callback))
-
     self.__events.setdefault(name, []).append(callback)
 
     return callback
 
   def on_any(self, callback):
     self._logger.debug('Subscribing %s on any signal' % (callback))
-
     self.__events.setdefault('__*', []).append(callback)
+
+    return callback
+
+  def once(self, name, callback):
+    self._logger.debug('Subscribing %s on %s for one time only' % (name, callback))
+    self.__events_once.setdefault(name, []).append(callback)
 
     return callback
 

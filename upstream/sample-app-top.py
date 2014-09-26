@@ -31,16 +31,16 @@ class ProcTask(Thread):
     while 1:
       pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 
-      loadavg = open('/proc/loadavg', 'rb').read().strip().split(' ')
-      meminfo = open('/proc/meminfo', 'rb').read().strip().split()
+      loadavg = open('/proc/loadavg', 'r').read().strip().split(' ')
+      meminfo = [x.split()[1] for x in open('/proc/meminfo', 'r').read().strip().split('\n')]
 
       proc = []
 
       for pid in pids:
         try:
-          stats = open(os.path.join('/proc', pid, 'stat'), 'rb').read().strip().split(' ')
-          statm = open(os.path.join('/proc', pid, 'statm'), 'rb').read().strip().split(' ')
-          cmdline = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read()
+          stats = open(os.path.join('/proc', pid, 'stat'), 'r').read().strip().split(' ')
+          statm = open(os.path.join('/proc', pid, 'statm'), 'r').read().strip().split(' ')
+          cmdline = open(os.path.join('/proc', pid, 'cmdline'), 'r').read()
 
           proc.append({
             'cmdline': cmdline,
@@ -51,11 +51,11 @@ class ProcTask(Thread):
             'priority': int(stats[17]),
             'nice': int(stats[18]),
             'vsize': int(stats[22]),
-            'mem-size': int(statm[0]),
-            'mem-resident': int(statm[1]),
-            'mem-shared': int(statm[2])
+            'mem_size': int(statm[0]),
+            'mem_resident': int(statm[1]),
+            'mem_shared': int(statm[2]),
+            'mem_percentage': round(int(statm[1]) * 100.0 / int(meminfo[0]), 2)
           })
-
 
         except:
           # proc has already terminated
@@ -63,10 +63,10 @@ class ProcTask(Thread):
 
       self.emit('proc-update', proc)
 
-      time.sleep(3)
+      time.sleep(5)
 
 
-app = App(debug_javascript=True, name='LensTop')
+app = App(inspector=True, name='LensTop')
 
 # load the app entry page
 app.namespaces.append('./sample-data')

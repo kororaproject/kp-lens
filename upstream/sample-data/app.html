@@ -4,20 +4,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="lens://css/lens.css" rel="stylesheet">
 </head>
-<body class="unselectable" ng-controller="AppCtrl">
-  <input type="text" ng-model="hostname"></input>
-  <button ng-click="updateHostname()">Update</button>
-  <button ng-click="closeApp()">Close</button>
+<body ng-controller="AppCtrl">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <input type="text" ng-model="hostname"></input>
+        <button ng-click="updateHostname()">Update</button>
+        <button ng-click="closeApp()">Close</button>
 
-  <checkbox ng-model="foo" true="fa-thumbs-o-up" false="fa-thumbs-o-down">WOW! A checkbox</checkbox>
+        <checkbox ng-model="foo" true="fa-thumbs-o-up" false="fa-thumbs-o-down">WOW! A checkbox</checkbox>
 
-  <radio ng-model="bar" value="red">Red</radio>
-  <radio ng-model="bar" value="green">Green</radio>
-  <radio ng-model="bar" value="blue">Blue</radio>
+        <radio ng-model="bar" value="red">Red</radio>
+        <radio ng-model="bar" value="green">Green</radio>
+        <radio ng-model="bar" value="blue">Blue</radio>
 
-  <p>{{foo}}, {{bar}}</p>
+        <progressbar class="progress-sm progress-striped active" value="progress"></progressbar>
+        <progressbar class="progress-xs progress-striped active" value="progress"></progressbar>
 
-  <script src="lens://js/lens.js"></script>
-  <script src="app://js/app.js"></script>
+        <p>{{foo}}, {{bar}}</p>
+
+        <script src="lens://js/lens.js"></script>
+        <script src="app://js/app.js"></script>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

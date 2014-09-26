@@ -1,4 +1,4 @@
-var app = angular.module('lens-app', ['lens-core']);
+var app = angular.module('lens-app', ['lens.bridge', 'lens.ui']);
 
 function AppCtrl($scope) {
   $scope.proc = [
@@ -12,11 +12,11 @@ function AppCtrl($scope) {
     { key: 'nice',     label: 'NI' },
     { key: 'priority', label: 'PR' },
     { key: 'vsize',   label: 'VIRT' },
-    { key: 'mem-resident',   label: 'RES' },
-    { key: 'mem-shared', label: 'SHR' },
+    { key: 'mem_resident',   label: 'RES' },
+    { key: 'mem_shared', label: 'SHR' },
     { key: 'state', label: 'S' },
     { key: 'status', label: 'CPU' },
-    { key: 'status', label: 'MEM' },
+    { key: 'mem_percentage', label: 'MEM' },
     { key: 'status', label: 'TIME' },
     { key: 'cmdline',  label: 'Command' },
   ];
@@ -42,8 +42,8 @@ function AppCtrl($scope) {
   };
 
   /* SIGNALS */
-  $scope.$on('update-proc', function(e, proc) {
-    $scope.proc = proc;
+  $scope.$on('update-proc', function(e, p) {
+    $scope.proc = p;
   });
 
   $scope.closeApp = function() {

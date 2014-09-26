@@ -26,7 +26,7 @@ from Lens.Thread import Thread
 
 class LongTask(Thread):
   def __init__(self):
-    Thread.__init__(self)
+    Thread.__init__(self, daemon=True)
 
   def run(self):
     delta = random.uniform(0.05, 0.5)
@@ -40,10 +40,11 @@ class LongTask(Thread):
     self.emit('complete', self.uuid, time.time())
 
 
-app = App()
+app = App(name="Lens. Threads", inspector=True)
 
 # load the app entry page
-app.load_ui('./sample-data/app-threads.html')
+app.namespaces.append('./sample-data')
+app.load_ui('app-threads.html')
 
 @app.connect('close')
 def _close_app_cb(*args):

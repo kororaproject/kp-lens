@@ -1,9 +1,10 @@
-var app = angular.module('lens-app', ['lens-core', 'lens-ui']);
+var app = angular.module('lens-app', ['lens.bridge', 'lens.ui']);
 
 function AppCtrl($scope) {
   $scope.hostname = 'unknown';
   $scope.foo = true;
   $scope.bar = 're';
+  $scope.progress = 32;
 
   /* SIGNALS */
   $scope.$on('update-config', function(e, hostname) {

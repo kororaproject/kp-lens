@@ -2,26 +2,32 @@
 <html lang="en" ng-app="lens-app">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="lens://css/lens.css" rel="stylesheet">
   <style>
     table { width: 100%; }
   </style>
 </head>
-<body class="unselectable" ng-controller="AppCtrl">
-  <input type="text" ng-model="hostname"></input>
-  <button ng-click="updateHostname()">Update</button>
-  <button ng-click="startLongTask()">Start Long Task</button>
-  <button ng-click="closeApp()">Close</button>
-
-  <table>
-    <tr>
-      <th>Task ID</th>
-      <th>Progress</th>
-    </tr>
-    <tr ng-repeat="(id, progress) in long_tasks">
-      <td>{{id}}</td>
-      <td>{{progress}}</td>
-    </tr>
-  </table>
+<body ng-controller="AppCtrl">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <h1><b>Lens.</b>Threads</h1>
+        <p>This sample demonstrates the background execution for running long tasks. Tasks are spawned in seperate processes (Lens Threads) and automatically establish a pipe connection to maintain communication between the app and the thread.</p>
+        <p>Feel free to start up a number of tasks. You will observe each thread communicate it's current progress back to the UI with no blocking.</p>
+        <button ng-click="startLongTask()" class="btn btn-primary"><i class="fa fa-fw fa-plus"></i> Random Long Task</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-6"><h4><b>Task ID</b></h4></div>
+      <div class="col-xs-6"><h4 class="text-center"><b>Progress</b></h4></div>
+    </div>
+    <div ng-repeat="(id, progress) in long_tasks" class="row">
+      <div class="col-xs-6">{{id}}</div>
+      <div class="col-xs-6">
+        <progressbar value="progress" class="progress-sm" ng-class="{'progress-striped active': progress<100}"></progressbar>
+      </div>
+    </div>
+  </div>
 
   <script src="lens://js/lens.min.js"></script>
   <script src="app://js/app-threads.js"></script>

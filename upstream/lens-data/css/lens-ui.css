@@ -684,6 +684,13 @@ body.modal-open,
   line-height: 16px;
 }
 
+.progress-sm .progress-bar[aria-valuenow="1"],
+.progress-sm .progress-bar[aria-valuenow="2"],
+.progress-xs .progress-bar[aria-valuenow="1"],
+.progress-xs .progress-bar[aria-valuenow="2"] {
+  min-width: 0;
+}
+
 /*
 ** TABS
 */

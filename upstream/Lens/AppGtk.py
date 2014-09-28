@@ -99,15 +99,7 @@ class _WebView(WebKit2.WebView):
       uri = decision.get_request().get_uri()
 
   def _load_changed_cb(self, view, event):
-    if event == WebKit2.LoadEvent.FINISHED:
-      uri = view.get_uri()
-
-      # REALLY FIXME see load_uri comments below
-      if uri.startswith('file:///tmp/'):
-        try:
-          os.unlink(uri[7:])
-        except:
-          pass
+    pass
 
   def _title_changed_cb(self, view, event):
     _in = view.get_title()
@@ -183,6 +175,8 @@ class ViewGtk(View):
   def load_uri(self, uri):
     self._logger.debug("Loading URI: %s" % uri)
 
+    # TODO: we require webkitgtk3 2.2.7 or later
+    #
     # FIXME
     # improve resource handling of lens:// schemas by intercepting resources
     # via WebKitWebPage (extensions) send-request(). Not yet exposed in python
@@ -193,15 +187,7 @@ class ViewGtk(View):
     html = html.replace('lens://', self._uri_lens_base)
     html = html.replace('app://', uri_base)
 
-    # REALLY FIXME (work around early webkitgtk3 < 2.4 ie CentOS 7)
-    if True:
-      f = tempfile.NamedTemporaryFile(delete=False)
-      f.write(html.encode('utf-8'))
-      self._lensview.load_uri('file://' + f.name)
-      f.close()
-
-    else:
-      self._lensview.load_html(html, uri_base)
+    self._lensview.load_html(html, uri_base)
 
   def set_size(self, width, height):
     self._window.set_size_request(width, height)

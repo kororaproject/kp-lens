@@ -5,7 +5,7 @@
  * Version: 0.11.0 - 2014-05-01
  * License: MIT
  */
-angular.module("lens.ui", ["lens.ui.tpls", "lens.ui.transition","lens.ui.collapse","lens.ui.accordion","lens.ui.alert","lens.ui.bindHtml","lens.ui.buttons","lens.ui.carousel","lens.ui.dateparser","lens.ui.position","lens.ui.datepicker","lens.ui.dropdown","lens.ui.modal","lens.ui.pagination","lens.ui.tooltip","lens.ui.popover","lens.ui.progressbar","lens.ui.rating","lens.ui.tabs","lens.ui.timepicker","lens.ui.typeahead", "lens.ui.radio", "lens.ui.checkbox"]);
+angular.module("lens.ui", ["lens.ui.tpls", "lens.ui.transition","lens.ui.collapse","lens.ui.accordion","lens.ui.alert","lens.ui.bindHtml","lens.ui.buttons","lens.ui.carousel","lens.ui.dateparser","lens.ui.position","lens.ui.datepicker","lens.ui.dropdown","lens.ui.modal","lens.ui.pagination","lens.ui.tooltip","lens.ui.popover","lens.ui.progressbar","lens.ui.rating","lens.ui.tabs","lens.ui.timepicker","lens.ui.typeahead", "lens.ui.radio", "lens.ui.checkbox", "lens.ui.radial"]);
 
 angular.module("lens.ui.tpls", ["template/accordion/accordion-group.html","template/accordion/accordion.html","template/alert/alert.html","template/carousel/carousel.html","template/carousel/slide.html","template/datepicker/datepicker.html","template/datepicker/day.html","template/datepicker/month.html","template/datepicker/popup.html","template/datepicker/year.html","template/modal/backdrop.html","template/modal/window.html","template/pagination/pager.html","template/pagination/pagination.html","template/tooltip/tooltip-html-unsafe-popup.html","template/tooltip/tooltip-popup.html","template/popover/popover.html","template/progressbar/bar.html","template/progressbar/progress.html","template/progressbar/progressbar.html","template/rating/rating.html","template/tabs/tab.html","template/tabs/tabset.html","template/timepicker/timepicker.html","template/typeahead/typeahead-match.html","template/typeahead/typeahead-popup.html"]);
 
@@ -4185,4 +4185,137 @@ angular.module('lens.ui.checkbox', [])
         }
       }
     }
+  });
+
+angular.module('lens.ui.radial', [])
+  .directive('radial', function($timeout) {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        radius: '=',
+        lineWidth: '=',
+        lineCap: '@',
+        value: '=',
+        bgColor: '@',
+        color: '@',
+        fontFamily: '@',
+        arcOffset: '@',
+        arcRange: '@',
+        maxValue: '@',
+        minValue: '@',
+        animate: '@',
+        animateDuration: '@'
+      },
+      template: function (elem, attrs) {
+        var classes = attrs.class ? ' ' + attrs.class : '';
+
+        return '<canvas class="' + classes + '"></canvas>';
+      },
+      link: function(scope, elem, attrs) {
+        var bgColor = scope.bgColor ? scope.bgColor : '#f5f5f5';
+        var color = scope.color ? scope.color : '#428bca';
+        var radius = scope.radius ? scope.radius : 100;
+        var lineWidth = scope.lineWidth ? scope.lineWidth : 55;
+        var lineCap = scope.lineCap ? scope.lineCap : 'butt';
+        var fontFamily = scope.fontFamily ? scope.fontFamily : '"Roboto Sans", "Source Sans Pro"';
+        var arcOffset = -90 + (scope.arcOffset ? parseInt(scope.arcOffset, 10) : 0);
+        var arcRange = scope.arcRange ? parseInt(scope.arcRange, 10) : 360;
+
+        var minValue = scope.minValue ? scope.minValue : 0;
+        var maxValue = scope.maxValue ? scope.maxValue : 100;
+        var animateDuration = scope.animateDuration ? parseInt(scope.animateDuration) : 500;
+
+        var animate = scope.animate ? /^(true|1)/i.test(scope.animate): true;
+        console.log(animate, scope.animate, !!scope.animate);
+
+        /* get canvas and it's context for drawing */
+        var canvas = angular.element(elem)[0];
+        var context = canvas.getContext('2d');
+
+        var maxDiameter = (radius + lineWidth) * 2;
+
+        var x = radius + lineWidth;
+        var y = radius + lineWidth;
+
+        var old_value = minValue;
+        var animationLoop;
+
+        canvas.width = maxDiameter;
+        canvas.height = maxDiameter;
+
+        var getRadians = function(degrees) {
+          return degrees * Math.PI / 180;
+        };
+
+        var drawArc = function(arcStart, arcEnd, arcColor) {
+          context.beginPath();
+          context.strokeStyle = arcColor;
+          context.lineWidth = lineWidth / 2;
+          context.lineCap = lineCap;
+
+          context.arc(x, y, radius, getRadians(arcStart), getRadians(arcEnd));
+
+          return context.stroke();
+        };
+
+        var drawMeter = function(value) {
+          clearCanvas();
+
+          // draw background arc
+          drawArc(arcOffset, arcOffset + arcRange, bgColor);
+
+          // draw value arc
+          var percentage = (value - minValue) / (maxValue - minValue);
+
+          drawArc(arcOffset, arcOffset + (percentage * arcRange), color);
+
+          context.fillStyle = color;
+
+          // print value
+          var relativeFontSize = 35;
+          var fontSize = (radius + (lineWidth * 2)) * relativeFontSize / 100;
+
+          context.font = fontSize + 'px ' + fontFamily;
+          context.textAlign = 'center';
+          context.textBaseline = 'middle';
+
+          return context.fillText(Math.round(percentage * 100) + "%", x, y);
+        };
+
+        var animateMeter = function() {
+          // clear animation loop if degrees reaches to new_degrees
+          if(Math.abs(old_value - scope.value) < 1 ) {
+            clearInterval(animationLoop);
+            old_value = scope.value;
+          }
+          else {
+            old_value += (old_value <= scope.value) ? 1 : -1;
+          }
+
+          drawMeter(old_value);
+        };
+
+        var clearCanvas = function() {
+          return context.clearRect(0, 0, canvas.width, canvas.height);
+        };
+
+        scope.render = drawMeter;
+        scope.clear = clearCanvas;
+
+        /* update on value changes */
+        return scope.$watch('value', function(p) {
+          if( animate ) {
+            if( typeof animationLoop != undefined ) {
+              clearInterval(animationLoop);
+            }
+
+            animationLoop = setInterval(animateMeter, animateDuration / Math.abs(scope.value - old_value));
+          }
+          else {
+            drawMeter(scope.value);
+          }
+        });
+      }
+    };
   });

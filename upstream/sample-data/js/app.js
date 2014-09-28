@@ -1,10 +1,10 @@
 var app = angular.module('lens-app', ['lens.bridge', 'lens.ui']);
 
-function AppCtrl($scope) {
+function AppCtrl($scope, $timeout) {
   $scope.hostname = 'unknown';
   $scope.foo = true;
   $scope.bar = 're';
-  $scope.progress = 32;
+  $scope.progress = 0;
 
   /* SIGNALS */
   $scope.$on('update-config', function(e, hostname) {
@@ -19,10 +19,12 @@ function AppCtrl($scope) {
     $scope.emit('close');
   };
 
-
-  $scope.debug = function() {
-    console.debug($scope.foo);
+  $scope.updateProgress = function() {
+    $scope.progress = Math.random() * 100;
+    $timeout(function() { $scope.updateProgress(); }, 3000);
   };
 
   $scope.emit('get-hostname');
+
+  $scope.updateProgress();
 }

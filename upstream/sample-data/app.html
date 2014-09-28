@@ -12,7 +12,8 @@
         <button ng-click="updateHostname()">Update</button>
         <button ng-click="closeApp()">Close</button>
 
-        <checkbox ng-model="foo" true="fa-thumbs-o-up" false="fa-thumbs-o-down">WOW! A checkbox</checkbox>
+        <checkbox ng-model="foo">HEH! A checkbox</checkbox>
+        <checkbox ng-model="foo" true="fa-thumbs-o-up" false="fa-thumbs-o-down">WOW! A custom icon checkbox</checkbox>
 
         <radio ng-model="bar" value="red">Red</radio>
         <radio ng-model="bar" value="green">Green</radio>
@@ -22,6 +23,10 @@
         <progressbar class="progress-xs progress-striped active" value="progress"></progressbar>
 
         <p>{{foo}}, {{bar}}</p>
+
+        <radial radius="50" line-width="20" value="progress"></radial>
+        <radial value="progress" radius="30" line-width="15" line-cap="round" bg-color="#e0f1cb" color="#9ad154" arc-offset="225" arc-range="270" animate="0"></radial>
+        <radial value="progress" radius="50" line-width="30" arc-offset="270" arc-range="180"></radial>
 
         <script src="lens://js/lens.js"></script>
         <script src="app://js/app.js"></script>

@@ -15,13 +15,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import logging
 import json
-import multiprocessing
+import logging
 import os
 import signal
-import tempfile
-import time
 
 from Lens.View import View
 from Lens.Thread import Thread, ThreadManager
@@ -173,8 +170,6 @@ class ViewGtk(View):
     self._lensview.run_javascript('var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});' % json.dumps([name] + list(args)), None, None, None)
 
   def load_uri(self, uri):
-    self._logger.debug("Loading URI: %s" % uri)
-
     # TODO: we require webkitgtk3 2.2.7 or later
     #
     # FIXME

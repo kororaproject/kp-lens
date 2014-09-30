@@ -23,45 +23,52 @@ import traceback
 from Lens.View import View
 from Lens.Thread import Thread, ThreadManager
 
-#: defines the list of Lens backends to be preloaded for auto-detection
-__preload = {
-  'gtk':  ['Lens.AppGtk',  'ViewGtk' ],
-  'gtk2': ['Lens.AppGtk2', 'ViewGtk2'],
-  'qt':   ['Lens.AppQt',   'ViewQt'  ]
-}
-
-__toolkits = {}
-
-#: preload our toolkits and store class object to allow building
-for k in __preload:
-  try:
-    __tk = __preload[k]
-    __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
-    __toolkits[k] = getattr(__module, __tk[1], None)
-
-  except:
-    #traceback.print_exc()
-    pass
-
-def get_toolkit(name, exact=False):
-  global __toolkits
-
-  if name in __toolkits:
-    return __toolkits[name]
-
-  elif exact:
-    raise Exception('Toolkit %s is not implemented or could not be loaded.' % name)
-
-  toolkits = __toolkits.keys()
-  if len(toolkits):
-    fallback = toolkits.pop()
-    return __toolkits[fallback]
-
-  raise Exception('No fallback toolkits implemented or loaded.')
-
-
-
 class App():
+  @staticmethod
+  def __get_toolkit(name, exact=False):
+    #: defines the list of Lens backends to be preloaded for auto-detection
+    __toolkits = {
+      'gtk':  ['Lens.AppGtk',  'ViewGtk' ],
+      'gtk2': ['Lens.AppGtk2', 'ViewGtk2'],
+      'qt':   ['Lens.AppQt',   'ViewQt'  ]
+    }
+
+    __tk_error = []
+
+    if name in __toolkits:
+      try:
+        print("Loading: %s" % (name))
+        __tk = __toolkits[name]
+        __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
+        return getattr(__module, __tk[1], None)
+      except:
+        #traceback.print_exc()
+        if exact:
+          raise Exception('Toolkit %s could not be loaded.' % (name))
+
+        else:
+          __tk_error.append(name)
+
+
+    elif exact:
+      raise Exception('Toolkit %s is not implemented.' % (name))
+
+    for k in __toolkits:
+      if k in __tk_error:
+        continue
+
+      try:
+        print("Loading fallback: %s" % (k))
+        __tk = __toolkits[name]
+        __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
+        return getattr(__module, __tk[1], None)
+      except:
+        #traceback.print_exc()
+        __tk_error.append(name)
+
+    raise Exception('No fallback toolkits implemented or loaded.')
+
+
   """The app object implements a Lens application and acts as the central
   object. Once created it will act as a central registry for the view
   toolkit abstraction, thread management, signal handling and much more.
@@ -82,11 +89,14 @@ class App():
     self._app_width = width
     self._app_height = height
 
-    #: determine the toolkit to use and build the appropiate LensView
+    #: determine the preferred toolkit to use and build the appropiate LensView
     if toolkit is None:
       toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
 
-    toolkit_klass = get_toolkit(toolkit.lower())
+    # attempt to load the preffered
+    toolkit_klass = App.__get_toolkit(toolkit.lower())
+    self._logger.debug('Using %s toolkit' % (toolkit.lower()))
+
     self._lv = toolkit_klass(name=name, width=width, height=height, inspector=inspector)
 
     #: find lens data path
@@ -186,6 +196,8 @@ class App():
       _uri = os.path.abspath(os.path.join(d, uri))
 
       if os.path.exists(_uri):
+        self._logger.debug("Loading URI: %s" % _uri)
+
         self._lv.load_uri('file://' + _uri)
         break
 

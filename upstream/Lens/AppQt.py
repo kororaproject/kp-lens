@@ -15,8 +15,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import logging
 import json
+import logging
+import os
 import signal
 
 from Lens.View import View
@@ -155,10 +156,17 @@ class ViewQt(View):
     self._frame.evaluateJavaScript(QString("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});" % json.dumps([name] + list(args))))
 
   def load_uri(self, uri):
-    self._logger.debug("Loading URI: %s" % uri)
+    # FIXME
+    # improve resource handling of lens:// schemas by intercepting resources
+    # via WebKitWebPage (extensions) send-request(). Not yet exposed in python
+    #
+    # for now we emulate the effect with a replace
+    uri_base = os.path.dirname(uri) + '/'
+    html = open(uri.replace('file://',''), 'r').read()
+    html = html.replace('lens://', self._uri_lens_base)
+    html = html.replace('app://', uri_base)
 
-    # load our index file
-    self._lensview.load(QUrl(uri))
+    self._lensview.setHtml(QString(html), QUrl(uri_base))
 
   def set_size(self, width, height):
     self._lensview.setFixedSize(width, height)

@@ -37,10 +37,10 @@ class App():
 
     if name in __toolkits:
       try:
-        print("Loading: %s" % (name))
         __tk = __toolkits[name]
         __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
         return getattr(__module, __tk[1], None)
+
       except:
         #traceback.print_exc()
         if exact:
@@ -67,7 +67,6 @@ class App():
         __tk_error.append(name)
 
     raise Exception('No fallback toolkits implemented or loaded.')
-
 
   """The app object implements a Lens application and acts as the central
   object. Once created it will act as a central registry for the view

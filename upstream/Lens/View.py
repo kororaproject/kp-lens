@@ -84,6 +84,12 @@ class EventEmitter():
     else:
       self.__events.pop(name, None)
 
+  def unsubscribe_like(self, like):
+    for k in self.__events.keys():
+      if like in k:
+        self._logger.debug('Unsubscribing %s which is like %s' % (k, like))
+        self.__events.pop(k)
+
 
 
 class View(EventEmitter):

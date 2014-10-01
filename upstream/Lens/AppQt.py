@@ -52,7 +52,7 @@ class ThreadManagerQt(ThreadManager):
         self._thread_completed(self.threads[data['uuid']]['t'])
 
       else:
-        self.emit('__thread_%s_%s' % (data['name'], data['uuid']), self.threads[data['uuid']], *data['args'])
+        self.emit('__thread_%s_%s' % (data['uuid'], data['name']), self.threads[data['uuid']], *data['args'])
 
     return True
 

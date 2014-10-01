@@ -30,7 +30,8 @@ class App():
     __toolkits = {
       'gtk':  ['Lens.AppGtk',  'ViewGtk' ],
       'gtk2': ['Lens.AppGtk2', 'ViewGtk2'],
-      'qt':   ['Lens.AppQt',   'ViewQt'  ]
+      'qt':   ['Lens.AppQt',   'ViewQt'  ],
+      'qt5':  ['Lens.AppQt5',  'ViewQt5' ]
     }
 
     __tk_error = []
@@ -115,8 +116,8 @@ class App():
 
     self._logger.debug("Using lens data path: %s" % self._lv._uri_lens_base)
 
-    #: store an app pointer to the thread manager
-    self.manager = self._lv._manager
+    #: store an app reference to the thread manager
+    self.threads = self._lv._manager
 
     #: manage directory namespaces for local app data
     self.namespaces = []
@@ -162,6 +163,13 @@ class App():
 
     # update window title on app name change
     self._lv.set_title(self._app_name)
+
+  # DEPRECATE:
+  # remove "manager" property in 1.0.0
+  @property
+  def manager(self):
+    self._logger.warn('The "manager" property is deprecated, use "threads" instead.')
+    return self.threads
 
   def close(self):
     self._lv.close()

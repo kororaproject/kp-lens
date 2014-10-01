@@ -114,6 +114,11 @@ class ThreadManager(EventEmitter):
     Decrements the count of concurrent threads and starts any
     pending threads if there is space
     """
+
+    #: unsubscribe all signals to the thread
+    if self.threads[thread.uuid]['u']:
+      self.unsubscribe_like('__thread_%s_' % (thread.uuid))
+
     del(self.threads[thread.uuid])
     running = len(self.threads) - len(self.pendingThreadArgs)
 
@@ -130,7 +135,7 @@ class ThreadManager(EventEmitter):
   def _register_thread_signals(self, thread, *args):
     pass
 
-  def add_thread(self, thread):
+  def add(self, thread, unsubscribe=True):
     # TODO: be nicer
     if not isinstance(thread, Thread):
       raise TypeError("not a LensThread stupiD!")
@@ -145,7 +150,8 @@ class ThreadManager(EventEmitter):
     if uuid not in self.threads:
       self.threads[uuid] = {
         't': _thread,
-        'p': _pipe
+        'p': _pipe,
+        'u': unsubscribe
       }
 
       self._register_thread_signals(_thread)
@@ -159,6 +165,18 @@ class ThreadManager(EventEmitter):
         self.pendingThreadArgs.append(uuid)
 
 
+  # DEPRECATE:
+  # use add() method instead, remove in reference in 1.0.0
+  def add_thread(self, thread, unsubscribe=True):
+    self._logger.warn('The "add_thread()" method is deprecated, use "add()" instead.')
+    self.add(thread, unsubscribe)
+
+  def on(self, thread, name, callback):
+    EventEmitter.on(self, '__thread_%s_%s' % (thread.uuid, name), callback)
+
+  # DEPRECATE:
+  # use on() method instead, remove in 1.0.0
   def on_thread(self, thread, name, callback):
-    self.on('__thread_%s_%s' % (name, thread.uuid), callback)
+    self._logger.warn('The "on_thread()" method is deprecated, use "on()" instead.')
+    self.on(thread, name, callback)
 

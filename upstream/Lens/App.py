@@ -18,7 +18,6 @@
 import logging
 import os
 import subprocess
-import traceback
 
 from Lens.View import View
 from Lens.Thread import Thread, ThreadManager
@@ -43,7 +42,6 @@ class App():
         return getattr(__module, __tk[1], None)
 
       except:
-        #traceback.print_exc()
         if exact:
           raise Exception('Toolkit %s could not be loaded.' % (name))
 
@@ -64,7 +62,6 @@ class App():
         __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
         return getattr(__module, __tk[1], None)
       except:
-        #traceback.print_exc()
         __tk_error.append(name)
 
     raise Exception('No fallback toolkits implemented or loaded.')

@@ -18,6 +18,7 @@
 import logging
 import multiprocessing
 import time
+import traceback
 
 from Lens.View import EventEmitter
 
@@ -127,10 +128,17 @@ class ThreadManager(EventEmitter):
     if running < self.maxConcurrentThreads:
       try:
         uuid = self.pendingThreadArgs.pop()
+
         self._logger.debug("Starting pending %s" % self.threads[uuid])
         self.threads[uuid]['t'].start()
+        self.emit('__thread_%s_started' % (uuid), self.threads[uuid])
+        self.emit('__thread_%s_state' % (uuid), self.threads[uuid], 'started')
+
       except IndexError:
         pass
+
+      except:
+        self._logger.warn('Caught exception!\n%s', traceback.format_exc())
 
   def _register_thread_signals(self, thread, *args):
     pass
@@ -156,14 +164,21 @@ class ThreadManager(EventEmitter):
 
       self._register_thread_signals(_thread)
 
+      state = 'added'
+
       if running < self.maxConcurrentThreads:
         self._logger.debug("Starting %s" % _thread)
         self.threads[uuid]['t'].start()
+        state = 'started'
+        self.emit('__thread_%s_started' % (uuid), thread)
 
       else:
         self._logger.debug("Queing %s" % thread)
         self.pendingThreadArgs.append(uuid)
+        state = 'queued'
+        self.emit('__thread_%s_queued' % (uuid), thread)
 
+      self.emit('__thread_%s_state' % (uuid), thread, state)
 
   # DEPRECATE:
   # use add() method instead, remove in reference in 1.0.0

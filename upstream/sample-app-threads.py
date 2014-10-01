@@ -40,6 +40,7 @@ class LongTask(Thread):
     self.emit('complete', self.uuid, time.time())
 
 
+
 app = App(name="Lens. Threads", inspector=True)
 
 # load the app entry page
@@ -62,16 +63,17 @@ def _update_hostname_cb(message):
 @app.connect('start-long-task')
 def _long_task_cb():
   t = LongTask()
-  app.manager.add_thread(t)
-  app.manager.on_thread(t, 'progress', _longtask_progress_cb)
-  app.manager.on_thread(t, 'complete', _longtask_complete_cb)
-
+  app.threads.add(t)
+  app.threads.on(t, 'progress', _longtask_progress_cb)
+  app.threads.on(t, 'complete', _longtask_complete_cb)
 
 def _longtask_progress_cb(thread, *args):
   app.emit('long-task-progress', *args)
 
 def _longtask_complete_cb(thread, *args):
   app.emit('long-task-complete', *args)
+
+
 
 app.start()
 

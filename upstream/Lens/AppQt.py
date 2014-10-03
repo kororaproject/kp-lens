@@ -174,7 +174,8 @@ class ViewQt(View):
     self._lensview.setHtml(QString(html), QUrl(uri_base))
 
   def set_size(self, width, height):
-    self._lensview.setFixedSize(width, height)
+    self._lensview.setMinimumSize(width, height)
+    self._lensview.resize(width, height)
 
   def set_title(self, title):
     self._lensview.setWindowTitle(QString(title))

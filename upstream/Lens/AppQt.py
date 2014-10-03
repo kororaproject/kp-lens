@@ -24,6 +24,7 @@ from Lens.View import View
 from Lens.Thread import Thread, ThreadManager
 
 # Qt4
+from dbus.mainloop.qt import DBusQtMainLoop
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
@@ -104,14 +105,12 @@ class ViewQt(View):
     self._frame = lv.page().mainFrame()
 
     # connect to Qt signals
+    lv.loadFinished.connect(self._loaded_cb)
     lv.titleChanged.connect(self._title_changed_cb)
     self._app.lastWindowClosed.connect(self._last_window_closed_cb)
 
     # connect to Lens signals
     self.on('__close_app', self._close_cb)
-
-    self.set_title(self._app_name)
-    self.set_size(self._app_width, self._app_height)
 
     # center on screen
     _frame_geometry = lv.frameGeometry()
@@ -120,13 +119,18 @@ class ViewQt(View):
     _frame_geometry.moveCenter(_center)
     lv.move(_frame_geometry.topLeft())
 
-    lv.show()
+    self.set_title(self._app_name)
+    self.set_size(self._app_width, self._app_height)
 
   def _close_cb(self):
     self._app.exit()
 
   def _last_window_closed_cb(self, *args):
     self.emit('__close_app', *args)
+
+  def _loaded_cb(self, success):
+    # show window once some page has loaded
+    self._lensview.show()
 
   def _title_changed_cb(self, title):
     _in = str(title)
@@ -150,6 +154,7 @@ class ViewQt(View):
 
   def _run(self):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    DBusQtMainLoop(set_as_default=True)
     self._app.exec_()
 
   def emit_js(self, name, *args):

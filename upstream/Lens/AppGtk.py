@@ -24,6 +24,7 @@ from Lens.View import View
 from Lens.Thread import Thread, ThreadManager
 
 # GTK
+from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import WebKit2, Gtk, GObject
 
 
@@ -134,11 +135,8 @@ class ViewGtk(View):
     self._build_app()
 
   def _build_app(self):
-    # build window and position in center of screen
+    # build window and webkit container
     self._window = w = Gtk.Window()
-    w.set_position(Gtk.WindowPosition.CENTER)
-
-    # build webkit container
     self._lensview = lv = _WebView(inspector=self._inspector)
 
     # add lensview to the parent window
@@ -146,15 +144,17 @@ class ViewGtk(View):
 
     # connect to Gtk signals
     lv.connect('on-js', self._on_js)
+    lv.connect('load-changed', self._load_change_cb)
     w.connect('delete-event', self._delete_event_cb)
 
     # connect to Lens signals
     self.on('__close_app', self._close_cb)
 
+    # center on screen
+    w.set_position(Gtk.WindowPosition.CENTER)
+
     self.set_title(self._app_name)
     self.set_size(self._app_width, self._app_height)
-
-    w.show_all()
 
   def _close_cb(self, *args):
     Gtk.main_quit(*args)
@@ -162,8 +162,14 @@ class ViewGtk(View):
   def _delete_event_cb(self, *args):
     self.emit('__close_app', *args)
 
+  def _load_change_cb(self, view, event):
+    # show window once some page has loaded
+    if( event == WebKit2.LoadEvent.FINISHED ):
+      self._window.show_all()
+
   def _run(self):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    DBusGMainLoop(set_as_default=True)
     Gtk.main()
 
   def emit_js(self, name, *args):

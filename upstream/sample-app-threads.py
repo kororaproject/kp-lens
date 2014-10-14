@@ -21,8 +21,8 @@ import pprint
 import random
 import time
 
-from Lens.App import App
-from Lens.Thread import Thread
+from lens.app import App
+from lens.thread import Thread
 
 class LongTask(Thread):
   def __init__(self):

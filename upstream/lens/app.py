@@ -19,18 +19,18 @@ import logging
 import os
 import subprocess
 
-from Lens.View import View
-from Lens.Thread import Thread, ThreadManager
+from lens.view import View
+from lens.thread import Thread, ThreadManager
 
 class App():
   @staticmethod
   def __get_toolkit(name, exact=False):
     #: defines the list of Lens backends to be preloaded for auto-detection
     __toolkits = {
-      'gtk':  ['Lens.AppGtk',  'ViewGtk' ],
-      'gtk2': ['Lens.AppGtk2', 'ViewGtk2'],
-      'qt':   ['Lens.AppQt',   'ViewQt'  ],
-      'qt5':  ['Lens.AppQt5',  'ViewQt5' ]
+      'gtk':  ['lens.appgtk',  'ViewGtk' ],
+      'gtk2': ['lens.appgtk2', 'ViewGtk2'],
+      'qt':   ['lens.appqt',   'ViewQt'  ],
+      'qt5':  ['lens.appqt5',  'ViewQt5' ]
     }
 
     __tk_error = []

@@ -19,7 +19,7 @@
 import os
 import pprint
 
-from Lens.App import App
+from lens.app import App
 
 app = App()
 

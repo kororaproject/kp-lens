@@ -20,7 +20,7 @@ import multiprocessing
 import time
 import traceback
 
-from Lens.View import EventEmitter
+from lens.view import EventEmitter
 
 __counter = 0
 def _new_name():

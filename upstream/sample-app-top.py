@@ -20,8 +20,8 @@ import os
 import pprint
 import time
 
-from Lens.App import App
-from Lens.Thread import Thread
+from lens.app import App
+from lens.thread import Thread
 
 class ProcTask(Thread):
   def __init__(self):

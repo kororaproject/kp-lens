@@ -20,7 +20,7 @@ import logging
 import os
 import pprint
 
-from Lens.App import App
+from lens.app import App
 
 class MyApp(App):
   def __init__(self):

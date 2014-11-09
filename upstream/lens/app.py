@@ -18,6 +18,7 @@
 import logging
 import os
 import subprocess
+import traceback
 
 from lens.view import View
 from lens.thread import Thread, ThreadManager
@@ -43,14 +44,11 @@ class App():
 
       except:
         if exact:
-          raise Exception('Toolkit %s could not be loaded.' % (name))
+          raise Exception('Toolkit %s is not implemented or could not be loaded.' % (name))
 
         else:
+          #traceback.print_exc()
           __tk_error.append(name)
-
-
-    elif exact:
-      raise Exception('Toolkit %s is not implemented.' % (name))
 
     for k in __toolkits:
       if k in __tk_error:
@@ -98,7 +96,7 @@ class App():
 
     #: find lens data path
     base = None
-    for d in ["/usr/share/lens", "lens", "lens-data"]:
+    for d in ["/usr/share/lens", "lens-data"]:
       if os.path.exists(d):
         if d.startswith('/'):
           base = d

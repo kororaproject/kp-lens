@@ -20,8 +20,8 @@ import logging
 import os
 import signal
 
-from Lens.View import View
-from Lens.Thread import Thread, ThreadManager
+from lens.view import View
+from lens.thread import Thread, ThreadManager
 
 # Qt4
 from dbus.mainloop.qt import DBusQtMainLoop

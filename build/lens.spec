@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.6.0
+Version:        0.6.1
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -21,8 +21,8 @@ Lightweight ENvironement-agnostic SDK (LENS) for building graphical UIs.
 # Nothing to build
 
 %install
-mkdir -p %{buildroot}%{python3_sitelib}/Lens
-mkdir -p %{buildroot}%{python_sitelib}/Lens
+mkdir -p %{buildroot}%{python3_sitelib}/lens
+mkdir -p %{buildroot}%{python_sitelib}/lens
 mkdir -p %{buildroot}%{_datadir}/%{name}
 
 ./build-bundles.sh
@@ -33,8 +33,8 @@ install -m 0644 COPYING %{buildroot}%{_datadir}/%{name}/
 install -m 0644 README %{buildroot}%{_datadir}/%{name}/
 
 
-install -m 0644 Lens/* %{buildroot}%{python_sitelib}/Lens/
-install -m 0644 Lens/* %{buildroot}%{python3_sitelib}/Lens/
+install -m 0644 lens/* %{buildroot}%{python_sitelib}/lens/
+install -m 0644 lens/* %{buildroot}%{python3_sitelib}/lens/
 
 
 %package -n python3-%{name}
@@ -48,7 +48,7 @@ Requires:       python3-gobject
 Python 3 API for constructing LENS applications
 
 %files -n  python3-%{name}
-%{python3_sitelib}/Lens
+%{python3_sitelib}/lens
 
 %package -n python-%{name}
 Summary:        Python 2 API for constructing LENS applications
@@ -61,7 +61,7 @@ Requires:       pygobject3
 Python 2 API for constructing LENS applications
 
 %files -n  python-%{name}
-%{python_sitelib}/Lens
+%{python_sitelib}/lens
 
 
 %files
@@ -70,6 +70,9 @@ Python 2 API for constructing LENS applications
 
 
 %changelog
+* Thu Oct 16 2014 Ian Firns <firnsy@kororaproject.org> 0.6.1-1
+- Updated to latest upstream.
+
 * Mon Oct  6 2014 Ian Firns <firnsy@kororaproject.org> 0.6.0-1
 - Updated to latest upstream.
 

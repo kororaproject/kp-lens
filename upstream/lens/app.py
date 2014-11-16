@@ -200,8 +200,9 @@ class App():
       if os.path.exists(_uri):
         self._logger.debug("Loading URI: %s" % _uri)
 
-        self._lv.load_uri('file://' + _uri)
-        break
+        return self._lv.load_uri('file://' + _uri)
+
+    raise Exception("Unable to locate application in the defined namespace.");
 
   def on(self, name, callback):
     self._lv.on(name, callback)

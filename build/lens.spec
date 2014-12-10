@@ -1,6 +1,6 @@
 Name:           lens
-Version:        0.6.2
-Release:        2%{?dist}
+Version:        0.6.3
+Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
 License:        GPLv3+
@@ -69,6 +69,9 @@ Python 2 API for constructing LENS applications
 
 
 %changelog
+* Thu Dec 11 2014 Ian Firns <firnsy@kororaproject.org> 0.6.3-1
+- Updated to latest upstream.
+
 * Wed Dec 10 2014 Chris Smart <csmart@kororaproject.org> 0.6.2-2
 - Pull in python-lens for main lens app
 

@@ -29,27 +29,22 @@ class EventEmitter():
       return self
 
   def emit(self, name, *args, **kwargs):
-    s = self.__events.get(name, [])
-    so = self.__events_once.pop(name, [])
+    s = self.__events.get(name, [])        # subscribers
+    so = self.__events_once.pop(name, [])  # subscribers - once only
+    gs = self.__events.get('__*', [])      # global subscribers
 
-    gs = self.__events.get('__*', [])
+    self._logger.debug('Emit %s in %s (%d, %d)' % (name, self, len(s)+len(so), len(gs)))
 
-    if not s and not gs:
-      self._logger.debug('Emit %s in %s (0, 0)' % (name, self))
+    # specific (including once only) subscribers
+    for cb in s + so:
+      cb(*args, **kwargs)
 
-    else:
-      self._logger.debug('Emit %s in %s (%d, %d)' % (name, self, len(s), len(gs)))
-
-      # specific (including once only) subscribers
-      for cb in s + so:
-        cb(*args, **kwargs)
-
-      # global subscribers
-      for cb in gs:
-        cb(name, *args, **kwargs)
+    # global subscribers
+    for cb in gs:
+      cb(name, *args, **kwargs)
 
   def has_subscribers(self, name):
-    return len(self.subscribers) > 0
+    return len(self.subscribers()) > 0
 
   def on(self, name, callback):
     self._logger.debug('Subscribing %s on %s' % (name, callback))
@@ -70,7 +65,7 @@ class EventEmitter():
     return callback
 
   def subscribers(self, name):
-    return self.__events.get(name, [])
+    return self.__events.get(name, []) + self.__events_once.get(name, []) + self.__events.get('__*', [])
 
   def unsubscribe(self, name, callback=None):
     # remove only the specified callback
@@ -85,10 +80,8 @@ class EventEmitter():
       self.__events.pop(name, None)
 
   def unsubscribe_like(self, like):
-    for k in self.__events.keys():
-      if like in k:
-        self._logger.debug('Unsubscribing %s which is like %s' % (k, like))
-        self.__events.pop(k)
+    # filter out any subscriptions based on "like"-ness
+    self.__events = {k:self.__events[k] for k in self.__events if like not in k}
 
 
 

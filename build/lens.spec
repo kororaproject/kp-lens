@@ -1,6 +1,6 @@
 Name:           lens
 Version:        0.6.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
 License:        GPLv3+
@@ -8,8 +8,7 @@ URL:            https://github.com/kororaproject/kp-lens.git
 Source0:        %{name}-%{version}.tar.gz
 
 BuildArch:      noarch
-BuildRequires:  python2-devel
-Requires:       python
+BuildRequires:  python2-devel python3-devel
 
 %description
 Lightweight ENvironement-agnostic SDK (LENS) for building graphical UIs.
@@ -42,7 +41,7 @@ Summary:        Python 3 API for constructing LENS applications
 Group:          Applications/System
 BuildRequires:  python3-devel
 Requires:       %{name} = %{version}-%{release}
-Requires:       python3-gobject
+Requires:       python3-gobject lens
 
 %description -n python3-%{name}
 Python 3 API for constructing LENS applications
@@ -55,7 +54,7 @@ Summary:        Python 2 API for constructing LENS applications
 Group:          Applications/System
 BuildRequires:  python2-devel
 Requires:       %{name} = %{version}-%{release}
-Requires:       pygobject3
+Requires:       pygobject3 lens
 
 %description -n python-%{name}
 Python 2 API for constructing LENS applications
@@ -70,6 +69,9 @@ Python 2 API for constructing LENS applications
 
 
 %changelog
+* Wed Dec 10 2014 Chris Smart <csmart@kororaproject.org> 0.6.2-2
+- Pull in python-lens for main lens app
+
 * Sun Nov 16 2014 Ian Firns <firnsy@kororaproject.org> 0.6.2-1
 - Updated to latest upstream.
 

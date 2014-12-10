@@ -131,7 +131,7 @@ b, strong {
 }
 
 .page-title {
-  font-family 'Source Sans Pro';
+  font-family: 'Source Sans Pro';
   margin: 16px 0;
   text-align: center;
 }
@@ -460,6 +460,22 @@ body.modal-open,
   margin-bottom: 0 !important;
 }
 
+/* NO-ANIMATIONS */
+.modal.fade.no-animation {
+  opacity: 1!important;
+}
+
+.modal.fade.no-animation .modal-dialog ,
+.modal.in.no-aminmation .modal-dialog {
+  -webkit-transform: translate(0, 0);
+  -ms-transform: translate(0, 0);
+  transform: translate(0, 0);
+}
+
+.modal-backdrop.fade.no-animation {
+  opacity: 0.8!important;
+}
+
 /*
 ** NAVIGATION (KOROBAR)
 */
@@ -747,6 +763,7 @@ body.modal-open,
   border-radius: 0 4px 4px 0;
   margin-right: 0;
 }
+
 /*
 ** CHECKBOX/RADIO
 */

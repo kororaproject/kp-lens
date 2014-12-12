@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import dbus
 import logging
 import os
 import subprocess
@@ -84,7 +85,11 @@ class App():
     self._app_width = width
     self._app_height = height
 
-    #: determine the preferred toolkit to use and build the appropiate LensView
+    # dbus
+    self._dbus_session = None
+    self._dbus_system = None
+
+    # determine the preferred toolkit to use and build the appropiate LensView
     if toolkit is None:
       toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
 
@@ -148,6 +153,18 @@ class App():
 
     return toolkit
 
+  def _dbus_async_cb(self, name):
+    def decorator(*args, **kwargs):
+      error = None
+
+      # check for DBus exceptions
+      if len(args) == 1 and isinstance(args[0], dbus.DBusException):
+        error = args[0]
+
+      self._lv.emit('dbus.'+ name, error, *args)
+
+    return decorator
+
   @property
   def name(self):
     return self._app_name
@@ -184,6 +201,46 @@ class App():
       return f
 
     return decorator
+
+
+  # DBus helpers
+  def dbus_async_call(self, signal, fn_method, *args):
+    if not isinstance(fn_method, dbus.proxies._DeferredMethod) and \
+       not isinstance(fn_method, dbus.proxies._ProxyMethod):
+       raise Exception('Not a valid deferred/proxy method.')
+
+    _cb = self._dbus_async_cb(signal)
+
+    return fn_method(*args, reply_handler=_cb, error_handler=_cb)
+
+  def dbus_interface(self, *args, **kwargs):
+    return dbus.Interface(*args, **kwargs)
+
+  def dbus_session(self):
+    if self._dbus_session is None:
+      self._dbus_session = dbus.SessionBus()
+
+    return self._dbus_session
+
+  def dbus_session_interface(self, org, path, interface=None):
+    if interface is None:
+      interface = org
+
+    proxy = self.dbus_session().get_object(org, path)
+    return self.dbus_interface(proxy, interface)
+
+  def dbus_system(self):
+    if self._dbus_system is None:
+      self._dbus_system = dbus.SystemBus()
+
+    return self._dbus_system
+
+  def dbus_system_interface(self, org, path, interface=None):
+    if interface is None:
+      interface = org
+
+    proxy = self.dbus_system().get_object(org, path)
+    return self.dbus_interface(proxy, interface)
 
   def emit(self, name, *args):
     self._lv.emit_js(name, *args)

@@ -88,8 +88,11 @@ class ViewQt(View):
 
   def __init__(self, name="MyLensApp", width=640, height=480, debug=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
-
+    # prepare Qt dbus mainloop
+    DBusQtMainLoop(set_as_default=True)
     self._app = QApplication([])
+
+    self._app_loaded = False
 
     self._logger = logging.getLogger('Lens.ViewQt')
     self._manager = ThreadManagerQt(app=self._app)
@@ -123,6 +126,7 @@ class ViewQt(View):
     self.set_size(self._app_width, self._app_height)
 
   def _close_cb(self):
+    self.emit('app.close')
     self._app.exit()
 
   def _last_window_closed_cb(self, *args):
@@ -131,6 +135,10 @@ class ViewQt(View):
   def _loaded_cb(self, success):
     # show window once some page has loaded
     self._lensview.show()
+
+    if not self._app_loaded:
+      self._app_loaded = True
+      self.emit('app.loaded')
 
   def _title_changed_cb(self, title):
     _in = str(title)
@@ -154,7 +162,6 @@ class ViewQt(View):
 
   def _run(self):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    DBusQtMainLoop(set_as_default=True)
     self._app.exec_()
 
   def emit_js(self, name, *args):

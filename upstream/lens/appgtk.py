@@ -126,6 +126,10 @@ class ViewGtk(View):
 
   def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, *args, **kwargs):
     View.__init__(self, name=name, width=width, height=height, *args, **kwargs)
+    # prepare Gtk dbus mainloop
+    DBusGMainLoop(set_as_default=True)
+
+    self._app_loaded = False
 
     self._logger = logging.getLogger('Lens.ViewGtk')
     self._manager = ThreadManagerGtk()
@@ -157,6 +161,7 @@ class ViewGtk(View):
     self.set_size(self._app_width, self._app_height)
 
   def _close_cb(self, *args):
+    self.emit('app.close')
     Gtk.main_quit(*args)
 
   def _delete_event_cb(self, *args):
@@ -167,9 +172,12 @@ class ViewGtk(View):
     if( event == WebKit2.LoadEvent.FINISHED ):
       self._window.show_all()
 
+      if not self._app_loaded:
+        self._app_loaded = True
+        self.emit('app.loaded')
+
   def _run(self):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    DBusGMainLoop(set_as_default=True)
     Gtk.main()
 
   def emit_js(self, name, *args):

@@ -157,5 +157,6 @@ class System():
       'arch': self._arch,
       'cpu':  self._cpu,
       'distribution': self._distribution,
-      'memory': self._memory,
+      'current_kernel': self._current_kernel,
+      'memory': self._memory
     }

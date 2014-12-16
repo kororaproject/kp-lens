@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.6.3
+Version:        0.7.1
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -69,6 +69,12 @@ Python 2 API for constructing LENS applications
 
 
 %changelog
+* Tue Dec 16 2014 Ian Firns <firnsy@kororaproject.org> 0.7.1-1
+- Updated to latest upstream.
+
+* Thu Dec 12 2014 Ian Firns <firnsy@kororaproject.org> 0.7.0-1
+- Updated to latest upstream.
+
 * Thu Dec 11 2014 Ian Firns <firnsy@kororaproject.org> 0.6.3-1
 - Updated to latest upstream.
 

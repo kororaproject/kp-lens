@@ -148,9 +148,9 @@ class System():
     if m:
       self._memory['swapFree'] = int(m.group(1)) * 1024
 
-
   def refresh(self):
-    pass
+    self._build_cpu_info()
+    self._build_mem_info()
 
   def to_dict(self):
     return {

@@ -29,6 +29,12 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
 
+# FIXME: QString does not exists in python3
+try:
+  from PyQt4.QtCore import QString
+except ImportError:
+  QString = type("")
+
 
 
 class ThreadManagerQt(ThreadManager):

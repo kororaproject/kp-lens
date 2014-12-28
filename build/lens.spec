@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.7.2
+Version:        0.7.3
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -69,6 +69,9 @@ Python 2 API for constructing LENS applications
 
 
 %changelog
+* Sun Dec 28 2014 Ian Firns <firnsy@kororaproject.org> 0.7.3-1
+- Fixed QString does not exist in python3 Qt4 bindings.
+
 * Tue Dec 16 2014 Ian Firns <firnsy@kororaproject.org> 0.7.1-1
 - Updated to latest upstream.
 

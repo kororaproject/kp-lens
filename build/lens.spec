@@ -11,7 +11,7 @@ BuildArch:      noarch
 BuildRequires:  python2-devel python3-devel
 
 %description
-Lightweight ENvironement-agnostic SDK (LENS) for building graphical UIs.
+Lightweight, ENvironment-agnostic SDK (LENS) for building graphical UIs.
 
 %prep
 %setup -q

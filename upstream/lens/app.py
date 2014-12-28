@@ -30,7 +30,6 @@ class App():
     #: defines the list of Lens backends to be preloaded for auto-detection
     __toolkits = {
       'gtk':  ['lens.appgtk',  'ViewGtk' ],
-      'gtk2': ['lens.appgtk2', 'ViewGtk2'],
       'qt':   ['lens.appqt',   'ViewQt'  ],
       'qt5':  ['lens.appqt5',  'ViewQt5' ]
     }
@@ -123,7 +122,7 @@ class App():
     self.namespaces = []
 
   def __get_desktop_toolkit_hint(self, hint):
-    def __is_running(self, process):
+    def __is_running(process):
       try:
         # Linux/Unix
         s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
@@ -132,7 +131,7 @@ class App():
         s.Popen(["tasklist", "/v"], stdout=subprocess.PIPE)
 
       for x in s.stdout:
-        if re.search(process, x):
+        if process in x.decode('utf-8'):
           return True
 
       return False
@@ -145,8 +144,8 @@ class App():
     elif os.environ.get('GNOME_DESKTOP_SESSION_ID'):
       toolkit = 'gtk'
 
-    elif __is_running("xfce-mcs-manage"):
-      toolkit = "gtk2"
+    elif __is_running("xfce-mcs-manage") or __is_running('xfce4-session'):
+      toolkit = "gtk"
 
     elif __is_running("ksmserver"):
       toolkit = 'qt'

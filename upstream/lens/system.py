@@ -48,7 +48,7 @@ class System():
       'codename': 'Unknown',
       'desktop':  'Unknown',
       'version':  'Unknown',
-      'live':     False,
+      'live':     (os.getlogin() == 'liveuser'),
     }
     self._build_dist_info()
 

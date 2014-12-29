@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.7.4
+Version:        0.7.5
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -69,6 +69,9 @@ Python 2 API for constructing LENS applications
 
 
 %changelog
+* Mon Dec 29 2014 Ian Firns <firnsy@kororaproject.org> 0.7.5-1
+- Fixed live environment detection logic.
+
 * Sun Dec 28 2014 Ian Firns <firnsy@kororaproject.org> 0.7.4-1
 - Updated Xfce detection logic.
 

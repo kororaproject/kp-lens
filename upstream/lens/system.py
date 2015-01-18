@@ -15,11 +15,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import locale
 import os
 import re
 
 class System():
   def __init__(self):
+    # align to current locale settings
+    locale.setlocale(locale.LC_NUMERIC, '')
+
     # store our base architecture
     arch = os.uname()[4]
 
@@ -72,27 +76,27 @@ class System():
 
     m = re.search('Socket\(s\):\s+(\d+)', cpuinfo)
     if m:
-      self._cpu['sockets'] = int(m.group(1))
+      self._cpu['sockets'] = locale.atoi(m.group(1))
 
     m = re.search('CPU MHz:\s+(.*)', cpuinfo)
     if m:
-      self._cpu['clock'] = int(float(m.group(1)) * 1e6)
+      self._cpu['clock'] = int(locale.atof(m.group(1)) * 1e6)
 
     m = re.search('CPU max MHz:\s+(.*)', cpuinfo)
     if m:
-      self._cpu['clockMax'] = int(float(m.group(1)) * 1e6)
+      self._cpu['clockMax'] = int(locale.atof(m.group(1)) * 1e6)
 
     m = re.search('CPU min MHz:\s+(.*)', cpuinfo)
     if m:
-      self._cpu['clockMin'] = int(float(m.group(1)) * 1e6)
+      self._cpu['clockMin'] = int(locale.atof(m.group(1)) * 1e6)
 
     m = re.search('Core\(s\) per socket:\s+(.*)', cpuinfo)
     if m:
-      self._cpu['cores_per_sockets'] = int(m.group(1))
+      self._cpu['cores_per_sockets'] = locale.atoi(m.group(1))
 
     m = re.search('Thread\(s\) per core:\s+(.*)', cpuinfo)
     if m:
-      self._cpu['threads_per_core'] = int(m.group(1))
+      self._cpu['threads_per_core'] = locale.atoi(m.group(1))
 
   def _build_dist_info(self):
     distinfo = open('/etc/redhat-release', 'r').read()
@@ -118,35 +122,35 @@ class System():
 
     m = re.search('MemTotal:\s+(\d+) kB', meminfo)
     if m:
-      self._memory['total'] = int(m.group(1)) * 1024
+      self._memory['total'] = locale.atoi(m.group(1)) * 1024
 
     m = re.search('MemFree:\s+(\d+) kB', meminfo)
     if m:
-      self._memory['free'] = int(m.group(1)) * 1024
+      self._memory['free'] = locale.atoi(m.group(1)) * 1024
 
     m = re.search('MemAvailable:\s+(\d+) kB', meminfo)
     if m:
-      self._memory['available'] = int(m.group(1)) * 1024
+      self._memory['available'] = locale.atoi(m.group(1)) * 1024
 
     m = re.search('Buffers:\s+(\d+) kB', meminfo)
     if m:
-      self._memory['buffers'] = int(m.group(1)) * 1024
+      self._memory['buffers'] = locale.atoi(m.group(1)) * 1024
 
     m = re.search('Cached:\s+(\d+) kB', meminfo)
     if m:
-      self._memory['cached'] = int(m.group(1)) * 1024
+      self._memory['cached'] = locale.atoi(m.group(1)) * 1024
 
     m = re.search('SwapCached:\s+(\d+) kB', meminfo)
     if m:
-      self._memory['swapCached'] = int(m.group(1)) * 1024
+      self._memory['swapCached'] = locale.atoi(m.group(1)) * 1024
 
     m = re.search('SwapTotal:\s+(\d+) kB', meminfo)
     if m:
-      self._memory['swapTotal'] = int(m.group(1)) * 1024
+      self._memory['swapTotal'] = locale.atoi(m.group(1)) * 1024
 
     m =re.search('SwapFree:\s+(\d+) kB', meminfo)
     if m:
-      self._memory['swapFree'] = int(m.group(1)) * 1024
+      self._memory['swapFree'] = locale.atoi(m.group(1)) * 1024
 
   def refresh(self):
     self._build_cpu_info()

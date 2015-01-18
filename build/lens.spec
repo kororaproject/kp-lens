@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.7.5
+Version:        0.7.6
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -10,8 +10,10 @@ Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 BuildRequires:  python2-devel python3-devel
 
+
 %description
 Lightweight, ENvironment-agnostic SDK (LENS) for building graphical UIs.
+
 
 %prep
 %setup -q
@@ -27,13 +29,14 @@ mkdir -p %{buildroot}%{_datadir}/%{name}
 ./build-bundles.sh
 
 cp -a lens-data/*  %{buildroot}%{_datadir}/%{name}/
-
 install -m 0644 COPYING %{buildroot}%{_datadir}/%{name}/
 install -m 0644 README %{buildroot}%{_datadir}/%{name}/
 
-
-install -m 0644 lens/* %{buildroot}%{python_sitelib}/lens/
-install -m 0644 lens/* %{buildroot}%{python3_sitelib}/lens/
+for f in __init__.py app.py appgtk.py appqt.py system.py thread.py view.py
+do
+  install -m 0644 lens/${f} %{buildroot}%{python_sitelib}/lens/${f}
+  install -m 0644 lens/${f} %{buildroot}%{python3_sitelib}/lens/${f}
+done
 
 
 %package -n python3-%{name}
@@ -41,26 +44,96 @@ Summary:        Python 3 API for constructing LENS applications
 Group:          Applications/System
 BuildRequires:  python3-devel
 Requires:       %{name} = %{version}-%{release}
-Requires:       python3-gobject lens
+Requires:       python3-%{name}-backend = %{version}-%{release}
 
 %description -n python3-%{name}
 Python 3 API for constructing LENS applications
 
 %files -n  python3-%{name}
-%{python3_sitelib}/lens
+%{python3_sitelib}/lens/__init__.py
+%{python3_sitelib}/lens/app.py
+%{python3_sitelib}/lens/system.py
+%{python3_sitelib}/lens/thread.py
+%{python3_sitelib}/lens/view.py
+%{python3_sitelib}/lens/__pycache__/__init__.*.py*
+%{python3_sitelib}/lens/__pycache__/app.*.py*
+%{python3_sitelib}/lens/__pycache__/system.*.py*
+%{python3_sitelib}/lens/__pycache__/thread.*.py*
+%{python3_sitelib}/lens/__pycache__/view.*.py*
+
+
+%package -n python3-%{name}-gtk
+Summary:        Python 3 API for constructing LENS applications on Gtk
+Group:          Applications/System
+Provides:       python3-%{name}-backend
+Requires:       python3-%{name} = %{version}-%{release}
+Requires:       python3-gobject webkitgtk4
+
+%description -n python3-%{name}-gtk
+Python 3 API for constructing LENS applications on Gtk systems
+
+%files -n python3-%{name}-gtk
+%{python3_sitelib}/lens/appgtk.py
+%{python3_sitelib}/lens/__pycache__/appgtk.*.py*
+
+
+%package -n python3-%{name}-qt
+Summary:        Python 3 API for constructing LENS applications on Qt
+Group:          Applications/System
+Provides:       python3-%{name}-backend
+Requires:       python3-%{name} = %{version}-%{release}
+Requires:       python3-PyQt4
+
+%description -n python3-%{name}-qt
+Python 3 API for constructing LENS applications on Gtk systems
+
+%files -n python3-%{name}-qt
+%{python3_sitelib}/lens/appqt.py
+%{python3_sitelib}/lens/__pycache__/appqt.*.py*
+
 
 %package -n python-%{name}
 Summary:        Python 2 API for constructing LENS applications
 Group:          Applications/System
 BuildRequires:  python2-devel
 Requires:       %{name} = %{version}-%{release}
-Requires:       pygobject3 lens
+Requires:       python-%{name}-backend = %{version}-%{release}
 
 %description -n python-%{name}
 Python 2 API for constructing LENS applications
 
 %files -n  python-%{name}
-%{python_sitelib}/lens
+%{python_sitelib}/lens/__init__.py*
+%{python_sitelib}/lens/app.py*
+%{python_sitelib}/lens/system.py*
+%{python_sitelib}/lens/thread.py*
+%{python_sitelib}/lens/view.py*
+
+
+%package -n python-%{name}-gtk
+Summary:        Python 2 API for constructing LENS applications on Gtk
+Group:          Applications/System
+Provides:       python-%{name}-backend
+Requires:       pygobject3 webkitgtk4
+
+%description -n python-%{name}-gtk
+Python 2 API for constructing LENS applications on Gtk systems
+
+%files -n python-%{name}-gtk
+%{python_sitelib}/lens/appgtk.py*
+
+
+%package -n python-%{name}-qt
+Summary:        Python 2 API for constructing LENS applications on Qt
+Group:          Applications/System
+Provides:       python-%{name}-backend
+Requires:       PyQt4
+
+%description -n python-%{name}-qt
+Python 2 API for constructing LENS applications on Gtk systems
+
+%files -n python-%{name}-qt
+%{python_sitelib}/lens/appqt.py*
 
 
 %files
@@ -69,6 +142,9 @@ Python 2 API for constructing LENS applications
 
 
 %changelog
+* Sun Jan 18 2015 Ian Firns <firnsy@kororaproject.org> 0.7.6-1
+- Fixed locale detection for float conversions.
+
 * Mon Dec 29 2014 Ian Firns <firnsy@kororaproject.org> 0.7.5-1
 - Fixed live environment detection logic.
 
@@ -81,7 +157,7 @@ Python 2 API for constructing LENS applications
 * Tue Dec 16 2014 Ian Firns <firnsy@kororaproject.org> 0.7.1-1
 - Updated to latest upstream.
 
-* Thu Dec 12 2014 Ian Firns <firnsy@kororaproject.org> 0.7.0-1
+* Fri Dec 12 2014 Ian Firns <firnsy@kororaproject.org> 0.7.0-1
 - Updated to latest upstream.
 
 * Thu Dec 11 2014 Ian Firns <firnsy@kororaproject.org> 0.6.3-1

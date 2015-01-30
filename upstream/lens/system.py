@@ -69,88 +69,105 @@ class System():
     self._build_mem_info()
 
   def _build_cpu_info(self):
-    cpuinfo = os.popen('lscpu').read()
-    m = re.search('Model name:\s+(.*)', cpuinfo)
-    if m:
-      self._cpu['model'] = m.group(1)
+    try:
+      p = os.popen('lscpu')
+      cpuinfo = p.read()
+      p.close()
+      m = re.search('Model name:\s+(.*)', cpuinfo)
+      if m:
+        self._cpu['model'] = m.group(1)
 
-    m = re.search('Socket\(s\):\s+(\d+)', cpuinfo)
-    if m:
-      self._cpu['sockets'] = locale.atoi(m.group(1))
+      m = re.search('Socket\(s\):\s+(\d+)', cpuinfo)
+      if m:
+        self._cpu['sockets'] = locale.atoi(m.group(1))
 
-    m = re.search('CPU MHz:\s+(.*)', cpuinfo)
-    if m:
-      self._cpu['clock'] = int(locale.atof(m.group(1)) * 1e6)
+      m = re.search('CPU MHz:\s+(.*)', cpuinfo)
+      if m:
+        self._cpu['clock'] = int(locale.atof(m.group(1)) * 1e6)
 
-    m = re.search('CPU max MHz:\s+(.*)', cpuinfo)
-    if m:
-      self._cpu['clockMax'] = int(locale.atof(m.group(1)) * 1e6)
+      m = re.search('CPU max MHz:\s+(.*)', cpuinfo)
+      if m:
+        self._cpu['clockMax'] = int(locale.atof(m.group(1)) * 1e6)
 
-    m = re.search('CPU min MHz:\s+(.*)', cpuinfo)
-    if m:
-      self._cpu['clockMin'] = int(locale.atof(m.group(1)) * 1e6)
+      m = re.search('CPU min MHz:\s+(.*)', cpuinfo)
+      if m:
+        self._cpu['clockMin'] = int(locale.atof(m.group(1)) * 1e6)
 
-    m = re.search('Core\(s\) per socket:\s+(.*)', cpuinfo)
-    if m:
-      self._cpu['cores_per_sockets'] = locale.atoi(m.group(1))
+      m = re.search('Core\(s\) per socket:\s+(.*)', cpuinfo)
+      if m:
+        self._cpu['cores_per_sockets'] = locale.atoi(m.group(1))
 
-    m = re.search('Thread\(s\) per core:\s+(.*)', cpuinfo)
-    if m:
-      self._cpu['threads_per_core'] = locale.atoi(m.group(1))
+      m = re.search('Thread\(s\) per core:\s+(.*)', cpuinfo)
+      if m:
+        self._cpu['threads_per_core'] = locale.atoi(m.group(1))
+
+    except:
+      pass
 
   def _build_dist_info(self):
-    distinfo = open('/etc/redhat-release', 'r').read()
-    m = re.search('(.+) release (\d+) \((.*)\)', distinfo)
-    if m:
-      self._distribution['name'] =     m.group(1)
-      self._distribution['codename'] = m.group(3)
-      self._distribution['version'] =  m.group(2)
+    try:
+      p = open('/etc/redhat-release', 'r')
+      distinfo = p.read()
+      p.close()
+      m = re.search('(.+) release (\d+) \((.*)\)', distinfo)
+      if m:
+        self._distribution['name'] =     m.group(1)
+        self._distribution['codename'] = m.group(3)
+        self._distribution['version'] =  m.group(2)
 
-    # store desktop session
-    if 'DESKTOP_SESSION' in os.environ and not 'default' in os.environ['DESKTOP_SESSION'].lower():
-      self._distribution['desktop'] = os.environ['DESKTOP_SESSION'].upper()
-    elif 'GDMSESSION' in os.environ and not 'default' in os.environ['GDMSESSION']:
-      self._distribution['desktop'] = os.environ['GDMSESSION'].upper()
-    elif 'XDG_CURRENT_DESKTOP' in os.environ and not 'default' in os.environ['XDG_CURRENT_DESKTOP']:
-      self._distribution['desktop'] = os.environ['XDG_CURRENT_DESKTOP'].upper()
+      # store desktop session
+      if 'DESKTOP_SESSION' in os.environ and not 'default' in os.environ['DESKTOP_SESSION'].lower():
+        self._distribution['desktop'] = os.environ['DESKTOP_SESSION'].upper()
+      elif 'GDMSESSION' in os.environ and not 'default' in os.environ['GDMSESSION']:
+        self._distribution['desktop'] = os.environ['GDMSESSION'].upper()
+      elif 'XDG_CURRENT_DESKTOP' in os.environ and not 'default' in os.environ['XDG_CURRENT_DESKTOP']:
+        self._distribution['desktop'] = os.environ['XDG_CURRENT_DESKTOP'].upper()
 
-    # store we are a live CD session
-    self._distribution['live'] = (os.getlogin() == 'liveuser')
+      # store we are a live CD session
+      self._distribution['live'] = (os.getlogin() == 'liveuser')
+
+    except:
+      pass
 
   def _build_mem_info(self):
-    meminfo = open('/proc/meminfo', 'r').read()
+    try:
+      p = open('/proc/meminfo', 'r')
+      meminfo = p.read()
 
-    m = re.search('MemTotal:\s+(\d+) kB', meminfo)
-    if m:
-      self._memory['total'] = locale.atoi(m.group(1)) * 1024
+      m = re.search('MemTotal:\s+(\d+) kB', meminfo)
+      if m:
+        self._memory['total'] = locale.atoi(m.group(1)) * 1024
 
-    m = re.search('MemFree:\s+(\d+) kB', meminfo)
-    if m:
-      self._memory['free'] = locale.atoi(m.group(1)) * 1024
+      m = re.search('MemFree:\s+(\d+) kB', meminfo)
+      if m:
+        self._memory['free'] = locale.atoi(m.group(1)) * 1024
 
-    m = re.search('MemAvailable:\s+(\d+) kB', meminfo)
-    if m:
-      self._memory['available'] = locale.atoi(m.group(1)) * 1024
+      m = re.search('MemAvailable:\s+(\d+) kB', meminfo)
+      if m:
+        self._memory['available'] = locale.atoi(m.group(1)) * 1024
 
-    m = re.search('Buffers:\s+(\d+) kB', meminfo)
-    if m:
-      self._memory['buffers'] = locale.atoi(m.group(1)) * 1024
+      m = re.search('Buffers:\s+(\d+) kB', meminfo)
+      if m:
+        self._memory['buffers'] = locale.atoi(m.group(1)) * 1024
 
-    m = re.search('Cached:\s+(\d+) kB', meminfo)
-    if m:
-      self._memory['cached'] = locale.atoi(m.group(1)) * 1024
+      m = re.search('Cached:\s+(\d+) kB', meminfo)
+      if m:
+        self._memory['cached'] = locale.atoi(m.group(1)) * 1024
 
-    m = re.search('SwapCached:\s+(\d+) kB', meminfo)
-    if m:
-      self._memory['swapCached'] = locale.atoi(m.group(1)) * 1024
+      m = re.search('SwapCached:\s+(\d+) kB', meminfo)
+      if m:
+        self._memory['swapCached'] = locale.atoi(m.group(1)) * 1024
 
-    m = re.search('SwapTotal:\s+(\d+) kB', meminfo)
-    if m:
-      self._memory['swapTotal'] = locale.atoi(m.group(1)) * 1024
+      m = re.search('SwapTotal:\s+(\d+) kB', meminfo)
+      if m:
+        self._memory['swapTotal'] = locale.atoi(m.group(1)) * 1024
 
-    m =re.search('SwapFree:\s+(\d+) kB', meminfo)
-    if m:
-      self._memory['swapFree'] = locale.atoi(m.group(1)) * 1024
+      m =re.search('SwapFree:\s+(\d+) kB', meminfo)
+      if m:
+        self._memory['swapFree'] = locale.atoi(m.group(1)) * 1024
+
+    except:
+      pass
 
   def refresh(self):
     self._build_cpu_info()

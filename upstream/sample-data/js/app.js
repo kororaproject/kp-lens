@@ -3,7 +3,7 @@ var app = angular.module('lens-app', ['lens.bridge', 'lens.ui']);
 function AppCtrl($scope, $timeout) {
   $scope.hostname = 'unknown';
   $scope.foo = true;
-  $scope.bar = 're';
+  $scope.bar = 'green';
   $scope.progress = 0;
 
   /* SIGNALS */
@@ -20,7 +20,7 @@ function AppCtrl($scope, $timeout) {
   };
 
   $scope.updateProgress = function() {
-    $scope.progress = Math.random() * 100;
+    $scope.progress = Math.floor(Math.random() * 100);
     $timeout(function() { $scope.updateProgress(); }, 3000);
   };
 

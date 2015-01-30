@@ -24,7 +24,7 @@ from lens.app import App
 
 class MyApp(App):
   def __init__(self):
-    App.__init__(self, name="SampleApp", inspector=True)
+    App.__init__(self, name="Lens. Widgets", inspector=True)
 
     self.namespaces = ['./sample-data']
 

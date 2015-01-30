@@ -100,7 +100,7 @@ class App():
 
     #: find lens data path
     base = None
-    for d in ["/usr/share/lens", "lens-data"]:
+    for d in ['/usr/share/lens', './lens-data']:
       if os.path.exists(d):
         if d.startswith('/'):
           base = d

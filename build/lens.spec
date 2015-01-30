@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.7.6
+Version:        0.8.0
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -142,6 +142,9 @@ Python 2 API for constructing LENS applications on Gtk systems
 
 
 %changelog
+* Fri Jan 30 2015 Ian Firns <firnsy@kororaproject.org> 0.8.0-1
+- Updated bootstrap to 3.3.1.
+
 * Sun Jan 18 2015 Ian Firns <firnsy@kororaproject.org> 0.7.6-1
 - Fixed locale detection for float conversions.
 

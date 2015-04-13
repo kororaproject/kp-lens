@@ -66,33 +66,25 @@ class ThreadManagerQt(ThreadManager):
 
 
 class _QWebView(QWebView):
-
-
-  def __init__(self):
+  def __init__(self, inspector=False):
     QWebView.__init__(self)
+    self._inspector = inspector
 
-  def contextMenuEvent(self, event):
+    # disable context menu if inspector not enabled
+    if not inspector:
+      self.contextMenuEvent = self.ignoreContextMenuEvent
+
+  def ignoreContextMenuEvent(self, event):
     event.ignore()
 
 
-
 class _QWebPage(QWebPage):
-
-
   def __init__(self, debug=False):
     QWebView.__init__(self)
-    self._debug = debug
-
-  def javaScriptConsoleMessage(self, message, line, source_id):
-    if self._debug:
-      print("%s: CONSOLEAPI LOG: %s (%s)" % (line, message, source_id))
-
 
 
 class ViewQt(View):
-
-
-  def __init__(self, name="MyLensApp", width=640, height=480, debug=False, *args, **kwargs):
+  def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
     # prepare Qt dbus mainloop
     DBusQtMainLoop(set_as_default=True)
@@ -103,13 +95,16 @@ class ViewQt(View):
     self._logger = logging.getLogger('Lens.ViewQt')
     self._manager = ThreadManagerQt(app=self._app)
 
-    self._debug = debug
+    self._inspector = inspector
     self._build_app()
 
   def _build_app(self):
     # build webkit container
-    self._lensview = lv = _QWebView()
-    lv.setPage(_QWebPage(debug=self._debug))
+    self._lensview = lv = _QWebView(inspector=self._inspector)
+    lv.setPage(_QWebPage())
+
+    if self._inspector:
+      lv.settings().setAttribute(QWebSettings.DeveloperExtrasEnabled, True)
 
     self._frame = lv.page().mainFrame()
 

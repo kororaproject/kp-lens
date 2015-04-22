@@ -77,7 +77,7 @@ class App():
   :param width: the width of the Lens applciation window. Defaults to 640.
   :param height the height of the Lens applciation window. Defaults to 480.
   """
-  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, inspector=False, *args, **kwargs):
+  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     self._logger = logging.getLogger('Lens.App')
 
     self._app_name = name
@@ -96,7 +96,7 @@ class App():
     toolkit_klass = App.__get_toolkit(toolkit.lower())
     self._logger.debug('Using %s toolkit' % (toolkit.lower()))
 
-    self._lv = toolkit_klass(name=name, width=width, height=height, inspector=inspector)
+    self._lv = toolkit_klass(name=name, width=width, height=height, inspector=inspector, start_maximized=start_maximized)
 
     #: find lens data path
     base = None
@@ -281,6 +281,12 @@ class App():
 
   def set_title(self, title):
     self._lv.set_title(title)
+
+  def toggle_window_maximize(self):
+    self._lv.toggle_window_maximize()
+
+  def toggle_window_fullscreen(self):
+    self._lv.toggle_window_fullscreen()
 
   def start(self):
     self._lv._run()

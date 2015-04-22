@@ -116,3 +116,8 @@ class View(EventEmitter):
   def set_title(self, name, message):
     raise NotImplementedError('Method "set_title" needs to be subclassed.')
 
+  def toggle_window_maximize(self):
+    raise NotImplementedError('Method "toggle_window_maximize" needs to be subclassed.')
+
+  def toggle_window_fullscreen(self):
+    raise NotImplementedError('Method "toggle_window_fullscreen" needs to be subclassed.')

@@ -40,6 +40,12 @@ def _update_hostname_cb(message):
   pp = pprint.PrettyPrinter(indent=2)
   pp.pprint(message)
 
+@app.connect('toggle-window-maximize')
+def _maximize_cb(*args):
+  app.toggle_window_maximize()
+
+@app.connect('toggle-window-fullscreen')
+def _fullscreen_cb(*args):
+  app.toggle_window_fullscreen()
 
 app.start()
-

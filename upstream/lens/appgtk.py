@@ -25,7 +25,7 @@ from lens.thread import Thread, ThreadManager
 
 # GTK
 from dbus.mainloop.glib import DBusGMainLoop
-from gi.repository import WebKit2, Gtk, GObject
+from gi.repository import WebKit2, Gtk, GObject, Gdk
 
 
 
@@ -124,7 +124,7 @@ class _WebView(WebKit2.WebView):
 class ViewGtk(View):
 
 
-  def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, *args, **kwargs):
+  def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     View.__init__(self, name=name, width=width, height=height, *args, **kwargs)
     # prepare Gtk dbus mainloop
     DBusGMainLoop(set_as_default=True)
@@ -136,6 +136,8 @@ class ViewGtk(View):
     self._uri_lens_base = None
 
     self._inspector = inspector
+    self._start_maximized = start_maximized
+    self._window_state = {}
     self._build_app()
 
   def _build_app(self):
@@ -150,6 +152,7 @@ class ViewGtk(View):
     lv.connect('on-js', self._on_js)
     lv.connect('load-changed', self._load_change_cb)
     w.connect('delete-event', self._delete_event_cb)
+    w.connect('window-state-event', self._window_state_event_cb)
 
     # connect to Lens signals
     self.on('__close_app', self._close_cb)
@@ -167,11 +170,16 @@ class ViewGtk(View):
   def _delete_event_cb(self, *args):
     self.emit('__close_app', *args)
 
+  def _window_state_event_cb(self, window, event, *args):
+    self._window_state["maximized"] = event.new_window_state & Gdk.WindowState.MAXIMIZED
+    self._window_state["fullscreen"] = event.new_window_state & Gdk.WindowState.FULLSCREEN
+
   def _load_change_cb(self, view, event):
     # show window once some page has loaded
     if( event == WebKit2.LoadEvent.FINISHED ):
       self._window.show_all()
-
+      if self._start_maximized:
+        self.toggle_window_maximize()
       if not self._app_loaded:
         self._app_loaded = True
         self.emit('app.loaded')
@@ -205,3 +213,18 @@ class ViewGtk(View):
     self._window.set_title(title)
     self._window.set_wmclass(title, title)
 
+  def toggle_window_maximize(self):
+    if self._window_state.get("maximized", False):
+      self._window.unmaximize()
+      self.emit_js('window-unmaximized')
+    else:
+      self._window.maximize()
+      self.emit_js('window-maximized')
+
+  def toggle_window_fullscreen(self):
+    if self._window_state.get("fullscreen", False):
+      self._window.unfullscreen()
+      self.emit_js('window-unfullscreen')
+    else:
+      self._window.fullscreen()
+      self.emit_js('window-fullscreen')

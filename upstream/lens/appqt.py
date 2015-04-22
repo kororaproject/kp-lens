@@ -84,7 +84,7 @@ class _QWebPage(QWebPage):
 
 
 class ViewQt(View):
-  def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, *args, **kwargs):
+  def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
     # prepare Qt dbus mainloop
     DBusQtMainLoop(set_as_default=True)
@@ -96,6 +96,7 @@ class ViewQt(View):
     self._manager = ThreadManagerQt(app=self._app)
 
     self._inspector = inspector
+    self._start_maximized = start_maximized
     self._build_app()
 
   def _build_app(self):
@@ -136,6 +137,9 @@ class ViewQt(View):
   def _loaded_cb(self, success):
     # show window once some page has loaded
     self._lensview.show()
+    if self._start_maximized:
+      self.toggle_window_maximize()
+
 
     if not self._app_loaded:
       self._app_loaded = True
@@ -188,3 +192,18 @@ class ViewQt(View):
   def set_title(self, title):
     self._lensview.setWindowTitle(QString(title))
 
+  def toggle_window_maximize(self):
+    if self._lensview.windowState() & Qt.WindowMaximized:
+      self._lensview.setWindowState(self._lensview.windowState() ^ Qt.WindowMaximized)
+      self.emit_js('window-unmaximized')
+    else:
+      self._lensview.setWindowState(self._lensview.windowState() | Qt.WindowMaximized)
+      self.emit_js('window-maximized')
+      
+  def toggle_window_fullscreen(self):
+    if self._lensview.windowState() & Qt.WindowFullScreen:
+      self._lensview.setWindowState(self._lensview.windowState() ^ Qt.WindowFullScreen)
+      self.emit_js('window-unfullscreen')
+    else:
+      self._lensview.setWindowState(self._lensview.windowState() | Qt.WindowFullScreen)
+      self.emit_js('window-fullscreen')

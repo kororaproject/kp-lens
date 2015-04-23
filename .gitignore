@@ -1,5 +1,6 @@
 build/sources/*.tar.gz
 
+upstream/lens/__pycache__
 upstream/*/*.pyc
 upstream/*/*.pyo
 

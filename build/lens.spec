@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.8.0
+Version:        0.9.0
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -114,6 +114,7 @@ Python 2 API for constructing LENS applications
 Summary:        Python 2 API for constructing LENS applications on Gtk
 Group:          Applications/System
 Provides:       python-%{name}-backend
+Requires:       python-%{name} = %{version}-%{release}
 Requires:       pygobject3 webkitgtk4
 
 %description -n python-%{name}-gtk
@@ -127,6 +128,7 @@ Python 2 API for constructing LENS applications on Gtk systems
 Summary:        Python 2 API for constructing LENS applications on Qt
 Group:          Applications/System
 Provides:       python-%{name}-backend
+Requires:       python-%{name} = %{version}-%{release}
 Requires:       PyQt4
 
 %description -n python-%{name}-qt
@@ -142,6 +144,12 @@ Python 2 API for constructing LENS applications on Gtk systems
 
 
 %changelog
+* Thu Apr 23 2015 Ian Firns <firnsy@kororaproject.org> 0.9.0-1
+- Provided initial system theme matching
+- Fixed widget fallback.
+- Added window toggling.
+- Fixed dep handling on python3 packages.
+
 * Fri Jan 30 2015 Ian Firns <firnsy@kororaproject.org> 0.8.0-1
 - Updated bootstrap to 3.3.1.
 

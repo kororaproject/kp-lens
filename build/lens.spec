@@ -9,6 +9,8 @@ Source0:        %{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python2-devel python3-devel
+Requires:       adobe-source-sans-pro-fonts
+Requires:       google-roboto-condensed-fonts
 
 
 %description

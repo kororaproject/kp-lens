@@ -36,7 +36,7 @@
 */
 
 * { cursor: default; }
-body { font-family: 'Source Sans Pro', 'Open Sans'; }
+body { font-family: 'Source Sans Pro'; font-weight: 200; }
 
 *:focus { outline: 0 !important; }
 

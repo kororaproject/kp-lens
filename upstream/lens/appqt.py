@@ -183,6 +183,9 @@ class ViewQt(View):
     html = html.replace('lens://', self._uri_lens_base)
     html = html.replace('app://', uri_base)
 
+    # replace system theming
+    html = html.replace('<style type="system" />', self._system_theme)
+
     self._lensview.setHtml(QString(html), QUrl(uri_base))
 
   def set_size(self, width, height):

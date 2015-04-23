@@ -56,11 +56,12 @@ class App():
 
       try:
         print("Loading fallback: %s" % (k))
-        __tk = __toolkits[name]
+        __tk = __toolkits[k]
         __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
         return getattr(__module, __tk[1], None)
       except:
-        __tk_error.append(name)
+        #traceback.print_exc()
+        __tk_error.append(k)
 
     raise Exception('No fallback toolkits implemented or loaded.')
 
@@ -92,15 +93,18 @@ class App():
     if toolkit is None:
       toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
 
-    # attempt to load the preffered
+    # attempt to load the preferred
     toolkit_klass = App.__get_toolkit(toolkit.lower())
     self._logger.debug('Using %s toolkit' % (toolkit.lower()))
 
     self._lv = toolkit_klass(name=name, width=width, height=height, inspector=inspector, start_maximized=start_maximized)
 
+    #: set system theme
+    self._lv.set_system_theme(self.__get_desktop_theme())
+
     #: find lens data path
     base = None
-    for d in ['/usr/share/lens', './lens-data']:
+    for d in ['./lens-data', '/usr/share/lens']:
       if os.path.exists(d):
         if d.startswith('/'):
           base = d
@@ -121,7 +125,7 @@ class App():
     #: manage directory namespaces for local app data
     self.namespaces = []
 
-  def __get_desktop_toolkit_hint(self, hint):
+  def __get_desktop_hint(self, hint="gnome"):
     def __is_running(process):
       try:
         # Linux/Unix
@@ -136,21 +140,55 @@ class App():
 
       return False
 
-    toolkit = hint
+    desktop = hint
 
     if os.environ.get('KDE_FULL_SESSION') == 'true':
-      toolkit = 'qt'
+      desktop = 'kde'
 
     elif os.environ.get('GNOME_DESKTOP_SESSION_ID'):
-      toolkit = 'gtk'
+      desktop = 'gnome'
 
     elif __is_running("xfce-mcs-manage") or __is_running('xfce4-session'):
-      toolkit = "gtk"
+      desktop = 'xfce'
 
     elif __is_running("ksmserver"):
+      desktop = 'kde'
+
+    return desktop
+
+  def __get_desktop_toolkit_hint(self, hint):
+    toolkit = hint
+    desktop = self.__get_desktop_hint()
+
+    if desktop in ['kde']:
       toolkit = 'qt'
 
+    elif desktop in ['gnome', 'mate', 'xfce']:
+      toolkit = "gtk"
+
     return toolkit
+
+  def __get_desktop_theme(self):
+    desktop = self.__get_desktop_hint()
+
+    theme = ''
+
+    if desktop in ['kde']:
+      pass
+
+    elif desktop in ['gnome', 'mate', 'xfce']:
+      try:
+        import gi.repository.Gio
+        settings = gi.repository.Gio.Settings('org.gnome.desktop.interface')
+        font = settings.get_string('font-name')
+
+        font_name, font_size = font.split(' ')
+        theme = "<style type='text/css'>* { font-family: '%s'; }</style>" % (font_name)
+
+      except:
+        pass
+
+    return theme
 
   def _dbus_async_cb(self, name):
     def decorator(*args, **kwargs):
@@ -160,7 +198,7 @@ class App():
       if len(args) == 1 and isinstance(args[0], dbus.DBusException):
         error = args[0]
 
-      self._lv.emit('dbus.'+ name, error, *args)
+      self._lv.emit('dbus.'+name, error, *args)
 
     return decorator
 

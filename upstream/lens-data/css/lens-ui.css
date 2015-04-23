@@ -1,33 +1,4 @@
 /*
-** FONTS
-*/
-@font-face {
-  font-family: 'Roboto Condensed';
-  font-style: normal;
-  font-weight: 300;
-  src: url(../fonts/b9QBgL0iMZfDSpmcXcE8nNeiznanRB67rGZDYkMvKPc.woff) format('woff');
-}
-@font-face {
-  font-family: 'Roboto Condensed';
-  font-style: normal;
-  font-weight: 400;
-  src: url(../fonts/Zd2E9abXLFGSr9G3YK2MsFzqCfRpIA3W6ypxnPISCPA.woff) format('woff');
-}
-@font-face {
-  font-family: 'Source Sans Pro';
-  font-style: normal;
-  font-weight: 300;
-  src: url(../fonts/toadOcfmlt9b38dHJxOBGNbE_oMaV8t2eFeISPpzbdE.woff) format('woff');
-}
-@font-face {
-  font-family: 'Source Sans Pro';
-  font-style: italic;
-  font-weight: 300;
-  src: url(../fonts/fpTVHK8qsXbIeTHTrnQH6GGomRtBD2u8FwSY4jjlmeA.woff) format('woff');
-}
-
-
-/*
 ** CLOAKING - ANGULARJS
 */
 
@@ -65,23 +36,13 @@
 */
 
 * { cursor: default; }
+body { font-family: 'Source Sans Pro', 'Open Sans'; }
 
 *:focus { outline: 0 !important; }
 
 a, a > * { cursor: pointer; }
 
-body, button, .form-control {
-  font-family:'Source Sans Pro';
-  font-weight: 300;
-  font-size: 14px;
-  line-height: 24px;
-}
-
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family:'Roboto Condensed';
-  font-weight: 300;
-}
+body, button, .form-control { font-size: 14px; }
 
 p { text-align: justify; }
 
@@ -113,6 +74,11 @@ body,
 ** TYPOGRAPHY
 */
 
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family:'Roboto Condensed';
+}
+
 p.no-space {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
@@ -125,13 +91,7 @@ p.no-space {
 
 .uppercase { text-transform: uppercase; }
 
-b, strong {
-  font-family: 'Roboto Condensed';
-  font-weight: 400;
-}
-
 .page-title {
-  font-family: 'Source Sans Pro';
   margin: 16px 0;
   text-align: center;
 }
@@ -316,8 +276,7 @@ footer .copyright > a:hover,
 footer .copyright > a:active,
 footer .copyright > a:visited {
   color: #fff;
-  font-family: 'Roboto Condensed';
-  font-weight: 400;
+  font-weight: bold;
 }
 
 footer p {

@@ -113,6 +113,9 @@ class View(EventEmitter):
   def set_size(self, name, message):
     raise NotImplementedError('Method "set_size" needs to be subclassed.')
 
+  def set_system_theme(self, theme):
+    self._system_theme = theme
+
   def set_title(self, name, message):
     raise NotImplementedError('Method "set_title" needs to be subclassed.')
 

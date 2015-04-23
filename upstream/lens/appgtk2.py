@@ -25,7 +25,7 @@ from lens.thread import Thread, ThreadManager
 
 # GTK
 from dbus.mainloop.glib import DBusGMainLoop
-from gi.repository import WebKit2, Gtk, GObject, Gdk
+from gi.repository import WebKit, Gtk, GObject
 
 
 
@@ -51,7 +51,7 @@ class ThreadManagerGtk(ThreadManager):
     return True
 
 
-class _WebView(WebKit2.WebView):
+class _WebView(WebKit.WebView):
   """
   """
 
@@ -60,11 +60,11 @@ class _WebView(WebKit2.WebView):
   }
 
   def __init__(self, inspector=False):
-    WebKit2.WebView.__init__(self)
+    WebKit.WebView.__init__(self)
 
     # register signals
-    self.connect('decide-policy', self._decide_policy_cb)
-    self.connect('load-changed', self._load_changed_cb)
+#    self.connect('decide-policy', self._decide_policy_cb)
+    self.connect('notify::load-status', self._load_changed_cb)
     self.connect('notify::title', self._title_changed_cb)
 
     #: need access to the context menu to inspect the app
@@ -91,7 +91,7 @@ class _WebView(WebKit2.WebView):
     return True
 
   def _decide_policy_cb(self, view, decision, decision_type):
-    if decision_type == WebKit2.PolicyDecisionType.NAVIGATION_ACTION:
+    if decision_type == WebKit.PolicyDecisionType.NAVIGATION_ACTION:
 
       # grab the requested URI
       uri = decision.get_request().get_uri()
@@ -121,38 +121,41 @@ class _WebView(WebKit2.WebView):
 
 
 
-class ViewGtk(View):
+class ViewGtk2(View):
 
 
-  def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
+  def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, *args, **kwargs):
     View.__init__(self, name=name, width=width, height=height, *args, **kwargs)
     # prepare Gtk dbus mainloop
     DBusGMainLoop(set_as_default=True)
 
     self._app_loaded = False
 
-    self._logger = logging.getLogger('Lens.ViewGtk')
+    self._logger = logging.getLogger('Lens.ViewGtk2')
     self._manager = ThreadManagerGtk()
     self._uri_lens_base = None
 
     self._inspector = inspector
-    self._start_maximized = start_maximized
-    self._window_state = {}
     self._build_app()
 
   def _build_app(self):
     # build window and webkit container
-    self._window = w = Gtk.Window()
+    self._window = w = Gtk.ScrolledWindow()
     self._lensview = lv = _WebView(inspector=self._inspector)
 
+    # Gtk2 requires a scrolled window child
+    sw = Gtk.ScrolledWindow()
+    sw.props.hscrollbar_policy = Gtk.POLICY_AUTOMATIC
+    sw.props.vscrollbar_policy = Gtk.POLICY_AUTOMATIC
+    sw.add(lv)
+
     # add lensview to the parent window
-    w.add(lv)
+    w.add(sw)
 
     # connect to Gtk signals
     lv.connect('on-js', self._on_js)
-    lv.connect('load-changed', self._load_change_cb)
+    lv.connect('notify::load-status', self._load_change_cb)
     w.connect('delete-event', self._delete_event_cb)
-    w.connect('window-state-event', self._window_state_event_cb)
 
     # connect to Lens signals
     self.on('__close_app', self._close_cb)
@@ -170,16 +173,11 @@ class ViewGtk(View):
   def _delete_event_cb(self, *args):
     self.emit('__close_app', *args)
 
-  def _window_state_event_cb(self, window, event, *args):
-    self._window_state["maximized"] = event.new_window_state & Gdk.WindowState.MAXIMIZED
-    self._window_state["fullscreen"] = event.new_window_state & Gdk.WindowState.FULLSCREEN
-
   def _load_change_cb(self, view, event):
     # show window once some page has loaded
-    if( event == WebKit2.LoadEvent.FINISHED ):
+    if view.get_load_status() == WebKit.LoadStatus.FINISHED:
       self._window.show_all()
-      if self._start_maximized:
-        self.toggle_window_maximize()
+
       if not self._app_loaded:
         self._app_loaded = True
         self.emit('app.loaded')
@@ -189,12 +187,9 @@ class ViewGtk(View):
     Gtk.main()
 
   def emit_js(self, name, *args):
-    self._lensview.run_javascript('var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});' % json.dumps([name] + list(args)), None, None, None)
+    self._lensview.execute_script('var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});' % json.dumps([name] + list(args)))
 
   def load_uri(self, uri):
-    # TODO: we require webkitgtk3 2.2.7 or later
-    #
-    # FIXME
     # improve resource handling of lens:// schemas by intercepting resources
     # via WebKitWebPage (extensions) send-request(). Not yet exposed in python
     #
@@ -204,30 +199,14 @@ class ViewGtk(View):
     html = html.replace('lens://', self._uri_lens_base)
     html = html.replace('app://', uri_base)
 
-    # replace system theming
-    html = html.replace('<style type="system" />', self._system_theme)
-
-    self._lensview.load_html(html, uri_base)
+    self._lensview.load_string(html, 'text/html', 'utf-8', uri_base)
 
   def set_size(self, width, height):
     self._window.set_size_request(width, height)
+    self._window.set_default_size(width, height)
+    self._window.resize(width, height)
 
   def set_title(self, title):
     self._window.set_title(title)
     self._window.set_wmclass(title, title)
 
-  def toggle_window_maximize(self):
-    if self._window_state.get("maximized", False):
-      self._window.unmaximize()
-      self.emit_js('window-unmaximized')
-    else:
-      self._window.maximize()
-      self.emit_js('window-maximized')
-
-  def toggle_window_fullscreen(self):
-    if self._window_state.get("fullscreen", False):
-      self._window.unfullscreen()
-      self.emit_js('window-unfullscreen')
-    else:
-      self._window.fullscreen()
-      self.emit_js('window-fullscreen')

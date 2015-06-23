@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.9.0
+Version:        0.9.1
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -146,6 +146,9 @@ Python 2 API for constructing LENS applications on Gtk systems
 
 
 %changelog
+* Tue Jun 23 2015 Ian Firns <firnsy@kororaproject.org> 0.9.1-1
+- Updated button theme.
+
 * Thu Apr 23 2015 Ian Firns <firnsy@kororaproject.org> 0.9.0-1
 - Provided initial system theme matching
 - Fixed widget fallback.

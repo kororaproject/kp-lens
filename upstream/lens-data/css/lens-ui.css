@@ -36,7 +36,7 @@
 */
 
 * { cursor: default; }
-body { font-family: 'Source Sans Pro'; font-weight: 200; }
+body, .btn { font-family: 'Source Sans Pro'; font-weight: 200; }
 
 *:focus { outline: 0 !important; }
 
@@ -54,13 +54,9 @@ pre {
 ** SELECTION
 */
 
-body,
-.unselectable {
+body, .unselectable {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -74,10 +70,7 @@ body,
 ** TYPOGRAPHY
 */
 
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family:'Roboto Condensed';
-}
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 { font-family:'Roboto Condensed'; }
 
 p.no-space {
   margin-bottom: 0 !important;
@@ -116,17 +109,11 @@ p.no-space {
   background-color: #f0f0f0;
 }
 
-.subtitle {
-  margin-top: 0;
-}
+.subtitle { margin-top: 0; }
 
-blockquote > *:first-child {
-  margin-top: 0;
-}
+blockquote > *:first-child { margin-top: 0; }
 
-blockquote p {
-  font-size: inherit;
-}
+blockquote p { font-size: inherit; }
 
 /*
 ** BREADCRUBS

@@ -17,12 +17,13 @@
 
 import logging
 
+logger = logging.getLogger('Lens.EventEmitter')
+
 class EventEmitter():
   def __init__(self):
     self.__events = {}
     self.__events_once = {}
 
-    self._logger = logging.getLogger('Lens.EventEmitter')
 
   def catch(self, callback=None):
     if self.on('error', callback) is not None:
@@ -33,7 +34,7 @@ class EventEmitter():
     so = self.__events_once.pop(name, [])  # subscribers - once only
     gs = self.__events.get('__*', [])      # global subscribers
 
-    self._logger.debug('Emit %s in %s (%d, %d)' % (name, self, len(s)+len(so), len(gs)))
+    logger.debug('Emit %s in %s (%d, %d)' % (name, self, len(s)+len(so), len(gs)))
 
     # specific (including once only) subscribers
     for cb in s + so:
@@ -47,19 +48,19 @@ class EventEmitter():
     return len(self.subscribers()) > 0
 
   def on(self, name, callback):
-    self._logger.debug('Subscribing %s on %s' % (name, callback))
+    logger.debug('Subscribing %s on %s' % (name, callback))
     self.__events.setdefault(name, []).append(callback)
 
     return callback
 
   def on_any(self, callback):
-    self._logger.debug('Subscribing %s on any signal' % (callback))
+    logger.debug('Subscribing %s on any signal' % (callback))
     self.__events.setdefault('__*', []).append(callback)
 
     return callback
 
   def once(self, name, callback):
-    self._logger.debug('Subscribing %s on %s for one time only' % (name, callback))
+    logger.debug('Subscribing %s on %s for one time only' % (name, callback))
     self.__events_once.setdefault(name, []).append(callback)
 
     return callback
@@ -86,8 +87,6 @@ class EventEmitter():
 
 
 class View(EventEmitter):
-
-
   def __init__(self, name="MyLensApp", width=640, height=480, *args, **kwargs):
     EventEmitter.__init__(self)
 
@@ -95,11 +94,21 @@ class View(EventEmitter):
     self._app_width = width
     self._app_height = height
 
+    self._javascript = 'var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});'
+
   def _build_app(self):
     raise NotImplementedError('Method "_build_app" needs to be subclassed.')
 
   def _on_js(self, thread, name, args):
     self.emit(name, *args)
+
+  @property
+  def javascript(self):
+    return self._javascript
+
+  @javascript.setter
+  def javascript(self, data):
+    self._javascript = data
 
   def close(self, *args, **kwargs):
     self.emit('__close_app')
@@ -109,6 +118,9 @@ class View(EventEmitter):
 
   def load_uri(self, uri):
     raise NotImplementedError('Method "load_uri" needs to be subclassed.')
+
+  def set_inspector(self, state):
+    raise NotImplementedError('Method "set_inspector" needs to be subclassed.')
 
   def set_size(self, name, message):
     raise NotImplementedError('Method "set_size" needs to be subclassed.')

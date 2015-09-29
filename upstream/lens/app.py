@@ -24,14 +24,17 @@ import traceback
 from lens.view import View
 from lens.thread import Thread, ThreadManager
 
+logger = logging.getLogger('Lens.App')
+
 class App():
   @staticmethod
   def __get_toolkit(name, exact=False):
     #: defines the list of Lens backends to be preloaded for auto-detection
     __toolkits = {
-      'gtk':  ['lens.appgtk',  'ViewGtk' ],
-      'qt':   ['lens.appqt',   'ViewQt'  ],
-      'qt5':  ['lens.appqt5',  'ViewQt5' ]
+      'gtk': ['lens.appgtk', 'ViewGtk' ],
+      'qt4': ['lens.appqt4', 'ViewQt4' ],
+      'qt5': ['lens.appqt5', 'ViewQt5' ],
+      'qt':  ['lens.appqt5', 'ViewQt5' ]
     }
 
     __tk_error = []
@@ -40,6 +43,7 @@ class App():
       try:
         __tk = __toolkits[name]
         __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
+        logger.debug('Loaded: {0}'.format(name))
         return getattr(__module, __tk[1], None)
 
       except:
@@ -47,7 +51,7 @@ class App():
           raise Exception('Toolkit %s is not implemented or could not be loaded.' % (name))
 
         else:
-          #traceback.print_exc()
+          logger.debug(traceback.format_exc())
           __tk_error.append(name)
 
     for k in __toolkits:
@@ -55,12 +59,12 @@ class App():
         continue
 
       try:
-        print("Loading fallback: %s" % (k))
+        logger.format('Loading fallback: {0}'.format(k))
         __tk = __toolkits[k]
         __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
         return getattr(__module, __tk[1], None)
       except:
-        #traceback.print_exc()
+        traceback.print_exc()
         __tk_error.append(k)
 
     raise Exception('No fallback toolkits implemented or loaded.')
@@ -78,29 +82,23 @@ class App():
   :param width: the width of the Lens applciation window. Defaults to 640.
   :param height the height of the Lens applciation window. Defaults to 480.
   """
-  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
-    self._logger = logging.getLogger('Lens.App')
-
+  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", *args, **kwargs):
     self._app_name = name
-    self._app_width = width
-    self._app_height = height
+    self._app_width = kwargs.get('width', 640)
+    self._app_height = kwargs.get('height', 480)
+
+    self._start_maximized = kwargs.get('start_maximized', False)
+
+    self._inspector = False
+    if os.environ.get('LENS_INSPECTOR') == '1':
+      self._inspector = kwargs.get('inspector', True)
+
+    if os.environ.get('LENS_DEBUG') == '1':
+      logging.basicConfig(level=logging.DEBUG)
 
     # dbus
     self._dbus_session = None
     self._dbus_system = None
-
-    # determine the preferred toolkit to use and build the appropiate LensView
-    if toolkit is None:
-      toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
-
-    # attempt to load the preferred
-    toolkit_klass = App.__get_toolkit(toolkit.lower())
-    self._logger.debug('Using %s toolkit' % (toolkit.lower()))
-
-    self._lv = toolkit_klass(name=name, width=width, height=height, inspector=inspector, start_maximized=start_maximized)
-
-    #: set system theme
-    self._lv.set_system_theme(self.__get_desktop_theme())
 
     #: find lens data path
     base = None
@@ -115,12 +113,9 @@ class App():
     if base is None:
       raise Exception('Unable to locate lens base data for UI components.')
 
-    self._lv._uri_lens_base = 'file://' + base + '/'
+    self._uri_base = os.path.abspath(base)
 
-    self._logger.debug("Using lens data path: %s" % self._lv._uri_lens_base)
-
-    #: store an app reference to the thread manager
-    self.threads = self._lv._manager
+    self.__load_toolkit(toolkit, toolkit_hint)
 
     #: manage directory namespaces for local app data
     self.namespaces = []
@@ -202,6 +197,39 @@ class App():
 
     return decorator
 
+  def __load_toolkit(self, toolkit=None, toolkit_hint='gtk'):
+    # determine the preferred toolkit to use and build the appropiate LensView
+    if toolkit is None:
+      toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
+
+    # attempt to load the preferred
+    toolkit_klass = App.__get_toolkit(toolkit.lower())
+    logger.debug('Using {0} toolkit'.format(toolkit.lower()))
+
+    self._lv = toolkit_klass(name=self._app_name, width=self._app_width, height=self._app_height, inspector=self._inspector, start_maximized=self._start_maximized)
+
+    #: set system theme
+    self._lv.set_system_theme(self.__get_desktop_theme())
+
+    self._lv._uri_lens_base = 'file://' + self._uri_base + '/'
+
+    logger.debug('Using lens data path: {0}'.format(self._lv._uri_lens_base))
+
+    #: store an app reference to the thread manager
+    self.threads = self._lv._manager
+
+
+  @property
+  def inspector(self):
+    return self._inspector
+
+  @inspector.setter
+  def inspector(self, state):
+    self._inspector = state
+
+    # update window title on app name change
+    self._lv.set_inspector(self._inspector)
+
   @property
   def name(self):
     return self._app_name
@@ -217,7 +245,7 @@ class App():
   # remove "manager" property in 1.0.0
   @property
   def manager(self):
-    self._logger.warn('The "manager" property is deprecated, use "threads" instead.')
+    logger.warn('The "manager" property is deprecated, use "threads" instead.')
     return self.threads
 
   def close(self):
@@ -292,7 +320,7 @@ class App():
       _uri = os.path.abspath(os.path.join(d, uri))
 
       if os.path.exists(_uri):
-        self._logger.debug("Loading URI: %s" % _uri)
+        logger.debug('Loading URI: {0}'.format(_uri))
 
         return self._lv.load_uri('file://' + _uri)
 

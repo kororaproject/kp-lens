@@ -3,8 +3,8 @@ angular.module('lens.bridge', []).
     $rootScope.emit = function() {
       var _args = Array.prototype.slice.call(arguments);
 
-      if( _args.length > 0 ) {
-        var c = { name: _args.shift(), args: _args };
+      if (_args.length > 0) {
+        var c = {name: _args.shift(), args: _args};
 
         /* update document title */
         var t = document.title;
@@ -15,7 +15,7 @@ angular.module('lens.bridge', []).
 
     $rootScope.safeApply = function(fn) {
       var phase = this.$root.$$phase;
-      if(phase == '$apply' || phase == '$digest') {
+      if (phase == '$apply' || phase == '$digest') {
         if(fn && (typeof(fn) === 'function')) {
           fn();
         }

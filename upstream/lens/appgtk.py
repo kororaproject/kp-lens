@@ -62,14 +62,16 @@ class _WebView(WebKit2.WebView):
   def __init__(self, inspector=False):
     WebKit2.WebView.__init__(self)
 
+    self.__inspector = inspector
+
     # register signals
     self.connect('decide-policy', self._decide_policy_cb)
     self.connect('load-changed', self._load_changed_cb)
     self.connect('notify::title', self._title_changed_cb)
 
-    #: need access to the context menu to inspect the app
+    #: don't need access to the context menu when not inspecting the app
     if not inspector:
-      self.connect('context-menu', self._context_menu_cb)
+      self.__context_menu_id = self.connect('context-menu', self._context_menu_cb)
 
     self.l_uri = None
 
@@ -119,6 +121,23 @@ class _WebView(WebKit2.WebView):
     except:
       pass
 
+  def set_inspector(self, state):
+    if state == self.__inspector:
+      return
+
+    try:
+      self.get_settings().set_property('enable-developer-extras', state)
+    except:
+      pass
+
+    #: need access to the context menu to inspect the app
+    if state:
+      self.disconnect(self.__context_menu_id)
+
+    else:
+      self.__context_menu_id = self.connect('context-menu', self._context_menu_cb)
+
+    self.__inspector = state
 
 
 class ViewGtk(View):
@@ -189,7 +208,7 @@ class ViewGtk(View):
     Gtk.main()
 
   def emit_js(self, name, *args):
-    self._lensview.run_javascript('var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});' % json.dumps([name] + list(args)), None, None, None)
+    self._lensview.run_javascript(self._javascript % json.dumps([name] + list(args)), None, None, None)
 
   def load_uri(self, uri):
     # TODO: we require webkitgtk3 2.2.7 or later
@@ -208,6 +227,9 @@ class ViewGtk(View):
     html = html.replace('<style type="system" />', self._system_theme)
 
     self._lensview.load_html(html, uri_base)
+
+  def set_inspector(self, state):
+    self._lensview.set_inspector(state)
 
   def set_size(self, width, height):
     self._window.set_size_request(width, height)

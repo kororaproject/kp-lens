@@ -17,7 +17,6 @@
 #
 
 import os
-import pprint
 
 from lens.app import App
 
@@ -37,8 +36,7 @@ def _get_hostname_cb(*args):
 
 @app.connect('update-hostname')
 def _update_hostname_cb(message):
-  pp = pprint.PrettyPrinter(indent=2)
-  pp.pprint(message)
+  print(message)
 
 @app.connect('toggle-window-maximize')
 def _maximize_cb(*args):

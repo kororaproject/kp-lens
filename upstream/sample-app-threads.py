@@ -41,7 +41,7 @@ class LongTask(Thread):
 
 
 
-app = App(name="Lens. Threads", inspector=True)
+app = App(name="Lens. Threads")
 
 # load the app entry page
 app.namespaces.append('./sample-data')

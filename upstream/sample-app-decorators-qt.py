@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 #
 # Copyright 2012-2014 "Korora Project" <dev@kororaproject.org>
 #
@@ -21,7 +21,7 @@ import pprint
 
 from lens.app import App
 
-app = App(toolkit="qt", name="Lens. Qt Toolkit", inspector=True)
+app = App(toolkit="qt4", name="Lens. Qt Toolkit")
 
 # load the app entry page
 app.namespaces.append('./sample-data')

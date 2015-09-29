@@ -37,7 +37,7 @@ except ImportError:
 
 
 
-class ThreadManagerQt(ThreadManager):
+class ThreadManagerQt4(ThreadManager):
   def __init__(self, app=None, maxConcurrentThreads=10):
     ThreadManager.__init__(self, maxConcurrentThreads)
 
@@ -68,14 +68,28 @@ class ThreadManagerQt(ThreadManager):
 class _QWebView(QWebView):
   def __init__(self, inspector=False):
     QWebView.__init__(self)
-    self._inspector = inspector
 
-    # disable context menu if inspector not enabled
-    if not inspector:
-      self.contextMenuEvent = self.ignoreContextMenuEvent
+    self.__inspector = None
+    self.__contextMenuEvent = self.contextMenuEvent
+
+    self.set_inspector(inspector)
 
   def ignoreContextMenuEvent(self, event):
     event.ignore()
+
+  def set_inspector(self, state):
+    if state == self.__inspector:
+      return
+
+    if state:
+      self.contextMenuEvent = self.__contextMenuEvent
+
+    # disable context menu if inspector not enabled
+    else:
+      self.contextMenuEvent = self.ignoreContextMenuEvent
+
+    self.__inspector = state
+
 
 
 class _QWebPage(QWebPage):
@@ -83,7 +97,8 @@ class _QWebPage(QWebPage):
     QWebView.__init__(self)
 
 
-class ViewQt(View):
+
+class ViewQt4(View):
   def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
     # prepare Qt dbus mainloop
@@ -92,8 +107,8 @@ class ViewQt(View):
 
     self._app_loaded = False
 
-    self._logger = logging.getLogger('Lens.ViewQt')
-    self._manager = ThreadManagerQt(app=self._app)
+    self._logger = logging.getLogger('Lens.ViewQt4')
+    self._manager = ThreadManagerQt4(app=self._app)
 
     self._inspector = inspector
     self._start_maximized = start_maximized
@@ -170,7 +185,7 @@ class ViewQt(View):
     self._app.exec_()
 
   def emit_js(self, name, *args):
-    self._frame.evaluateJavaScript(QString("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});" % json.dumps([name] + list(args))))
+    self._frame.evaluateJavaScript(QString(self._javascript % json.dumps([name] + list(args))))
 
   def load_uri(self, uri):
     # FIXME
@@ -188,6 +203,9 @@ class ViewQt(View):
 
     self._lensview.setHtml(QString(html), QUrl(uri_base))
 
+  def set_inspector(self, state):
+    self._lensview.set_inspector(state)
+
   def set_size(self, width, height):
     self._lensview.setMinimumSize(width, height)
     self._lensview.resize(width, height)
@@ -202,7 +220,7 @@ class ViewQt(View):
     else:
       self._lensview.setWindowState(self._lensview.windowState() | Qt.WindowMaximized)
       self.emit_js('window-maximized')
-      
+
   def toggle_window_fullscreen(self):
     if self._lensview.windowState() & Qt.WindowFullScreen:
       self._lensview.setWindowState(self._lensview.windowState() ^ Qt.WindowFullScreen)

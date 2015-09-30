@@ -348,6 +348,12 @@ class App():
   def set_title(self, title):
     self._lv.set_title(title)
 
+  def signal(self, name, *args):
+    self.emit(name, *args)
+
+  def slot(self, name, callback):
+    self.on(name, callback)
+
   def toggle_window_maximize(self):
     self._lv.toggle_window_maximize()
 

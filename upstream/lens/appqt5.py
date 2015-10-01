@@ -140,7 +140,6 @@ class ViewQt5(View):
     if self._start_maximized:
       self.toggle_window_maximize()
 
-
     if not self._app_loaded:
       self._app_loaded = True
       self.emit('app.loaded')
@@ -170,7 +169,7 @@ class ViewQt5(View):
     self._app.exec_()
 
   def emit_js(self, name, *args):
-    self._frame.evaluateJavaScript(QString("var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});" % json.dumps([name] + list(args))))
+    self._frame.evaluateJavaScript(QString(self._javascript % json.dumps([name] + list(args))))
 
   def load_uri(self, uri):
     # FIXME
@@ -182,6 +181,7 @@ class ViewQt5(View):
     html = open(uri.replace('file://',''), 'r').read()
     html = html.replace('lens://', self._uri_lens_base)
     html = html.replace('app://', uri_base)
+    html = html.replace('<head>', self._lens_head)
 
     # replace system theming
     html = html.replace('<style type="system" />', self._system_theme)

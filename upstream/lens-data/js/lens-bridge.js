@@ -1,16 +1,7 @@
 angular.module('lens.bridge', []).
   run(function($rootScope) {
     $rootScope.emit = function() {
-      var _args = Array.prototype.slice.call(arguments);
-
-      if (_args.length > 0) {
-        var c = {name: _args.shift(), args: _args};
-
-        /* update document title */
-        var t = document.title;
-        document.title = '_BR::' + angular.toJson(c, false);
-        document.title = t;
-      }
+      window.lens.emit.apply(undefined, arguments);
     };
 
     $rootScope.safeApply = function(fn) {
@@ -24,4 +15,13 @@ angular.module('lens.bridge', []).
         this.$apply(fn);
       }
     };
+
+    window.lens.on_any(function() {
+      a = arguments;
+      var _rs = angular.element(document).scope();
+      _rs.safeApply(function(){
+        _rs.$broadcast.apply(_rs, a)
+      });
+    });
   });
+

@@ -222,6 +222,7 @@ class ViewGtk(View):
     html = open(uri.replace('file://',''), 'r').read()
     html = html.replace('lens://', self._uri_lens_base)
     html = html.replace('app://', uri_base)
+    html = html.replace('<head>', self._lens_head)
 
     # replace system theming
     html = html.replace('<style type="system" />', self._system_theme)

@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.9.1
+Version:        0.10.0
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -146,6 +146,9 @@ Python 2 API for constructing LENS applications on Gtk systems
 
 
 %changelog
+* Thu Oct  1 2015 Ian Firns <firnsy@kororaproject.org> 0.10.0-1
+- Refactored angularjs bridge out of core lens.
+
 * Tue Jun 23 2015 Ian Firns <firnsy@kororaproject.org> 0.9.1-1
 - Updated button theme.
 

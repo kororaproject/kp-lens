@@ -32,9 +32,9 @@ mkdir -p %{buildroot}%{_datadir}/%{name}
 
 cp -a lens-data/*  %{buildroot}%{_datadir}/%{name}/
 install -m 0644 COPYING %{buildroot}%{_datadir}/%{name}/
-install -m 0644 README %{buildroot}%{_datadir}/%{name}/
+#install -m 0644 README %{buildroot}%{_datadir}/%{name}/
 
-for f in __init__.py app.py appgtk.py appqt.py system.py thread.py view.py
+for f in __init__.py app.py appgtk.py appgtk2.py appqt4.py appqt5.py system.py thread.py view.py
 do
   install -m 0644 lens/${f} %{buildroot}%{python_sitelib}/lens/${f}
   install -m 0644 lens/${f} %{buildroot}%{python3_sitelib}/lens/${f}
@@ -75,8 +75,8 @@ Requires:       python3-gobject webkitgtk4
 Python 3 API for constructing LENS applications on Gtk systems
 
 %files -n python3-%{name}-gtk
-%{python3_sitelib}/lens/appgtk.py
-%{python3_sitelib}/lens/__pycache__/appgtk.*.py*
+%{python3_sitelib}/lens/appgtk*.py
+%{python3_sitelib}/lens/__pycache__/appgtk*.py*
 
 
 %package -n python3-%{name}-qt
@@ -90,8 +90,8 @@ Requires:       python3-PyQt4
 Python 3 API for constructing LENS applications on Gtk systems
 
 %files -n python3-%{name}-qt
-%{python3_sitelib}/lens/appqt.py
-%{python3_sitelib}/lens/__pycache__/appqt.*.py*
+%{python3_sitelib}/lens/appqt*.py
+%{python3_sitelib}/lens/__pycache__/appqt*.py*
 
 
 %package -n python-%{name}
@@ -123,7 +123,7 @@ Requires:       pygobject3 webkitgtk4
 Python 2 API for constructing LENS applications on Gtk systems
 
 %files -n python-%{name}-gtk
-%{python_sitelib}/lens/appgtk.py*
+%{python_sitelib}/lens/appgtk*.py*
 
 
 %package -n python-%{name}-qt
@@ -137,11 +137,11 @@ Requires:       PyQt4
 Python 2 API for constructing LENS applications on Gtk systems
 
 %files -n python-%{name}-qt
-%{python_sitelib}/lens/appqt.py*
+%{python_sitelib}/lens/appqt*.py*
 
 
 %files
-%doc README COPYING
+%doc COPYING
 %{_datadir}/%{name}/
 
 

@@ -23,18 +23,20 @@ import signal
 from lens.view import View
 from lens.thread import Thread, ThreadManager
 
+logger = logging.getLogger('Lens.Backend.Qt4')
+
 # Qt4
 from dbus.mainloop.qt import DBusQtMainLoop
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtWebKit import *
+from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
 # FIXME: QString does not exists in python3
 try:
   from PyQt4.QtCore import QString
 except ImportError:
   QString = type("")
-
 
 
 class ThreadManagerQt4(ThreadManager):
@@ -64,6 +66,31 @@ class ThreadManagerQt4(ThreadManager):
     return True
 
 
+class CustomNetworkAccessManager(QNetworkAccessManager):
+  def __init__(self, old_manager):
+    QNetworkAccessManager.__init__(self)
+    self._uri_app_base = ''
+    self._uri_lens_base = ''
+    self.old_manager = old_manager
+    self.setCache(old_manager.cache())
+    self.setCookieJar(old_manager.cookieJar())
+    self.setProxy(old_manager.proxy())
+    self.setProxyFactory(old_manager.proxyFactory())
+
+  def createRequest(self, operation, request, data):
+    path = o = request.url().toString()
+
+    if path.startswith('app://'):
+      path = path.replace('app://', 'file://' + self._uri_app_base)
+      logger.debug('Loading app resource: {0}'.format(o))
+
+    elif path.startswith('lens://'):
+      path = path.replace('lens://', 'file://' + self._uri_lens_base)
+      logger.debug('Loading lens resource: {0}'.format(o))
+
+    request.setUrl(QUrl(QString(path)))
+
+    return QNetworkAccessManager.createRequest(self, operation, request, data)
 
 class _QWebView(QWebView):
   def __init__(self, inspector=False):
@@ -129,6 +156,10 @@ class ViewQt4(View):
     lv.titleChanged.connect(self._title_changed_cb)
     self._app.lastWindowClosed.connect(self._last_window_closed_cb)
 
+    #
+    self._cnam = CustomNetworkAccessManager(lv.page().networkAccessManager())
+    lv.page().setNetworkAccessManager(self._cnam)
+
     # connect to Lens signals
     self.on('__close_app', self._close_cb)
 
@@ -154,7 +185,6 @@ class ViewQt4(View):
     self._lensview.show()
     if self._start_maximized:
       self.toggle_window_maximize()
-
 
     if not self._app_loaded:
       self._app_loaded = True
@@ -193,10 +223,9 @@ class ViewQt4(View):
     # via WebKitWebPage (extensions) send-request(). Not yet exposed in python
     #
     # for now we emulate the effect with a replace
-    uri_base = os.path.dirname(uri) + '/'
+    self._cnam._uri_app_base = uri_base = os.path.dirname(uri) + '/'
+    print(uri_base)
     html = open(uri.replace('file://',''), 'r').read()
-    html = html.replace('lens://', self._uri_lens_base)
-    html = html.replace('app://', uri_base)
     html = html.replace('<head>', self._lens_head)
 
     # replace system theming
@@ -213,6 +242,12 @@ class ViewQt4(View):
 
   def set_title(self, title):
     self._lensview.setWindowTitle(QString(title))
+
+  def set_uri_app_base(self, uri):
+    self._cnam._uri_app_base = uri
+
+  def set_uri_lens_base(self, uri):
+    self._cnam._uri_lens_base = uri
 
   def toggle_window_maximize(self):
     if self._lensview.windowState() & Qt.WindowMaximized:

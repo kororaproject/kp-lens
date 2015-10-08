@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 "Korora Project" <dev@kororaproject.org>
+# Copyright 2012-2015 "Korora Project" <dev@kororaproject.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the temms of the GNU General Public License as published by

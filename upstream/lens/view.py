@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 "Korora Project" <dev@kororaproject.org>
+# Copyright 2012-2015 "Korora Project" <dev@kororaproject.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the temms of the GNU General Public License as published by
@@ -153,7 +153,6 @@ class View(EventEmitter):
     '''
 
     self._javascript = 'window.lens.__emit(%s)'
-    #self._javascript = 'var _rs = angular.element(document).scope(); _rs.safeApply(function(){_rs.$broadcast.apply(_rs,%s)});'
 
   def _build_app(self):
     raise NotImplementedError('Method "_build_app" needs to be subclassed.')
@@ -189,6 +188,9 @@ class View(EventEmitter):
 
   def set_title(self, name, message):
     raise NotImplementedError('Method "set_title" needs to be subclassed.')
+
+  def set_uri_lens_base(self, uri):
+    self._uri_lens_base = uri
 
   def toggle_window_maximize(self):
     raise NotImplementedError('Method "toggle_window_maximize" needs to be subclassed.')

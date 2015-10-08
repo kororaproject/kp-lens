@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.10.0
+Version:        0.11
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -25,18 +25,15 @@ Lightweight, ENvironment-agnostic SDK (LENS) for building graphical UIs.
 
 %install
 mkdir -p %{buildroot}%{python3_sitelib}/lens
-mkdir -p %{buildroot}%{python_sitelib}/lens
 mkdir -p %{buildroot}%{_datadir}/%{name}
 
 ./build-bundles.sh
 
 cp -a lens-data/*  %{buildroot}%{_datadir}/%{name}/
 install -m 0644 COPYING %{buildroot}%{_datadir}/%{name}/
-#install -m 0644 README %{buildroot}%{_datadir}/%{name}/
 
-for f in __init__.py app.py appgtk.py appgtk2.py appqt4.py appqt5.py system.py thread.py view.py
+for f in __init__.py app.py appgtk.py appqt4.py appqt5.py system.py thread.py view.py
 do
-  install -m 0644 lens/${f} %{buildroot}%{python_sitelib}/lens/${f}
   install -m 0644 lens/${f} %{buildroot}%{python3_sitelib}/lens/${f}
 done
 
@@ -79,66 +76,34 @@ Python 3 API for constructing LENS applications on Gtk systems
 %{python3_sitelib}/lens/__pycache__/appgtk*.py*
 
 
-%package -n python3-%{name}-qt
-Summary:        Python 3 API for constructing LENS applications on Qt
+%package -n python3-%{name}-qt4
+Summary:        Python 3 API for constructing LENS applications on Qt4
 Group:          Applications/System
 Provides:       python3-%{name}-backend
 Requires:       python3-%{name} = %{version}-%{release}
 Requires:       python3-PyQt4
 
-%description -n python3-%{name}-qt
-Python 3 API for constructing LENS applications on Gtk systems
+%description -n python3-%{name}-qt4
+Python 3 API for constructing LENS applications on Qt4 systems
 
-%files -n python3-%{name}-qt
-%{python3_sitelib}/lens/appqt*.py
-%{python3_sitelib}/lens/__pycache__/appqt*.py*
+%files -n python3-%{name}-qt4
+%{python3_sitelib}/lens/appqt4.py
+%{python3_sitelib}/lens/__pycache__/appqt4.*.py*
 
-
-%package -n python-%{name}
-Summary:        Python 2 API for constructing LENS applications
+%package -n python3-%{name}-qt5
+Summary:        Python 3 API for constructing LENS applications on Qt5
 Group:          Applications/System
-BuildRequires:  python2-devel
-Requires:       %{name} = %{version}-%{release}
-Requires:       python-%{name}-backend = %{version}-%{release}
+Provides:       python3-%{name}-backend
+Requires:       python3-%{name} = %{version}-%{release}
+Requires:       python3-PyQt5
+Obsoletes:      python3-%{name}-qt
 
-%description -n python-%{name}
-Python 2 API for constructing LENS applications
+%description -n python3-%{name}-qt5
+Python 3 API for constructing LENS applications on Qt5 systems
 
-%files -n  python-%{name}
-%{python_sitelib}/lens/__init__.py*
-%{python_sitelib}/lens/app.py*
-%{python_sitelib}/lens/system.py*
-%{python_sitelib}/lens/thread.py*
-%{python_sitelib}/lens/view.py*
-
-
-%package -n python-%{name}-gtk
-Summary:        Python 2 API for constructing LENS applications on Gtk
-Group:          Applications/System
-Provides:       python-%{name}-backend
-Requires:       python-%{name} = %{version}-%{release}
-Requires:       pygobject3 webkitgtk4
-
-%description -n python-%{name}-gtk
-Python 2 API for constructing LENS applications on Gtk systems
-
-%files -n python-%{name}-gtk
-%{python_sitelib}/lens/appgtk*.py*
-
-
-%package -n python-%{name}-qt
-Summary:        Python 2 API for constructing LENS applications on Qt
-Group:          Applications/System
-Provides:       python-%{name}-backend
-Requires:       python-%{name} = %{version}-%{release}
-Requires:       PyQt4
-
-%description -n python-%{name}-qt
-Python 2 API for constructing LENS applications on Gtk systems
-
-%files -n python-%{name}-qt
-%{python_sitelib}/lens/appqt*.py*
-
+%files -n python3-%{name}-qt5
+%{python3_sitelib}/lens/appqt5.py
+%{python3_sitelib}/lens/__pycache__/appqt5.*.py*
 
 %files
 %doc COPYING
@@ -146,6 +111,12 @@ Python 2 API for constructing LENS applications on Gtk systems
 
 
 %changelog
+* Thu Oct  8 2015 Ian Firns <firnsy@kororaproject.org> 0.11.0-1
+- Remove HTML replace hack for resource loading.
+
+* Fri Oct  2 2015 Ian Firns <firnsy@kororaproject.org> 0.10.1-1
+- No longer build for python 2.
+
 * Thu Oct  1 2015 Ian Firns <firnsy@kororaproject.org> 0.10.0-1
 - Refactored angularjs bridge out of core lens.
 

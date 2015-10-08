@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 "Korora Project" <dev@kororaproject.org>
+# Copyright 2012-2015 "Korora Project" <dev@kororaproject.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the temms of the GNU General Public License as published by
@@ -31,10 +31,11 @@ class App():
   def __get_toolkit(name, exact=False):
     #: defines the list of Lens backends to be preloaded for auto-detection
     __toolkits = {
-      'gtk': ['lens.appgtk', 'ViewGtk' ],
-      'qt4': ['lens.appqt4', 'ViewQt4' ],
-      'qt5': ['lens.appqt5', 'ViewQt5' ],
-      'qt':  ['lens.appqt5', 'ViewQt5' ]
+      'gtk3': ['lens.appgtk', 'ViewGtk'],
+      'gtk':  ['lens.appgtk', 'ViewGtk'],
+      'qt4':  ['lens.appqt4', 'ViewQt4'],
+      'qt5':  ['lens.appqt5', 'ViewQt5'],
+      'qt':   ['lens.appqt5', 'ViewQt5']
     }
 
     __tk_error = []
@@ -89,12 +90,17 @@ class App():
 
     self._start_maximized = kwargs.get('start_maximized', False)
 
+    # check environment for inspector overrides
     self._inspector = False
     if os.environ.get('LENS_INSPECTOR') == '1':
       self._inspector = kwargs.get('inspector', True)
 
+    # check environment for debug overrides
     if os.environ.get('LENS_DEBUG') == '1':
       logging.basicConfig(level=logging.DEBUG)
+
+    # check environment for toolkit overrides
+    toolkit = os.environ.get('LENS_TOOLKIT', toolkit)
 
     # dbus
     self._dbus_session = None
@@ -211,9 +217,9 @@ class App():
     #: set system theme
     self._lv.set_system_theme(self.__get_desktop_theme())
 
-    self._lv._uri_lens_base = 'file://' + self._uri_base + '/'
+    self._lv.set_uri_lens_base(self._uri_base + '/')
 
-    logger.debug('Using lens data path: {0}'.format(self._lv._uri_lens_base))
+    logger.debug('Using lens data path: {0}'.format(self._uri_base))
 
     #: store an app reference to the thread manager
     self.threads = self._lv._manager
@@ -322,7 +328,7 @@ class App():
       if os.path.exists(_uri):
         logger.debug('Loading URI: {0}'.format(_uri))
 
-        return self._lv.load_uri('file://' + _uri)
+        return self._lv.load_uri(_uri)
 
     raise Exception("Unable to locate application in the defined namespace.");
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 "Korora Project" <dev@kororaproject.org>
+# Copyright 2012-2015 "Korora Project" <dev@kororaproject.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the temms of the GNU General Public License as published by
@@ -25,9 +25,9 @@ from lens.thread import Thread, ThreadManager
 
 # GTK
 from dbus.mainloop.glib import DBusGMainLoop
-from gi.repository import WebKit2, Gtk, GObject, Gdk
+from gi.repository import WebKit2, Gio, Gtk, GObject, Gdk
 
-
+logger = logging.getLogger('Lens.Backend.Gtk3')
 
 class ThreadManagerGtk(ThreadManager):
   def __init__(self, maxConcurrentThreads=10):
@@ -64,10 +64,18 @@ class _WebView(WebKit2.WebView):
 
     self.__inspector = inspector
 
+    self._uri_app_base = '/'
+    self._uri_lens_base = '/'
+
     # register signals
     self.connect('decide-policy', self._decide_policy_cb)
     self.connect('load-changed', self._load_changed_cb)
     self.connect('notify::title', self._title_changed_cb)
+
+    # register custom uri schemes for app:// and lens://
+    context = WebKit2.WebContext.get_default()
+    context.register_uri_scheme('app', self._uri_resource_app_cb)
+    context.register_uri_scheme('lens', self._uri_resource_lens_cb)
 
     #: don't need access to the context menu when not inspecting the app
     if not inspector:
@@ -121,6 +129,28 @@ class _WebView(WebKit2.WebView):
     except:
       pass
 
+  def _uri_resource_app_cb(self, request):
+    path = o = request.get_uri().split('?')[0]
+    path = path.replace('app://', self._uri_app_base)
+
+    if os.path.exists(path):
+      logger.debug('Loading app resource: {0}'.format(o))
+      request.finish(Gio.File.new_for_path(path).read(None), -1, Gio.content_type_guess(path, None)[0])
+
+    else:
+      raise Exception('App resource path not found: {0}'.format(path))
+
+  def _uri_resource_lens_cb(self, request):
+    path = o = request.get_uri().split('?')[0]
+    path = path.replace('lens://', self._uri_lens_base)
+
+    if os.path.exists(path):
+      logger.debug('Loading lens resource: {0}'.format(o))
+      request.finish(Gio.File.new_for_path(path).read(None), -1, Gio.content_type_guess(path, None)[0])
+
+    else:
+      raise Exception('Lens resource path not found: {0}'.format(path))
+
   def set_inspector(self, state):
     if state == self.__inspector:
       return
@@ -152,7 +182,6 @@ class ViewGtk(View):
 
     self._logger = logging.getLogger('Lens.ViewGtk')
     self._manager = ThreadManagerGtk()
-    self._uri_lens_base = None
 
     self._inspector = inspector
     self._start_maximized = start_maximized
@@ -213,15 +242,10 @@ class ViewGtk(View):
   def load_uri(self, uri):
     # TODO: we require webkitgtk3 2.2.7 or later
     #
-    # FIXME
-    # improve resource handling of lens:// schemas by intercepting resources
-    # via WebKitWebPage (extensions) send-request(). Not yet exposed in python
-    #
-    # for now we emulate the effect with a replace
-    uri_base = os.path.dirname(uri) + '/'
-    html = open(uri.replace('file://',''), 'r').read()
-    html = html.replace('lens://', self._uri_lens_base)
-    html = html.replace('app://', uri_base)
+
+    self._lensview._uri_app_base = uri_base = os.path.dirname(uri) + '/'
+
+    html = open(uri, 'r').read()
     html = html.replace('<head>', self._lens_head)
 
     # replace system theming
@@ -238,6 +262,12 @@ class ViewGtk(View):
   def set_title(self, title):
     self._window.set_title(title)
     self._window.set_wmclass(title, title)
+
+  def set_uri_app_base(self, uri):
+    self._lensview._uri_app_base = uri
+
+  def set_uri_lens_base(self, uri):
+    self._lensview._uri_lens_base = uri
 
   def toggle_window_maximize(self):
     if self._window_state.get("maximized", False):

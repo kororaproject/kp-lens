@@ -1,6 +1,6 @@
 var app = angular.module('lens-app', ['lens.bridge', 'lens.ui']);
 
-function AppCtrl($scope) {
+app.controller('AppCtrl', function($scope) {
   $scope.hostname = 'unknown';
   $scope.long_tasks = {};
 
@@ -27,4 +27,4 @@ function AppCtrl($scope) {
   }
 
   $scope.emit('get-hostname');
-}
+});

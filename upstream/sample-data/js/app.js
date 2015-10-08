@@ -1,6 +1,6 @@
 var app = angular.module('lens-app', ['lens.bridge', 'lens.ui']);
 
-function AppCtrl($scope, $timeout) {
+app.controller('AppCtrl', function($scope, $timeout) {
   $scope.hostname = 'unknown';
   $scope.foo = true;
   $scope.bar = 'green';
@@ -56,4 +56,4 @@ function AppCtrl($scope, $timeout) {
   $scope.emit('get-hostname');
 
   $scope.updateProgress();
-}
+});

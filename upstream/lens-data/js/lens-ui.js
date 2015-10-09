@@ -5,14 +5,17 @@
  * Version: 0.11.0 - 2014-05-01
  * License: MIT
  */
-angular.module("lens.ui", ["lens.ui.tpls", "lens.ui.transition","lens.ui.collapse","lens.ui.accordion","lens.ui.alert","lens.ui.bindHtml","lens.ui.buttons","lens.ui.carousel","lens.ui.dateparser","lens.ui.position","lens.ui.datepicker","lens.ui.dropdown","lens.ui.modal","lens.ui.pagination","lens.ui.tooltip","lens.ui.popover","lens.ui.progressbar","lens.ui.rating","lens.ui.tabs","lens.ui.timepicker","lens.ui.typeahead", "lens.ui.radio", "lens.ui.checkbox", "lens.ui.radial", "lens.ui.locationbar"])
+angular.module("lens.ui", ["lens.ui.tpls", "lens.ui.transition","lens.ui.collapse","lens.ui.accordion","lens.ui.alert","lens.ui.bindHtml","lens.ui.buttons","lens.ui.carousel","lens.ui.dateparser","lens.ui.position","lens.ui.datepicker","lens.ui.dropdown","lens.ui.modal","lens.ui.pagination","lens.ui.tooltip","lens.ui.popover","lens.ui.progressbar","lens.ui.rating","lens.ui.tabs","lens.ui.timepicker","lens.ui.typeahead", "lens.ui.radio", "lens.ui.checkbox", "lens.ui.radial", "lens.ui.locationbar"], function($compileProvider) {
+  $compileProvider.imgSrcSanitizationWhitelist('app://');
+  $compileProvider.imgSrcSanitizationWhitelist('lens://');
+})
   .config(function($sceDelegateProvider) {
     $sceDelegateProvider.resourceUrlWhitelist([
         'self',        // allow same origin resource loads.
         'template/**', // allow loading from our templates domain.
         'app://',      // allow app schemes
         'lens://'      // allow lens schemes
-    ])
+    ]);
   });
 
 angular.module("lens.ui.tpls", ["template/accordion/accordion-group.html","template/accordion/accordion.html","template/alert/alert.html","template/carousel/carousel.html","template/carousel/slide.html","template/datepicker/datepicker.html","template/datepicker/day.html","template/datepicker/month.html","template/datepicker/popup.html","template/datepicker/year.html","template/modal/backdrop.html","template/modal/window.html","template/pagination/pager.html","template/pagination/pagination.html","template/tooltip/tooltip-html-unsafe-popup.html","template/tooltip/tooltip-popup.html","template/popover/popover.html","template/progressbar/bar.html","template/progressbar/progress.html","template/progressbar/progressbar.html","template/rating/rating.html","template/tabs/tab.html","template/tabs/tabset.html","template/timepicker/timepicker.html","template/typeahead/typeahead-match.html","template/typeahead/typeahead-popup.html"]);

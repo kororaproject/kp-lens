@@ -6,8 +6,7 @@
  * License: MIT
  */
 angular.module("lens.ui", ["lens.ui.tpls", "lens.ui.transition","lens.ui.collapse","lens.ui.accordion","lens.ui.alert","lens.ui.bindHtml","lens.ui.buttons","lens.ui.carousel","lens.ui.dateparser","lens.ui.position","lens.ui.datepicker","lens.ui.dropdown","lens.ui.modal","lens.ui.pagination","lens.ui.tooltip","lens.ui.popover","lens.ui.progressbar","lens.ui.rating","lens.ui.tabs","lens.ui.timepicker","lens.ui.typeahead", "lens.ui.radio", "lens.ui.checkbox", "lens.ui.radial", "lens.ui.locationbar"], function($compileProvider) {
-  $compileProvider.imgSrcSanitizationWhitelist('app://');
-  $compileProvider.imgSrcSanitizationWhitelist('lens://');
+  $compileProvider.imgSrcSanitizationWhitelist(/(app|lens):/);
 })
   .config(function($sceDelegateProvider) {
     $sceDelegateProvider.resourceUrlWhitelist([

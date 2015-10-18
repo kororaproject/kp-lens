@@ -90,16 +90,16 @@ class App():
 
     self._start_maximized = kwargs.get('start_maximized', False)
 
-    # check environment for inspector overrides
+    #: check environment for inspector overrides
     self._inspector = False
     if os.environ.get('LENS_INSPECTOR') == '1':
       self._inspector = kwargs.get('inspector', True)
 
-    # check environment for debug overrides
+    #: check environment for debug overrides
     if os.environ.get('LENS_DEBUG') == '1':
       logging.basicConfig(level=logging.DEBUG)
 
-    # check environment for toolkit overrides
+    #: check environment for toolkit overrides
     toolkit = os.environ.get('LENS_TOOLKIT', toolkit)
 
     # dbus
@@ -251,13 +251,10 @@ class App():
   # remove "manager" property in 1.0.0
   @property
   def manager(self):
-    logger.warn('The "manager" property is deprecated, use "threads" instead.')
+    logger.warn('DEPRECATED: the "manager" property is deprecated, use "threads" instead.')
     return self.threads
 
-  def close(self):
-    self._lv.close()
-
-  def connect(self, name):
+  def bind(self, name):
     """A decorator that is used to register a callback for
        a given signal. Example usage::
 
@@ -273,8 +270,29 @@ class App():
 
     return decorator
 
+  def close(self):
+    self._lv.close()
 
-  # DBus helpers
+  # DEPRECATE:
+  # remove "connect" method in 1.0.0
+  def connect(self, name):
+    logger.warn('DEPRECATED: "connect" has been renamed to "bind".')
+    """A decorator that is used to register a callback for
+       a given signal. Example usage::
+
+         @app.connect('hello')
+         def hello_cb():
+           print("Hi!")
+
+    :param name: the name of the signal to subscribe to
+    """
+    def decorator(f):
+      self.on(name, f)
+      return f
+
+    return decorator
+
+  # dbus helpers
   def dbus_async_call(self, signal, fn_method, *args):
     if not isinstance(fn_method, dbus.proxies._DeferredMethod) and \
        not isinstance(fn_method, dbus.proxies._ProxyMethod):
@@ -317,23 +335,13 @@ class App():
     self._lv.emit_js(name, *args)
 
   def load_ui(self, uri):
-    """Load the UI from the specified URI. The URI is a relative path within
-    the defined application namespace.
-
-    :param uri: the uri to the entry page of the UI.
-    """
-    for d in self.namespaces:
-      _uri = os.path.abspath(os.path.join(d, uri))
-
-      if os.path.exists(_uri):
-        logger.debug('Loading URI: {0}'.format(_uri))
-
-        return self._lv.load_uri(_uri)
-
-    raise Exception("Unable to locate application in the defined namespace.");
+    logger.warn('DEPRECATED: "load_ui" no longer required.')
 
   def on(self, name, callback):
     self._lv.on(name, callback)
+
+  def once(self, name, callback):
+    self._lv.once(name, callback)
 
   def resize(self, width, height):
     """Resizes the application window.
@@ -360,12 +368,24 @@ class App():
   def slot(self, name, callback):
     self.on(name, callback)
 
+  def start(self):
+    #: validate app.html can be found
+    for d in self.namespaces:
+      _uri = os.path.abspath(os.path.join(d, 'app.html'))
+
+      if os.path.exists(_uri):
+        logger.debug('Loading URI: {0}'.format(_uri))
+
+        self._lv.load_uri(_uri)
+        self._lv._run()
+        exit(0)
+
+    logger.error('Unable to load app.')
+    exit(1)
+
   def toggle_window_maximize(self):
     self._lv.toggle_window_maximize()
 
   def toggle_window_fullscreen(self):
     self._lv.toggle_window_fullscreen()
-
-  def start(self):
-    self._lv._run()
 

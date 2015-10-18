@@ -77,6 +77,10 @@ class _WebView(WebKit2.WebView):
     context.register_uri_scheme('app', self._uri_resource_app_cb)
     context.register_uri_scheme('lens', self._uri_resource_lens_cb)
 
+    sm = context.get_security_manager()
+    sm.register_uri_scheme_as_cors_enabled('app')
+    sm.register_uri_scheme_as_cors_enabled('lens')
+
     #: don't need access to the context menu when not inspecting the app
     if not inspector:
       self.__context_menu_id = self.connect('context-menu', self._context_menu_cb)
@@ -131,10 +135,16 @@ class _WebView(WebKit2.WebView):
 
   def _uri_resource_app_cb(self, request):
     path = o = request.get_uri().split('?')[0]
-    path = path.replace('app://', self._uri_app_base)
+
+    if path == 'app:///':
+      path = self._uri_app_base + 'app.html'
+
+    else:
+      path = path.replace('app://', self._uri_app_base)
+
+    logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
     if os.path.exists(path):
-      logger.debug('Loading app resource: {0}'.format(o))
       request.finish(Gio.File.new_for_path(path).read(None), -1, Gio.content_type_guess(path, None)[0])
 
     else:
@@ -144,8 +154,9 @@ class _WebView(WebKit2.WebView):
     path = o = request.get_uri().split('?')[0]
     path = path.replace('lens://', self._uri_lens_base)
 
+    logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
+
     if os.path.exists(path):
-      logger.debug('Loading lens resource: {0}'.format(o))
       request.finish(Gio.File.new_for_path(path).read(None), -1, Gio.content_type_guess(path, None)[0])
 
     else:
@@ -242,16 +253,8 @@ class ViewGtk(View):
   def load_uri(self, uri):
     # TODO: we require webkitgtk3 2.2.7 or later
     #
-
-    self._lensview._uri_app_base = uri_base = os.path.dirname(uri) + '/'
-
-    html = open(uri, 'r').read()
-    html = html.replace('<head>', self._lens_head)
-
-    # replace system theming
-    html = html.replace('<style type="system" />', self._system_theme)
-
-    self._lensview.load_html(html, uri_base)
+    self._lensview._uri_app_base = os.path.dirname(uri) + '/'
+    self._lensview.load_uri('app:///')
 
   def set_inspector(self, state):
     self._lensview.set_inspector(state)

@@ -67,30 +67,30 @@ class ThreadManagerQt4(ThreadManager):
 
 
 class CustomNetworkAccessManager(QNetworkAccessManager):
-  def __init__(self, old_manager):
-    QNetworkAccessManager.__init__(self)
+  def __init__(self, parent=None):
+    super().__init__(parent=parent)
     self._uri_app_base = ''
     self._uri_lens_base = ''
-    self.old_manager = old_manager
-    self.setCache(old_manager.cache())
-    self.setCookieJar(old_manager.cookieJar())
-    self.setProxy(old_manager.proxy())
-    self.setProxyFactory(old_manager.proxyFactory())
 
-  def createRequest(self, operation, request, data):
+  def createRequest(self, operation, request, device):
     path = o = request.url().toString()
 
-    if path.startswith('app://'):
-      path = path.replace('app://', 'file://' + self._uri_app_base)
-      logger.debug('Loading app resource: {0}'.format(o))
+    if path.startswith('app://') or path.startswith('lens://'):
+      if path == 'app:///':
+        path = 'file://' + self._uri_app_base + 'app.html'
+        logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
-    elif path.startswith('lens://'):
-      path = path.replace('lens://', 'file://' + self._uri_lens_base)
-      logger.debug('Loading lens resource: {0}'.format(o))
+      elif path.startswith('app://'):
+        path = path.replace('app://', 'file://' + self._uri_app_base)
+        logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
-    request.setUrl(QUrl(QString(path)))
+      elif path.startswith('lens://'):
+        path = path.replace('lens://', 'file://' + self._uri_lens_base)
+        logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
 
-    return QNetworkAccessManager.createRequest(self, operation, request, data)
+      request.setUrl(QUrl(QString(path)))
+
+    return QNetworkAccessManager.createRequest(self, operation, request, device)
 
 class _QWebView(QWebView):
   def __init__(self, inspector=False):
@@ -124,7 +124,6 @@ class _QWebPage(QWebPage):
     QWebView.__init__(self)
 
 
-
 class ViewQt4(View):
   def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
@@ -134,7 +133,6 @@ class ViewQt4(View):
 
     self._app_loaded = False
 
-    self._logger = logging.getLogger('Lens.ViewQt4')
     self._manager = ThreadManagerQt4(app=self._app)
 
     self._inspector = inspector
@@ -157,7 +155,7 @@ class ViewQt4(View):
     self._app.lastWindowClosed.connect(self._last_window_closed_cb)
 
     #
-    self._cnam = CustomNetworkAccessManager(lv.page().networkAccessManager())
+    self._cnam = CustomNetworkAccessManager()
     lv.page().setNetworkAccessManager(self._cnam)
 
     # connect to Lens signals
@@ -218,20 +216,14 @@ class ViewQt4(View):
     self._frame.evaluateJavaScript(QString(self._javascript % json.dumps([name] + list(args))))
 
   def load_uri(self, uri):
-    # FIXME
-    # improve resource handling of lens:// schemas by intercepting resources
-    # via WebKitWebPage (extensions) send-request(). Not yet exposed in python
-    #
-    # for now we emulate the effect with a replace
-    self._cnam._uri_app_base = uri_base = os.path.dirname(uri) + '/'
-    print(uri_base)
-    html = open(uri.replace('file://',''), 'r').read()
-    html = html.replace('<head>', self._lens_head)
+    uri_base = os.path.dirname(uri) + '/'
+    self.set_uri_app_base(uri_base)
+    path = uri_base + 'app.html'
 
-    # replace system theming
-    html = html.replace('<style type="system" />', self._system_theme)
-
-    self._lensview.setHtml(QString(html), QUrl(uri_base))
+    stream = QFile(path)
+    if stream.open(QFile.ReadOnly):
+      data = str(stream.readAll(), 'utf-8')
+      self._lensview.setHtml(data, QUrl('file://' + uri_base))
 
   def set_inspector(self, state):
     self._lensview.set_inspector(state)

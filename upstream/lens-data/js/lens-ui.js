@@ -11,6 +11,7 @@ angular.module("lens.ui", ["lens.ui.tpls", "lens.ui.transition","lens.ui.collaps
   .config(function($sceDelegateProvider) {
     $sceDelegateProvider.resourceUrlWhitelist([
         'self',        // allow same origin resource loads.
+        '**', // allow loading from our templates domain.
         'template/**', // allow loading from our templates domain.
         'app://',      // allow app schemes
         'lens://'      // allow lens schemes

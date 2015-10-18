@@ -6,5 +6,5 @@ upstream/*/*.pyo
 
 upstream/lens-data/js/lens.js
 upstream/lens-data/js/lens.min.js
-upstream/lens-data/js/lens-core.js
-upstream/lens-data/js/lens-core.min.js
+upstream/lens-data/js/lens-angular.js
+upstream/lens-data/js/lens-angular.min.js

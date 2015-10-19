@@ -142,6 +142,9 @@ class _WebView(WebKit2.WebView):
     else:
       path = path.replace('app://', self._uri_app_base)
 
+      # variable substitution
+      path = path.replace('$backend', 'gtk3')
+
     logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
     if os.path.exists(path):
@@ -153,6 +156,9 @@ class _WebView(WebKit2.WebView):
   def _uri_resource_lens_cb(self, request):
     path = o = request.get_uri().split('?')[0]
     path = path.replace('lens://', self._uri_lens_base)
+
+    # make lens.css backend specific
+    path = path.replace('lens.css', 'lens-gtk3.css')
 
     logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
 

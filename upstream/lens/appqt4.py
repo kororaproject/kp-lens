@@ -84,8 +84,15 @@ class CustomNetworkAccessManager(QNetworkAccessManager):
         path = path.replace('app://', 'file://' + self._uri_app_base)
         logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
+        # variable substitution
+        path = path.replace('$backend', 'qt4')
+
       elif path.startswith('lens://'):
         path = path.replace('lens://', 'file://' + self._uri_lens_base)
+
+        # make lens.css backend specific
+        path = path.replace('lens.css', 'lens-qt4.css')
+
         logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
 
       request.setUrl(QUrl(QString(path)))

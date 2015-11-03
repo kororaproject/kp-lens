@@ -60,7 +60,7 @@ class App():
         continue
 
       try:
-        logger.format('Loading fallback: {0}'.format(k))
+        logger.debug('Loading fallback: {0}'.format(k))
         __tk = __toolkits[k]
         __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
         return getattr(__module, __tk[1], None)

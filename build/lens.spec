@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.11.3
+Version:        0.11.4
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -111,6 +111,9 @@ Python 3 API for constructing LENS applications on Qt5 systems
 
 
 %changelog
+* Wed Nov  4 2015 Ian Firns <firnsy@kororaproject.org> 0.11.4-1
+- Fixed missing toolkit and fallback detection.
+
 * Mon Oct 19 2015 Ian Firns <firnsy@kororaproject.org> 0.11.3-1
 - Support backend specific lens styling.
 

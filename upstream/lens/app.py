@@ -65,7 +65,7 @@ class App():
         __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
         return getattr(__module, __tk[1], None)
       except:
-        traceback.print_exc()
+        logger.debug(traceback.format_exc())
         __tk_error.append(k)
 
     raise Exception('No fallback toolkits implemented or loaded.')

@@ -23,26 +23,25 @@ from lens.app import App
 app = App()
 
 # load the app entry page
-app.namespaces.append('./sample-data')
-app.load_ui('app.html')
+app.namespaces.append('./sample-data/app')
 
-@app.connect('close')
+@app.bind('close')
 def _close_app_cb(*args):
   app.close()
 
-@app.connect('get-hostname')
+@app.bind('get-hostname')
 def _get_hostname_cb(*args):
   app.emit('update-config', os.uname()[1])
 
-@app.connect('update-hostname')
+@app.bind('update-hostname')
 def _update_hostname_cb(message):
   print(message)
 
-@app.connect('toggle-window-maximize')
+@app.bind('toggle-window-maximize')
 def _maximize_cb(*args):
   app.toggle_window_maximize()
 
-@app.connect('toggle-window-fullscreen')
+@app.bind('toggle-window-fullscreen')
 def _fullscreen_cb(*args):
   app.toggle_window_fullscreen()
 

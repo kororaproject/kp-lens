@@ -26,14 +26,13 @@ class MyApp(App):
   def __init__(self):
     App.__init__(self, name="Lens. Widgets", inspector=True)
 
-    self.namespaces = ['./sample-data']
-
-    # load the app entry page
-    self.load_ui('app.html')
+    self.namespaces = ['./sample-data/app']
 
     self.on('close', self._close_app_cb)
     self.on('get-hostname', self._get_hostname_cb)
     self.on('update-hostname', self._update_hostname_cb)
+    self.on('toggle-window-fullscreen', self._fullscreen_cb)
+    self.on('toggle-window-maximize', self._maximize_cb)
 
   def _close_app_cb(self, *args):
     self.close()
@@ -44,6 +43,13 @@ class MyApp(App):
   def _update_hostname_cb(self, message):
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(message)
+
+  def _fullscreen_cb(*args):
+    app.toggle_window_fullscreen()
+
+  def _maximize_cb(*args):
+    app.toggle_window_maximize()
+
 
 logging.basicConfig(level=logging.DEBUG)
 

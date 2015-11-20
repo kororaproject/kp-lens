@@ -69,19 +69,18 @@ class ProcTask(Thread):
 app = App(inspector=True, name='LensTop')
 
 # load the app entry page
-app.namespaces.append('./sample-data')
-app.load_ui('app-top.html')
+app.namespaces.append('./sample-data/app-top')
 
-@app.connect('close')
+@app.bind('close')
 def _close_app_cb(*args):
   app.close()
 
-@app.connect('start-proc-watch')
+@app.bind('start-proc-watch')
 def _start_proc_watch_cb(*args):
   t = ProcTask()
   t.daemon = True
-  app.manager.add_thread(t)
-  app.manager.on_thread(t, 'proc-update', _proctask_update_cb)
+  app.threads.add(t)
+  app.threads.on(t, 'proc-update', _proctask_update_cb)
 
 def _proctask_update_cb(thread, proc):
   app.emit('update-proc', proc)

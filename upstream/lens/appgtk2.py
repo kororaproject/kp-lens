@@ -25,6 +25,8 @@ from lens.thread import Thread, ThreadManager
 
 # GTK
 from dbus.mainloop.glib import DBusGMainLoop
+import gi
+gi.require_version('WebKit', '3.0')
 from gi.repository import WebKit, Gtk, GObject
 
 

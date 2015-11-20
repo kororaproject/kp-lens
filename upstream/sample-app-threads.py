@@ -44,23 +44,22 @@ class LongTask(Thread):
 app = App(name="Lens. Threads")
 
 # load the app entry page
-app.namespaces.append('./sample-data')
-app.load_ui('app-threads.html')
+app.namespaces.append('./sample-data/app-threads')
 
-@app.connect('close')
+@app.bind('close')
 def _close_app_cb(*args):
   app.close()
 
-@app.connect('get-hostname')
+@app.bind('get-hostname')
 def _get_hostname_cb(*args):
   app.emit('update-config', os.uname()[1])
 
-@app.connect('update-hostname')
+@app.bind('update-hostname')
 def _update_hostname_cb(message):
   pp = pprint.PrettyPrinter(indent=2)
   pp.pprint(message)
 
-@app.connect('start-long-task')
+@app.bind('start-long-task')
 def _long_task_cb():
   t = LongTask()
   app.threads.add(t)

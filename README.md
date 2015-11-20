@@ -12,13 +12,13 @@ A typical Lens app is composed of two phases, there's the backend which is
 written in python and the frontend which is composed of HTML5/CSS3/JS similar
 to web development.
 
-A bridge exists the Python and WebKit components that can be traversed through
-signal/slot calls. For example Python slots can be reached via WebKit signals
-and conversely Webkit slots can be reached via Python signals.
+A bridge exists between the Python and WebKit components that can be traversed 
+through signal/slot calls. For example Python slots can be reached via WebKit 
+signals and conversely Webkit slots can be reached via Python signals.
 
 A simple app is shown below.
 
-```
+```python
 from lens.app import App
 
 app = App()
@@ -38,7 +38,7 @@ def _get_hostname_cb(*args):
 app.start()
 ```
 
-```
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,7 +51,7 @@ app.start()
   <p>Hostname: <span id="hostname"></span></p>
   <button id="close">CLOSE</button>
 
-  <script src="lens://js/lens.js"></script>
+  <script src="lens://js/lens-angular.min.js"></script>
   <script src="app://js/app.js"></script>
   <script>
 

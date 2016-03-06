@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.11.4
+Version:        0.12
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -95,7 +95,8 @@ Summary:        Python 3 API for constructing LENS applications on Qt5
 Group:          Applications/System
 Provides:       python3-%{name}-backend
 Requires:       python3-%{name} = %{version}-%{release}
-Requires:       python3-PyQt5
+Requires:       python3-qt5
+Requires:       qt5-qtwebchannel
 Obsoletes:      python3-%{name}-qt
 
 %description -n python3-%{name}-qt5
@@ -111,6 +112,9 @@ Python 3 API for constructing LENS applications on Qt5 systems
 
 
 %changelog
+* Sat Mar  5 2016 Ian Firns <firnsy@kororaproject.org> 0.12.0-1
+- Utilise QtWebChannel for python/webkit bridge.
+
 * Wed Nov  4 2015 Ian Firns <firnsy@kororaproject.org> 0.11.4-1
 - Fixed missing toolkit and fallback detection.
 

@@ -7,11 +7,11 @@ window.lens = {
       var args = data.slice(1);
 
       s = window.lens.__cb[name] || [];
-      Array.prototype.push.apply(s, window.lens.__cb['__*']     || []);
+      Array.prototype.push.apply(s, window.lens.__cb['*']       || []);
       Array.prototype.push.apply(s, window.lens.__cb_once[name] || []);
       delete window.lens.__cb_once[name];
 
-      s.forEach(function(cb) { cb.apply(undefined, args); });
+      s.forEach(function(cb) { cb.apply(undefined, data); });
     }
   },
   "emit":function() {
@@ -35,8 +35,8 @@ window.lens = {
     var getType = {};
     // assume "on any" when only callback is supplied
     if (name && getType.toString.call(name) === '[object Function]') {
-      window.lens.__cb['__*'] = window.lens.__cb['__*'] || [];
-      window.lens.__cb['__*'].push(name);
+      window.lens.__cb['*'] = window.lens.__cb['*'] || [];
+      window.lens.__cb['*'].push(name);
     }
     else if (cb && getType.toString.call(cb) === '[object Function]') {
       window.lens.__cb[name] = window.lens.__cb[name] || [];

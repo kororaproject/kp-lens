@@ -16,7 +16,7 @@ angular.module('lens.bridge', []).
       }
     };
 
-    window.lens.on_any(function() {
+    window.lens.on(function() {
       a = arguments;
       var _rs = angular.element(document).scope();
       _rs.safeApply(function(){

@@ -52,7 +52,7 @@ class System():
       'codename': 'Unknown',
       'desktop':  'Unknown',
       'version':  'Unknown',
-      'live':     (os.getlogin() == 'liveuser'),
+      'live':     (os.getenv('LOGNAME') == 'liveuser'),
     }
     self._build_dist_info()
 

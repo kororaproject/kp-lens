@@ -22,6 +22,7 @@ window.lens = {
         "name":args.shift(),
         "args":args
       });
+      document.title = '';
     }
   },
   "has_subscribers":function(name) {

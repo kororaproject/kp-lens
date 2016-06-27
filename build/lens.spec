@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.12
+Version:        0.12.1
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -112,6 +112,9 @@ Python 3 API for constructing LENS applications on Qt5 systems
 
 
 %changelog
+* Mon Jun 27 2016 Ian Firns <firnsy@kororaproject.org> 0.12.1-1
+- Fixed lens-bridge and modified liveuser detection.
+
 * Sat Mar  5 2016 Ian Firns <firnsy@kororaproject.org> 0.12.0-1
 - Utilise QtWebChannel for python/webkit bridge.
 

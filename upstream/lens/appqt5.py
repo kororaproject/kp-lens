@@ -100,6 +100,7 @@ class CustomNetworkAccessManager(QNetworkAccessManager):
 
     return QNetworkAccessManager.createRequest(self, operation, request, device)
 
+
 class _QWebView(QWebView):
   def __init__(self, inspector=False):
     QWebView.__init__(self)
@@ -124,7 +125,6 @@ class _QWebView(QWebView):
       self.contextMenuEvent = self.ignoreContextMenuEvent
 
     self.__inspector = state
-
 
 
 class _QWebPage(QWebPage):

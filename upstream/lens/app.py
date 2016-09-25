@@ -31,11 +31,11 @@ class App():
   def __get_toolkit(name, exact=False):
     #: defines the list of Lens backends to be preloaded for auto-detection
     __toolkits = {
-      'gtk3': ['lens.appgtk', 'ViewGtk'],
-      'gtk':  ['lens.appgtk', 'ViewGtk'],
+      'gtk3': ['lens.appgtk', 'ViewGtk3'],
+      'gtk':  ['lens.appgtk', 'ViewGtk3'],
       'qt4':  ['lens.appqt4', 'ViewQt4'],
       'qt5':  ['lens.appqt5', 'ViewQt5'],
-      'qt':   ['lens.appqt5', 'ViewQt5']
+      'qt':   ['lens.appqt5', 'ViewQt4']
     }
 
     __tk_error = []

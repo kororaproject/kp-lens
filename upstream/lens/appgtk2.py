@@ -31,7 +31,7 @@ from gi.repository import WebKit, Gtk, GObject
 
 
 
-class ThreadManagerGtk(ThreadManager):
+class ThreadManagerGtk2(ThreadManager):
   def __init__(self, maxConcurrentThreads=10):
     ThreadManager.__init__(self, maxConcurrentThreads)
 
@@ -134,7 +134,7 @@ class ViewGtk2(View):
     self._app_loaded = False
 
     self._logger = logging.getLogger('Lens.ViewGtk2')
-    self._manager = ThreadManagerGtk()
+    self._manager = ThreadManagerGtk2()
     self._uri_lens_base = None
 
     self._inspector = inspector

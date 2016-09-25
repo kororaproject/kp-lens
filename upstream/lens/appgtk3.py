@@ -31,7 +31,7 @@ from gi.repository import WebKit2, Gio, Gtk, GObject, Gdk
 
 logger = logging.getLogger('Lens.Backend.Gtk3')
 
-class ThreadManagerGtk(ThreadManager):
+class ThreadManagerGtk3(ThreadManager):
   def __init__(self, maxConcurrentThreads=10):
     ThreadManager.__init__(self, maxConcurrentThreads)
 
@@ -189,7 +189,7 @@ class _WebView(WebKit2.WebView):
     self.__inspector = state
 
 
-class ViewGtk(View):
+class ViewGtk3(View):
 
 
   def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
@@ -199,8 +199,8 @@ class ViewGtk(View):
 
     self._app_loaded = False
 
-    self._logger = logging.getLogger('Lens.ViewGtk')
-    self._manager = ThreadManagerGtk()
+    self._logger = logging.getLogger('Lens.ViewGtk3')
+    self._manager = ThreadManagerGtk3()
 
     self._inspector = inspector
     self._start_maximized = start_maximized

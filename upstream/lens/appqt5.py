@@ -241,6 +241,7 @@ class ViewQt5(View):
     self._lensview.set_inspector(state)
 
   def set_size(self, width, height):
+    logger.debug('Setting app size: {0}x{1}'.format(width, height))
     self._lensview.setMinimumSize(width, height)
     self._lensview.resize(width, height)
 

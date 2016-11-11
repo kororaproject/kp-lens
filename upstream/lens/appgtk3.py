@@ -225,7 +225,7 @@ class ViewGtk3(View):
     self.on('__close_app', self._close_cb)
 
     # center on screen
-    w.set_position(Gtk.WindowPosition.CENTER)
+    w.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
     self.set_title(self._app_name)
     self.set_size(self._app_width, self._app_height)
@@ -268,7 +268,9 @@ class ViewGtk3(View):
     self._lensview.set_inspector(state)
 
   def set_size(self, width, height):
+    logger.debug('Setting app size: {0}x{1}'.format(width, height))
     self._window.set_size_request(width, height)
+    self._window.set_default_size(width, height)
 
   def set_title(self, title):
     self._window.set_title(title)

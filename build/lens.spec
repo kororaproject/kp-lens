@@ -32,7 +32,7 @@ mkdir -p %{buildroot}%{_datadir}/%{name}
 cp -a lens-data/*  %{buildroot}%{_datadir}/%{name}/
 install -m 0644 COPYING %{buildroot}%{_datadir}/%{name}/
 
-for f in __init__.py app.py appgtk.py appqt4.py appqt5.py system.py thread.py view.py
+for f in __init__.py app.py appgtk3.py appqt4.py appqt5.py system.py thread.py view.py
 do
   install -m 0644 lens/${f} %{buildroot}%{python3_sitelib}/lens/${f}
 done

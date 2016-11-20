@@ -117,9 +117,15 @@ class System():
 
       # store desktop session
       if 'DESKTOP_SESSION' in os.environ and not 'default' in os.environ['DESKTOP_SESSION'].lower():
-        self._distribution['desktop'] = os.environ['DESKTOP_SESSION'].upper()
+        if 'plasma' in os.environ['DESKTOP_SESSION'].lower():
+          self._distribution['desktop'] = 'KDE PLASMA'
+
+        else:
+          self._distribution['desktop'] = os.environ['DESKTOP_SESSION'].upper()
+
       elif 'GDMSESSION' in os.environ and not 'default' in os.environ['GDMSESSION']:
         self._distribution['desktop'] = os.environ['GDMSESSION'].upper()
+
       elif 'XDG_CURRENT_DESKTOP' in os.environ and not 'default' in os.environ['XDG_CURRENT_DESKTOP']:
         self._distribution['desktop'] = os.environ['XDG_CURRENT_DESKTOP'].upper()
 

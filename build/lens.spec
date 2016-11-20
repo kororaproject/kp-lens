@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.12.3
+Version:        0.12.4
 Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
@@ -96,6 +96,7 @@ Group:          Applications/System
 Provides:       python3-%{name}-backend
 Requires:       python3-%{name} = %{version}-%{release}
 Requires:       python3-qt5
+Requires:       python3-qt5-webkit
 Requires:       qt5-qtwebchannel
 Obsoletes:      python3-%{name}-qt
 
@@ -112,6 +113,9 @@ Python 3 API for constructing LENS applications on Qt5 systems
 
 
 %changelog
+* Sun Nov 20 2016 Ian Firns <firnsy@kororaproject.org> 0.12.4-1
+- Fix missing dependency for the qt5 backend.
+
 * Sat Nov 12 2016 Ian Firns <firnsy@kororaproject.org> 0.12.3-1
 - Fix geometry setting on gtk backends.
 

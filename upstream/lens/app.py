@@ -35,7 +35,7 @@ class App():
       'gtk':  ['lens.appgtk3', 'ViewGtk3'],
       'qt4':  ['lens.appqt4', 'ViewQt4'],
       'qt5':  ['lens.appqt5', 'ViewQt5'],
-      'qt':   ['lens.appqt5', 'ViewQt4']
+      'qt':   ['lens.appqt5', 'ViewQt5']
     }
 
     __tk_error = []

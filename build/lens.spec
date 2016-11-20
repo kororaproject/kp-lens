@@ -1,6 +1,6 @@
 Name:           lens
 Version:        0.12.4
-Release:        1%{?dist}
+Release:        1%{?dist}.1
 Summary:        Simple desktop environment agnostic SDK
 
 License:        GPLv3+

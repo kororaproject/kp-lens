@@ -28,7 +28,7 @@ logger = logging.getLogger('Lens.App')
 
 class App():
   @staticmethod
-  def __get_toolkit(name, exact=False):
+  def __get_toolkit(name, custom_toolkits, exact=False):
     #: defines the list of Lens backends to be preloaded for auto-detection
     __toolkits = {
       'gtk3': ['lens.appgtk3', 'ViewGtk3'],
@@ -37,6 +37,8 @@ class App():
       'qt5':  ['lens.appqt5', 'ViewQt5'],
       'qt':   ['lens.appqt5', 'ViewQt5']
     }
+
+    __toolkits.update(custom_toolkits)
 
     __tk_error = []
 
@@ -78,12 +80,14 @@ class App():
                   will be auto detected.
   :param toolkit_hint: hint to the preferred toolkit if the auto detection
                        fails to determine the active toolkit.
+  :param custom_toolkits: Additional or overriding toolkit class definitions.
   :param name: the name of the Lens application. Also shown in the Lens
                application window's title bar.
   :param width: the width of the Lens applciation window. Defaults to 640.
   :param height the height of the Lens applciation window. Defaults to 480.
   """
-  def __init__(self, toolkit=None, toolkit_hint='gtk', name="MyLensApp", *args, **kwargs):
+  def __init__(self, toolkit=None, toolkit_hint='gtk', custom_toolkits={}, name="MyLensApp", *args, **kwargs):
+    self.custom_toolkits = custom_toolkits
     self._app_name = name
     self._app_width = kwargs.get('width', 640)
     self._app_height = kwargs.get('height', 480)
@@ -209,7 +213,7 @@ class App():
       toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
 
     # attempt to load the preferred
-    toolkit_klass = App.__get_toolkit(toolkit.lower())
+    toolkit_klass = App.__get_toolkit(toolkit.lower(), self.custom_toolkits)
     logger.debug('Using {0} toolkit'.format(toolkit.lower()))
 
     self._lv = toolkit_klass(name=self._app_name, width=self._app_width, height=self._app_height, inspector=self._inspector, start_maximized=self._start_maximized)

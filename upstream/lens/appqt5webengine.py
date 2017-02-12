@@ -249,7 +249,6 @@ class ViewQt5WebEngine(View):
     self._app.exec_()
 
   def emit_js(self, name, *args):
-    print("emitting js")
     self._page.runJavaScript(QString(self._javascript % json.dumps([name] + list(args))))
 
   def load_uri(self, uri):

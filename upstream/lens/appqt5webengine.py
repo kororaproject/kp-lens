@@ -163,7 +163,7 @@ class ViewQt5WebEngine(View):
 
   def _build_app(self):
     if self._inspector:
-      os.environ['QTWEBENGINE_REMOTE_DEBUGGING'] = '8001'
+      os.environ.setdefault('QTWEBENGINE_REMOTE_DEBUGGING', '8001')
     # build webengine container
     self._lensview = lv = _QWebView(inspector=self._inspector)
     self._page = _QWebPage()

@@ -84,3 +84,8 @@ right-click and opening of the Inspector.
 ```
 LENS_INSPECTOR=1 ./app
 ```
+
+When using QtWebEngine as the toolkit, setting `LENS_INSPECTOR=1` will start the
+remote debugging console on port 8001. The console is accessible using a
+chromium based browser. The port can be changed by setting `QTWEBENGINE_REMOTE_DEBUGGING`
+to the desired port.

@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import os
+import platform
 import pprint
 import random
 import time
@@ -39,33 +39,6 @@ class LongTask(Thread):
 
     self.emit('complete', self.uuid, time.time())
 
-
-
-app = App(name="Lens. Threads")
-
-# load the app entry page
-app.namespaces.append('./sample-data/app-threads')
-
-@app.bind('close')
-def _close_app_cb(*args):
-  app.close()
-
-@app.bind('get-hostname')
-def _get_hostname_cb(*args):
-  app.emit('update-config', os.uname()[1])
-
-@app.bind('update-hostname')
-def _update_hostname_cb(message):
-  pp = pprint.PrettyPrinter(indent=2)
-  pp.pprint(message)
-
-@app.bind('start-long-task')
-def _long_task_cb():
-  t = LongTask()
-  app.threads.add(t)
-  app.threads.on(t, 'progress', _longtask_progress_cb)
-  app.threads.on(t, 'complete', _longtask_complete_cb)
-
 def _longtask_progress_cb(thread, *args):
   app.emit('long-task-progress', *args)
 
@@ -73,6 +46,33 @@ def _longtask_complete_cb(thread, *args):
   app.emit('long-task-complete', *args)
 
 
+if __name__ == '__main__':
+  app = App(name="Lens. Threads")
 
-app.start()
+  # load the app entry page
+  app.namespaces.append('./sample-data/app-threads')
+
+  @app.bind('close')
+  def _close_app_cb(*args):
+    app.close()
+
+  @app.bind('get-hostname')
+  def _get_hostname_cb(*args):
+    app.emit('update-config', platform.node())
+
+  @app.bind('update-hostname')
+  def _update_hostname_cb(message):
+    pp = pprint.PrettyPrinter(indent=2)
+    pp.pprint(message)
+
+  @app.bind('start-long-task')
+  def _long_task_cb():
+    t = LongTask()
+    app.threads.add(t)
+    app.threads.on(t, 'progress', _longtask_progress_cb)
+    app.threads.on(t, 'complete', _longtask_complete_cb)
+
+
+
+  app.start()
 

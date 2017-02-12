@@ -15,7 +15,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import dbus
+try:
+  import dbus
+except ImportError:
+  # might be windows...
+  pass
+
 import logging
 import os
 import subprocess
@@ -31,11 +36,12 @@ class App():
   def __get_toolkit(name, custom_toolkits, exact=False):
     #: defines the list of Lens backends to be preloaded for auto-detection
     __toolkits = {
-      'gtk3': ['lens.appgtk3', 'ViewGtk3'],
-      'gtk':  ['lens.appgtk3', 'ViewGtk3'],
-      'qt4':  ['lens.appqt4', 'ViewQt4'],
-      'qt5':  ['lens.appqt5', 'ViewQt5'],
-      'qt':   ['lens.appqt5', 'ViewQt5']
+      'gtk3':         ['lens.appgtk3', 'ViewGtk3'],
+      'gtk':          ['lens.appgtk3', 'ViewGtk3'],
+      'qt4':          ['lens.appqt4', 'ViewQt4'],
+      'qt':           ['lens.appqt5', 'ViewQt5'],
+      'qt5':          ['lens.appqt5', 'ViewQt5'],
+      'qt5webengine': ['lens.appqt5webengine', 'ViewQt5WebEngine']
     }
 
     __toolkits.update(custom_toolkits)
@@ -137,7 +143,7 @@ class App():
         s = subprocess.Popen(["ps", "axw"], stdout=subprocess.PIPE)
       except:
         # Windows
-        s.Popen(["tasklist", "/v"], stdout=subprocess.PIPE)
+        s = subprocess.Popen(["tasklist", "/v"], stdout=subprocess.PIPE)
 
       for x in s.stdout:
         if process in x.decode('utf-8'):
@@ -159,6 +165,9 @@ class App():
     elif __is_running("ksmserver"):
       desktop = 'kde'
 
+    elif __is_running("svchost.exe"):
+      desktop = "windows"
+
     return desktop
 
   def __get_desktop_toolkit_hint(self, hint):
@@ -170,6 +179,9 @@ class App():
 
     elif desktop in ['gnome', 'mate', 'xfce']:
       toolkit = "gtk"
+
+    elif desktop in ['windows']:
+      toolkit = 'qt5webengine'
 
     return toolkit
 

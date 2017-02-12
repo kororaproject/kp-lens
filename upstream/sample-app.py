@@ -17,7 +17,7 @@
 #
 
 import logging
-import os
+import platform
 import pprint
 
 from lens.app import App
@@ -38,7 +38,7 @@ class MyApp(App):
     self.close()
 
   def _get_hostname_cb(self, *args):
-    self.emit('update-config', os.uname()[1])
+    self.emit('update-config', platform.node())
 
   def _update_hostname_cb(self, message):
     pp = pprint.PrettyPrinter(indent=2)

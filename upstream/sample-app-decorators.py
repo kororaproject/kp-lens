@@ -16,7 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import os
+import platform
 
 from lens.app import App
 
@@ -31,7 +31,8 @@ def _close_app_cb(*args):
 
 @app.bind('get-hostname')
 def _get_hostname_cb(*args):
-  app.emit('update-config', os.uname()[1])
+  app.emit('update-config', platform.node())
+
 
 @app.bind('update-hostname')
 def _update_hostname_cb(message):

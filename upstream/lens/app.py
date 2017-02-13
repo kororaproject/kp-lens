@@ -41,7 +41,7 @@ class App():
       'qt4':          ['lens.appqt4',          'ViewQt4'],
       'qt':           ['lens.appqt5webengine', 'ViewQt5WebEngine'],
       'qt5':          ['lens.appqt5webengine', 'ViewQt5WebEngine'],
-      'qt5webengine': ['lens.appqt5webengine', 'ViewQt5WebEngine']
+      'qt5webengine': ['lens.appqt5webengine', 'ViewQt5WebEngine'],
       'qt5webkit':    ['lens.appqt5webkit',    'ViewQt5WebKit']
     }
 

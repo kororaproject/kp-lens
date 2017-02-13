@@ -39,9 +39,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineCore import *
-from PyQt5.QtWebEngineWidgets import *
+from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineProfile, QWebEngineScript, QWebEngineView
 from PyQt5.QtWebChannel import *
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 # FIXME: QString does not exists in python3
 try:
@@ -94,6 +93,7 @@ class AppSchemeHandler(QWebEngineUrlSchemeHandler):
 
       # variable substitution
       path = path.replace('$backend', 'qt5')
+
     request.redirect(QUrl(QString(path)))
 
 class LensSchemeHandler(QWebEngineUrlSchemeHandler):
@@ -142,9 +142,12 @@ class _QWebPage(QWebEnginePage):
     QWebEnginePage.__init__(self)
 
 
-class ViewQt5WebEngine(View):
+class ViewQt5WebEngine(View, QObject):
+  _emit_js_signal = pyqtSignal(str, QVariant);
+
   def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
+    QObject.__init__(self)
     # prepare Qt dbus mainloop
     try:
       DBusQtMainLoop(set_as_default=True)
@@ -161,32 +164,54 @@ class ViewQt5WebEngine(View):
     self._start_maximized = start_maximized
     self._build_app()
 
+
   def _build_app(self):
     if self._inspector:
       os.environ.setdefault('QTWEBENGINE_REMOTE_DEBUGGING', '8001')
+
     # build webengine container
     self._lensview = lv = _QWebView(inspector=self._inspector)
-    self._page = _QWebPage()
+    self._page = p = _QWebPage()
     lv.setPage(self._page)
-
-    #if self._inspector:
-    #  lv.settings().setAttribute(lv.settings().DeveloperExtrasEnabled, True)
-
-    #self._frame = lv.page().mainFrame()
 
     # connect to Qt signals
     lv.loadFinished.connect(self._loaded_cb)
-    lv.titleChanged.connect(self._title_changed_cb)
     self._app.lastWindowClosed.connect(self._last_window_closed_cb)
 
-    self._channel = QWebChannel(lv.page())
-#    lv.page().setWebChannel(self._channel)
-#    self.channel.registerObject(foo)
+    # build webchannel script and inject
+    qwebchannel_js = QFile(':/qtwebchannel/qwebchannel.js')
+    if not qwebchannel_js.open(QIODevice.ReadOnly):
+        raise SystemExit('Failed to load qwebchannel.js with error: %s' % qwebchannel_js.errorString())
+    qwebchannel_js = bytes(qwebchannel_js.readAll()).decode('utf-8')
 
-    #
-    #self._cnam = CustomNetworkAccessManager()
-    #lv.page().setNetworkAccessManager(self._cnam)
+    script = QWebEngineScript()
+    script.setSourceCode(qwebchannel_js + '''
+        window.lens = window.lens || {};
+        window.lens._channel = new QWebChannel(qt.webChannelTransport, function(channel) {
+          window.lens.emit = function() {
+            var args = Array.prototype.slice.call(arguments);
+            if (args.length > 0) {
+              channel.objects.bridge._from_bridge(args);
+            }
+          };
 
+          channel.objects.bridge._emit_js_signal.connect(function(name, args) {
+            window.lens.__broadcast(name, args);
+          });
+        });
+      ''')
+    script.setName('lens-bridge')
+    script.setWorldId(QWebEngineScript.MainWorld)
+    script.setInjectionPoint(QWebEngineScript.DocumentCreation)
+    script.setRunsOnSubFrames(True)
+
+    p.profile().scripts().insert(script)
+
+    self._channel = QWebChannel(p)
+    p.setWebChannel(self._channel)
+    self._channel.registerObject('bridge', self)
+
+    # set up scheme handlers for app:// and lens://
     self._app_scheme_handler = AppSchemeHandler()
     self._lens_scheme_handler = LensSchemeHandler()
 
@@ -211,6 +236,11 @@ class ViewQt5WebEngine(View):
     self.emit('app.close')
     self._app.exit()
 
+  @pyqtSlot(QVariant)
+  def _from_bridge(self, name_args):
+    # emit our python/js bridge signal
+    self.emit(name_args[0], *name_args[1:])
+
   def _last_window_closed_cb(self, *args):
     self.emit('__close_app', *args)
 
@@ -224,32 +254,12 @@ class ViewQt5WebEngine(View):
       self._app_loaded = True
       self.emit('app.loaded')
 
-  def _title_changed_cb(self, title):
-    _in = str(title)
-
-    # check for "_BR::" leader to determine we're crossing
-    # the python/JS bridge
-    if _in is None or not _in.startswith('_BR::'):
-      return
-
-    try:
-      _in = json.loads(_in[5:])
-
-      _name = _in.setdefault('name', '')
-      _args = _in.setdefault('args', [])
-
-    except:
-      return
-
-    # emit our python/js bridge signal
-    self.emit(_name, *_args)
-
   def _run(self):
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     self._app.exec_()
 
   def emit_js(self, name, *args):
-    self._page.runJavaScript(QString(self._javascript % json.dumps([name] + list(args))))
+    self._emit_js_signal.emit(name, list(args))
 
   def load_uri(self, uri):
     uri_base = os.path.dirname(uri) + '/'

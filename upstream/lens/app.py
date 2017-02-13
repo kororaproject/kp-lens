@@ -23,6 +23,7 @@ except ImportError:
 
 import logging
 import os
+import sys
 import subprocess
 import traceback
 
@@ -395,7 +396,7 @@ class App():
 
         self._lv.load_uri(_uri)
         self._lv._run()
-        exit(0)
+        sys.exit(0)
 
     logger.error('Unable to load app.')
     exit(1)

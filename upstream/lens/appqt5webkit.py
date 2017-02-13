@@ -1,5 +1,5 @@
 #
-# Copyright 2012-2014 "Korora Project" <dev@kororaproject.org>
+# Copyright 2012-2017 "Korora Project" <dev@kororaproject.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the temms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ class _QWebPage(QWebPage):
     QWebView.__init__(self)
 
 
-class ViewQt5(View):
+class ViewQt5WebKit(View):
   def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
     # prepare Qt dbus mainloop

@@ -102,6 +102,8 @@ class View(EventEmitter):
   def _on_js(self, thread, name, args):
     self.emit(name, *args)
 
+  #
+  # PROPERTIES
   @property
   def javascript(self):
     return self._javascript
@@ -110,11 +112,16 @@ class View(EventEmitter):
   def javascript(self, data):
     self._javascript = data
 
+  #
+  # METHODS
   def close(self, *args, **kwargs):
     self.emit('__close_app')
 
   def emit_js(self, name, *args):
     raise NotImplementedError('Method "emit_js" needs to be subclassed.')
+
+  def load_string(self, uri):
+    raise NotImplementedError('Method "load_string" needs to be subclassed.')
 
   def load_uri(self, uri):
     raise NotImplementedError('Method "load_uri" needs to be subclassed.')

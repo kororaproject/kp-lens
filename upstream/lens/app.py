@@ -386,17 +386,25 @@ class App():
   def slot(self, name, callback):
     self.on(name, callback)
 
-  def start(self):
-    #: validate app.html can be found
-    for d in self.namespaces:
-      _uri = os.path.abspath(os.path.join(d, 'app.html'))
+  def start(self, data=''):
+    if len(data.strip()):
+      logger.debug('Loading STRING: {0}'.format(data))
 
-      if os.path.exists(_uri):
-        logger.debug('Loading URI: {0}'.format(_uri))
+      self._lv.load_string(data)
+      self._lv._run()
+      sys.exit(0)
 
-        self._lv.load_uri(_uri)
-        self._lv._run()
-        sys.exit(0)
+    else:
+      #: validate app.html can be found
+      for d in self.namespaces:
+        _uri = os.path.abspath(os.path.join(d, 'app.html'))
+
+        if os.path.exists(_uri):
+          logger.debug('Loading URI: {0}'.format(_uri))
+
+          self._lv.load_uri(_uri)
+          self._lv._run()
+          sys.exit(0)
 
     logger.error('Unable to load app.')
     exit(1)

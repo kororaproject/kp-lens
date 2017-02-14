@@ -33,7 +33,6 @@ def _close_app_cb(*args):
 def _get_hostname_cb(*args):
   app.emit('update-config', platform.node())
 
-
 @app.bind('update-hostname')
 def _update_hostname_cb(message):
   print(message)

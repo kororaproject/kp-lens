@@ -258,6 +258,9 @@ class ViewGtk3(View):
   def emit_js(self, name, *args):
     self._lensview.run_javascript(self._javascript % json.dumps([name] + list(args)), None, None, None)
 
+  def load_string(self, data):
+    self._lensview.load_html(data, self._lensview._uri_app_base)
+
   def load_uri(self, uri):
     # TODO: we require webkitgtk3 2.2.7 or later
     #

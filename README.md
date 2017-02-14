@@ -19,48 +19,51 @@ signals and conversely Webkit slots can be reached via Python signals.
 A simple app is shown below.
 
 ```python
+import platform
 from lens.app import App
 
 app = App()
 
-# load the app entry page
-app.namespaces.append('./app-data')
-app.load_ui('app.html')
-
-@app.connect('close')
+# bind to the 'close' signal
+@app.bind('close')
 def _close_app_cb(*args):
   app.close()
 
-@app.connect('get-hostname')
+# bind to the 'get-hostname' signal
+@app.bind('get-hostname')
 def _get_hostname_cb(*args):
-  app.emit('update-config', os.uname()[1])
+  app.emit('update-hostname', platform.node())
 
-app.start()
-```
+# start the app event loop
+app.start("""
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <link href="lens://css/lens.css" rel="stylesheet">
+  </head>
+  <body>
+    <h1>Lens. Demo</h1>
+    <p>This sample demonstrates simple communication between the Python and JS code paths.</p>
+    <p>Hostname: <span id="hostname"></span></p>
+    <button id="closeBtn">CLOSE</button>
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <link href="lens://css/lens.css" rel="stylesheet">
-  <link href="app://css/app.css" rel="stylesheet">
-</head>
-<body>
-  <h1>Lens. Demo</h1>
-  <p>This sample demonstrates most of the widgets supported by Lens. Leveraging the Bootstrap and the Angular UI projects, the scope for Lens widgets are limited only by your abilities in HTML5, CSS3 and JS.</p>
-  <p>Hostname: <span id="hostname"></span></p>
-  <button id="close">CLOSE</button>
+    <script src="lens://js/lens.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        document.getElementById("closeBtn").onclick = function() {
+          lens.emit('close');
+        };
 
-  <script src="lens://js/lens-angular.min.js"></script>
-  <script src="app://js/app.js"></script>
-  <script>
+        lens.on('update-hostname', function(e, hostname) {
+          document.getElementById('hostname').innerHTML = hostname;
+        });
 
-  </script>
-</body>
-</html>
-```
-
-```
+        lens.emit('get-hostname');
+      });
+    </script>
+  </body>
+  </html>
+""")
 ```
 
 ## Developing

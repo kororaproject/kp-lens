@@ -79,7 +79,7 @@ class ThreadManagerQt5(ThreadManager):
 class AppSchemeHandler(QWebEngineUrlSchemeHandler):
   def __init__(self,):
     super().__init__()
-    self._uri_app_base = ''
+    self._uri_app_base = '/'
 
   def requestStarted(self, request):
     path = o = request.requestUrl().toString()
@@ -99,14 +99,16 @@ class AppSchemeHandler(QWebEngineUrlSchemeHandler):
 class LensSchemeHandler(QWebEngineUrlSchemeHandler):
   def __init__(self):
     super().__init__()
-    self._uri_lens_base = ''
+    self._uri_lens_base = '/'
 
   def requestStarted(self, request):
     path = o = request.requestUrl().toString()
     path = path.replace('lens://', self._uri_lens_base)
-    logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
 
     path = path.replace('lens.css', 'lens-qt5webengine.css')
+
+    logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
+
 
     request.redirect(QUrl(QString(path)))
 
@@ -216,8 +218,8 @@ class ViewQt5WebEngine(View, QObject):
     self._lens_scheme_handler = LensSchemeHandler()
 
     self._profile = QWebEngineProfile().defaultProfile()
-    self._profile.installUrlSchemeHandler(str.encode('app'), self._app_scheme_handler)
-    self._profile.installUrlSchemeHandler(str.encode('lens'), self._lens_scheme_handler)
+    self._profile.installUrlSchemeHandler('app'.encode(), self._app_scheme_handler)
+    self._profile.installUrlSchemeHandler('lens'.encode(), self._lens_scheme_handler)
 
     # connect to Lens signals
     self.on('__close_app', self._close_cb)
@@ -260,6 +262,10 @@ class ViewQt5WebEngine(View, QObject):
 
   def emit_js(self, name, *args):
     self._emit_js_signal.emit(name, list(args))
+
+  def load_string(self, data):
+    index_uri = pathlib.Path(self._app_scheme_handler._uri_app_base).as_uri()
+    self._lensview.setHtml(data, QUrl(index_uri))
 
   def load_uri(self, uri):
     uri_base = os.path.dirname(uri) + '/'

@@ -33,53 +33,6 @@ from lens.thread import Thread, ThreadManager
 logger = logging.getLogger('Lens.App')
 
 class App():
-  @staticmethod
-  def __get_toolkit(name, custom_toolkits, exact=False):
-    #: defines the list of Lens backends to be preloaded for auto-detection
-    __toolkits = {
-      'gtk3':         ['lens.appgtk3',         'ViewGtk3'],
-      'gtk':          ['lens.appgtk3',         'ViewGtk3'],
-      'qt4':          ['lens.appqt4',          'ViewQt4'],
-      'qt':           ['lens.appqt5webengine', 'ViewQt5WebEngine'],
-      'qt5':          ['lens.appqt5webengine', 'ViewQt5WebEngine'],
-      'qt5webengine': ['lens.appqt5webengine', 'ViewQt5WebEngine'],
-      'qt5webkit':    ['lens.appqt5webkit',    'ViewQt5WebKit']
-    }
-
-    __toolkits.update(custom_toolkits)
-
-    __tk_error = []
-
-    if name in __toolkits:
-      try:
-        __tk = __toolkits[name]
-        __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
-        logger.debug('Loaded: {0}'.format(name))
-        return getattr(__module, __tk[1], None)
-
-      except:
-        if exact:
-          raise Exception('Toolkit %s is not implemented or could not be loaded.' % (name))
-
-        else:
-          logger.debug(traceback.format_exc())
-          __tk_error.append(name)
-
-    for k in __toolkits:
-      if k in __tk_error:
-        continue
-
-      try:
-        logger.debug('Loading fallback: {0}'.format(k))
-        __tk = __toolkits[k]
-        __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
-        return getattr(__module, __tk[1], None)
-      except:
-        logger.debug(traceback.format_exc())
-        __tk_error.append(k)
-
-    raise Exception('No fallback toolkits implemented or loaded.')
-
   """The app object implements a Lens application and acts as the central
   object. Once created it will act as a central registry for the view
   toolkit abstraction, thread management, signal handling and much more.
@@ -209,17 +162,52 @@ class App():
 
     return theme
 
-  def _dbus_async_cb(self, name):
-    def decorator(*args, **kwargs):
-      error = None
+  @staticmethod
+  def __get_toolkit(name, custom_toolkits, exact=False):
+    #: defines the list of Lens backends to be preloaded for auto-detection
+    __toolkits = {
+      'gtk3':         ['lens.appgtk3',         'ViewGtk3'],
+      'gtk':          ['lens.appgtk3',         'ViewGtk3'],
+      'qt4':          ['lens.appqt4',          'ViewQt4'],
+      'qt':           ['lens.appqt5webengine', 'ViewQt5WebEngine'],
+      'qt5':          ['lens.appqt5webengine', 'ViewQt5WebEngine'],
+      'qt5webengine': ['lens.appqt5webengine', 'ViewQt5WebEngine'],
+      'qt5webkit':    ['lens.appqt5webkit',    'ViewQt5WebKit']
+    }
 
-      # check for DBus exceptions
-      if len(args) == 1 and isinstance(args[0], dbus.DBusException):
-        error = args[0]
+    __toolkits.update(custom_toolkits)
 
-      self._lv.emit('dbus.'+name, error, *args)
+    __tk_error = []
 
-    return decorator
+    if name in __toolkits:
+      try:
+        __tk = __toolkits[name]
+        __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
+        logger.debug('Loaded: {0}'.format(name))
+        return getattr(__module, __tk[1], None)
+
+      except:
+        if exact:
+          raise Exception('Toolkit %s is not implemented or could not be loaded.' % (name))
+
+        else:
+          logger.debug(traceback.format_exc())
+          __tk_error.append(name)
+
+    for k in __toolkits:
+      if k in __tk_error:
+        continue
+
+      try:
+        logger.debug('Loading fallback: {0}'.format(k))
+        __tk = __toolkits[k]
+        __module = __import__(__tk[0], globals(), locals(), [__tk[1]], 0)
+        return getattr(__module, __tk[1], None)
+      except:
+        logger.debug(traceback.format_exc())
+        __tk_error.append(k)
+
+    raise Exception('No fallback toolkits implemented or loaded.')
 
   def __load_toolkit(self, toolkit=None, toolkit_hint='gtk'):
     # determine the preferred toolkit to use and build the appropiate LensView
@@ -242,6 +230,20 @@ class App():
     #: store an app reference to the thread manager
     self.threads = self._lv._manager
 
+  def _dbus_async_cb(self, name):
+    def decorator(*args, **kwargs):
+      error = None
+
+      # check for DBus exceptions
+      if len(args) == 1 and isinstance(args[0], dbus.DBusException):
+        error = args[0]
+
+      self._lv.emit('dbus.'+name, error, *args)
+
+    return decorator
+
+  #
+  # PROPERTIES
 
   @property
   def inspector(self):
@@ -265,12 +267,8 @@ class App():
     # update window title on app name change
     self._lv.set_title(self._app_name)
 
-  # DEPRECATE:
-  # remove "manager" property in 1.0.0
-  @property
-  def manager(self):
-    logger.warn('DEPRECATED: the "manager" property is deprecated, use "threads" instead.')
-    return self.threads
+  #
+  # PUBLIC METHODS
 
   def bind(self, name):
     """A decorator that is used to register a callback for
@@ -290,25 +288,6 @@ class App():
 
   def close(self):
     self._lv.close()
-
-  # DEPRECATE:
-  # remove "connect" method in 1.0.0
-  def connect(self, name):
-    logger.warn('DEPRECATED: "connect" has been renamed to "bind".')
-    """A decorator that is used to register a callback for
-       a given signal. Example usage::
-
-         @app.connect('hello')
-         def hello_cb():
-           print("Hi!")
-
-    :param name: the name of the signal to subscribe to
-    """
-    def decorator(f):
-      self.on(name, f)
-      return f
-
-    return decorator
 
   # dbus helpers
   def dbus_async_call(self, signal, fn_method, *args):
@@ -351,9 +330,6 @@ class App():
 
   def emit(self, name, *args):
     self._lv.emit_js(name, *args)
-
-  def load_ui(self, uri):
-    logger.warn('DEPRECATED: "load_ui" no longer required.')
 
   def on(self, name, callback):
     self._lv.on(name, callback)

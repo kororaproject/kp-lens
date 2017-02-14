@@ -26,7 +26,13 @@ from lens.thread import Thread, ThreadManager
 logger = logging.getLogger('Lens.Backend.Qt5')
 
 # Qt5
-from dbus.mainloop.qt import DBusQtMainLoop
+try:
+  from dbus.mainloop.pyqt5 import DBusQtMainLoop
+
+except ImportError:
+  # TODO: validate we're not might be windows
+  pass
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -135,9 +141,16 @@ class _QWebPage(QWebPage):
 class ViewQt5WebKit(View):
   def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
-    # prepare Qt dbus mainloop
-    DBusQtMainLoop(set_as_default=True)
+
     self._app = QApplication([])
+
+    # prepare Qt DBus mainloop
+    try:
+      DBusQtMainLoop(set_as_default=True)
+
+    except NameError:
+      # TODO: validate DBus failed to import (windows)
+      pass
 
     self._app_loaded = False
 

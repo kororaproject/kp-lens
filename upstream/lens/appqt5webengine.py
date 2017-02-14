@@ -30,9 +30,10 @@ logger = logging.getLogger('Lens.Backend.Qt5')
 
 # Qt5
 try:
-  from dbus.mainloop.qt import DBusQtMainLoop
+  from dbus.mainloop.pyqt5 import DBusQtMainLoop
+
 except ImportError:
-  # might be windows
+  # TODO: validate we're not might be windows
   pass
 
 from PyQt5.QtCore import *
@@ -150,13 +151,16 @@ class ViewQt5WebEngine(View, QObject):
   def __init__(self, name="MyLensApp", width=640, height=480, inspector=False, start_maximized=False, *args, **kwargs):
     View.__init__(self, name=name, width=width,height=height, *args, **kwargs)
     QObject.__init__(self)
-    # prepare Qt dbus mainloop
+
+    self._app = QApplication([])
+
+    # prepare Qt DBus mainloop
     try:
       DBusQtMainLoop(set_as_default=True)
+
     except NameError:
-      # dbus failed to import (windows)
+      # TODO: validate DBus failed to import (windows)
       pass
-    self._app = QApplication([])
 
     self._app_loaded = False
 

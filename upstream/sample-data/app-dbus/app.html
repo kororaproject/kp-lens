@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="lens-app">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="lens://css/lens.css" rel="stylesheet">
+</head>
+<body ng-controller="AppCtrl">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <h1><b>Lens.</b>DBus</h1>
+        <p style="color: #333">This sample demonstrates communications with DBus.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-6">
+        <div class="input-group">
+          <input type="text" ng-model="hostname" class="form-control"></input>
+          <div class="input-group-btn">
+            <button ng-click="updateHostname()" class="btn btn-default">Update</button>
+          </div>
+        </div>
+
+        <checkbox ng-model="foo">Standard checkbox</checkbox>
+        <checkbox ng-model="foo" true="fa-thumbs-o-up" false="fa-thumbs-o-down">Custom icon checkbox</checkbox>
+
+        <radio ng-model="bar" value="red">Red</radio>
+        <radio ng-model="bar" value="green">Green</radio>
+        <radio ng-model="bar" value="blue">Blue</radio>
+
+        <progressbar class="progress-sm progress-striped active" value="progress"></progressbar>
+        <progressbar class="progress-xs progress-striped active" value="progress"></progressbar>
+
+            <button ng-click="maximize()" class="btn btn-primary">{{maximizeButtonText}}</button>
+            <button ng-click="fullscreen()" class="btn btn-warning">{{fullscreenButtonText}}</button>
+            <button ng-click="closeApp()" class="btn btn-danger">Close App</button>
+      </div>
+      <div class="col-xs-6">
+        <radial radius="50" line-width="20" value="progress"></radial>
+        <radial value="progress" radius="30" line-width="15" line-cap="round" bg-color="#e0f1cb" color="#9ad154" arc-offset="225" arc-range="270" animate="0"></radial>
+        <radial value="progress" radius="50" line-width="30" bg-color="#e0a19b" color="#9a3134"  arc-offset="270" arc-range="180"></radial>
+
+        <script src="lens://js/lens-angular.min.js"></script>
+        <script src="lens://js/lens.js"></script>
+        <script src="app://js/app.js"></script>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <p class="text-center">Checkbox: {{foo}}, Radio: {{bar}}, Progress: {{progress}}%</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

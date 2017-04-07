@@ -2,16 +2,16 @@
 # Copyright 2012-2017 "Korora Project" <dev@kororaproject.org>
 #
 # This program is free software: you can redistribute it and/or modify
-# it under the temms of the GNU General Public License as published by
+# it under the temms of the Lesser GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# Lesser GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
+# You should have received a copy of the Lesser GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
@@ -208,11 +208,17 @@ class ViewGtk3(View):
     self._build_app()
 
   def _build_app(self):
-    # build window and webkit container
+    # build window
     self._window = w = Gtk.Window()
-    self._lensview = lv = _WebView(inspector=self._inspector)
 
-    # add lensview to the parent window
+    self.set_title(self._app_name)
+    self.set_size(self._app_width, self._app_height)
+
+    # center on screen
+    w.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+
+    # build and add webkit container
+    self._lensview = lv = _WebView(inspector=self._inspector)
     w.add(lv)
 
     # connect to Gtk signals
@@ -223,12 +229,6 @@ class ViewGtk3(View):
 
     # connect to Lens signals
     self.on('__close_app', self._close_cb)
-
-    # center on screen
-    w.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-
-    self.set_title(self._app_name)
-    self.set_size(self._app_width, self._app_height)
 
   def _close_cb(self, *args):
     self.emit('app.close')

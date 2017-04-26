@@ -3,7 +3,7 @@ Version:        0.13.0
 Release:        1%{?dist}.1
 Summary:        Simple desktop environment agnostic SDK
 
-License:        GPLv3+
+License:        LGPLv3+
 URL:            https://github.com/kororaproject/kp-lens.git
 Source0:        %{name}-%{version}.tar.gz
 
@@ -30,9 +30,9 @@ mkdir -p %{buildroot}%{_datadir}/%{name}
 ./build-bundles.sh
 
 cp -a lens-data/*  %{buildroot}%{_datadir}/%{name}/
-install -m 0644 COPYING %{buildroot}%{_datadir}/%{name}/
+install -m 0644 COPYING.md %{buildroot}%{_datadir}/%{name}/
 
-for f in __init__.py app.py appgtk3.py appqt4.py appqt5.py system.py thread.py view.py
+for f in __init__.py app.py appgtk3.py appqt4.py appqt5webengine.py system.py thread.py view.py
 do
   install -m 0644 lens/${f} %{buildroot}%{python3_sitelib}/lens/${f}
 done
@@ -96,7 +96,7 @@ Group:          Applications/System
 Provides:       python3-%{name}-backend
 Requires:       python3-%{name} = %{version}-%{release}
 Requires:       python3-qt5
-Requires:       python3-qt5-webkit
+Requires:       python3-qt5-webengine
 Requires:       qt5-qtwebchannel
 Obsoletes:      python3-%{name}-qt
 
@@ -104,11 +104,11 @@ Obsoletes:      python3-%{name}-qt
 Python 3 API for constructing LENS applications on Qt5 systems
 
 %files -n python3-%{name}-qt5
-%{python3_sitelib}/lens/appqt5.py
-%{python3_sitelib}/lens/__pycache__/appqt5.*.py*
+%{python3_sitelib}/lens/appqt5webengine.py
+%{python3_sitelib}/lens/__pycache__/appqt5webengine.*.py*
 
 %files
-%doc COPYING
+%doc COPYING.md
 %{_datadir}/%{name}/
 
 

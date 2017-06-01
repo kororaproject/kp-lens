@@ -1,8 +1,8 @@
 build/sources/*.tar.gz
 
-upstream/lens/__pycache__
-upstream/*/*.pyc
-upstream/*/*.pyo
+upstream/**/__pycache__
+upstream/**/*.pyc
+upstream/**/*.pyo
 
 upstream/lens-data/js/lens.js
 upstream/lens-data/js/lens.min.js

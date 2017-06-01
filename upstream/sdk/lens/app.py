@@ -73,7 +73,7 @@ class App():
 
     #: find lens data path
     base = None
-    for d in ['./lens-data', '/usr/share/lens']:
+    for d in ['../sdk/lens-data', '/usr/share/lens']:
       if os.path.exists(d):
         if d.startswith('/'):
           base = d

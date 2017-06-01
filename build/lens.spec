@@ -1,5 +1,5 @@
 Name:           lens
-Version:        0.13.0
+Version:        0.14.0
 Release:        1%{?dist}.1
 Summary:        Simple desktop environment agnostic SDK
 
@@ -26,6 +26,8 @@ Lightweight, ENvironment-agnostic SDK (LENS) for building graphical UIs.
 %install
 mkdir -p %{buildroot}%{python3_sitelib}/lens
 mkdir -p %{buildroot}%{_datadir}/%{name}
+
+cd sdk
 
 ./build-bundles.sh
 

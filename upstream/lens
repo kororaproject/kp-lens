@@ -50,7 +50,7 @@ parser_run.add_argument('-l', '--lens-path', dest='lens_path', help='Use custom 
 args = parser.parse_args()
 
 if args.directory is None:
-  args.directory = ''
+  args.directory = os.getcwd()
 
 app_root      = os.path.join(args.directory, args.name)
 data_root     = os.path.join(app_root, 'data')
@@ -95,6 +95,7 @@ if args.command == 'generate':
     f.write(
 """#!/usr/bin/python3
 
+import platform
 from lens.app import App
 
 class {0}App(App):
@@ -104,10 +105,13 @@ class {0}App(App):
     self.namespaces = ['./data']
 
     self.on('close', self._close_app_cb)
+    self.on('get-hostname', self._get_hostname_cb)
 
   def _close_app_cb(self, *args):
     self.close()
 
+  def _get_hostname_cb(self, *args):
+    self.emit('set-hostname', platform.node())
 
 app = {0}App()
 app.start()
@@ -130,8 +134,10 @@ app.start()
 <body>
   <div class="center-hv">
     <h1>Lens. {0}</h1>
-    <p>Welcome to your very first Lens app, built via <code>lens generate {0}</code>.</p>
-    <p>Hostname: <span id="hostname"></span></p>
+    <div class="description">
+      <p>Welcome to your very first Lens app, built via <code>lens generate {0}</code>.</p>
+      <p>Hostname: <span id="hostname"></span></p>
+    </div>
     <div class="text-center">
       <button id="closeBtn">CLOSE</button>
     </div>
@@ -151,6 +157,7 @@ app.start()
     f.write(
 """
 h1 { text-align: center; }
+.description { padding: 0 16px; }
 """
     )
     f.close()
@@ -164,7 +171,7 @@ h1 { text-align: center; }
     lens.emit('close');
   };
 
-  lens.on('update-hostname', function(e, hostname) {
+  lens.on('set-hostname', function(e, hostname) {
     document.getElementById('hostname').innerHTML = hostname;
   });
 
@@ -198,29 +205,29 @@ elif args.command == 'run':
   if args.lens_path is not None:
     env['PYTHONPATH'] = args.lens_path
 
-  print(env)
+  # rebuild CSS cache if it exists
+  if os.path.exists(css_root):
+    logger.info('Rebuilding CSS cache ...')
 
-  # rebuild CSS cache
-  logger.info('Rebuilding CSS cache ...')
+    css_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(css_root) for f in filenames if f.endswith('.css')]
 
-  css_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(css_root) for f in filenames if f.endswith('.css')]
+    with open(app_css_cache, 'w') as outfile:
+      for css_file in css_files:
+        with open(css_file) as infile:
+          for line in infile:
+            outfile.write(line)
 
-  with open(app_css_cache, 'w') as outfile:
-    for css_file in css_files:
-      with open(css_file) as infile:
-        for line in infile:
-          outfile.write(line)
+  # rebuild JS cache if it exists
+  if os.path.exists(js_root):
+    logger.info('Rebuilding JS cache ...')
 
-  # rebuild JS cache
-  logger.info('Rebuilding JS cache ...')
+    js_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(js_root) for f in filenames if f.endswith('.js')]
 
-  js_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(js_root) for f in filenames if f.endswith('.js')]
-
-  with open(app_js_cache, 'w') as outfile:
-    for js_file in js_files:
-      with open(js_file) as infile:
-        for line in infile:
-          outfile.write(line)
+    with open(app_js_cache, 'w') as outfile:
+      for js_file in js_files:
+        with open(js_file) as infile:
+          for line in infile:
+            outfile.write(line)
 
   logger.info('Starting Lens app: {0}'.format(args.name))
 

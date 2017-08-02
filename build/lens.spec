@@ -115,6 +115,9 @@ Python 3 API for constructing LENS applications on Qt5 systems
 
 
 %changelog
+* Wed Aug  2 2017 Ian Firns <firnsy@kororaproject.org> 0.14.0-1
+- Initial lens helper and folder re-org.
+
 * Fri Apr  7 2017 Ian Firns <firnsy@kororaproject.org> 0.13.0-1
 - Updated license and added initial i18n support.
 

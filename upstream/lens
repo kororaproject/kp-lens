@@ -203,7 +203,7 @@ elif args.command == 'run':
     env['LENS_TOOLKIT'] = args.toolkit
 
   if args.lens_path is not None:
-    env['PYTHONPATH'] = args.lens_path
+    env['PYTHONPATH'] = os.path.abspath(args.lens_path)
 
   # rebuild CSS cache if it exists
   if os.path.exists(css_root):

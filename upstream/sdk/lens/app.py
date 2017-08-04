@@ -73,7 +73,9 @@ class App():
 
     #: find lens data path
     base = None
-    for d in ['../sdk/lens-data', '/usr/share/lens']:
+    logger.debug("Current working directory %s", os.getcwd())
+    sdk_path = os.path.join(os.path.dirname(__file__), '../lens-data')
+    for d in [sdk_path, '/usr/share/lens']:
       if os.path.exists(d):
         if d.startswith('/'):
           base = d

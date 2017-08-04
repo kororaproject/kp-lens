@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+
+import platform
+from lens.app import App
+
+class ${name}App(App):
+  def __init__(self):
+    App.__init__(self, name="Lens. ${name}")
+
+    self.namespaces = ['./data']
+
+    self.on('close', self._close_app_cb)
+    self.on('get-hostname', self._get_hostname_cb)
+
+  def _close_app_cb(self, *args):
+    self.close()
+
+  def _get_hostname_cb(self, *args):
+    self.emit('set-hostname', platform.node())
+
+app = ${name}App()
+app.start()

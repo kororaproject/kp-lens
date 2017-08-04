@@ -1,0 +1,54 @@
+#!/usr/bin/python3
+
+import platform
+from lens.app import App
+
+app = App(name="Lens. ${name}")
+
+@app.bind('close')
+def _close_app_cb(*args):
+  app.close()
+
+@app.bind('get-hostname')
+def _get_hostname_cb(*args):
+  app.emit('set-hostname', platform.node())
+
+app.start("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="lens://css/lens.css" rel="stylesheet">
+  <style>
+    h1 { text-align: center; }
+    .description { padding: 0 16px; }
+  </style>
+</head>
+<body>
+  <div class="center-hv">
+    <h1>Lens. ${name}</h1>
+    <div class="description">
+      <p>Welcome to your very first Lens app, built via <code>lens generate ${name}</code>.</p>
+      <p>Hostname: <span id="hostname"></span></p>
+    </div>
+    <div class="text-center">
+      <button id="closeBtn">CLOSE</button>
+    </div>
+  </div>
+
+<script src="lens://js/lens.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function(event) {
+    document.getElementById("closeBtn").onclick = function() {
+      lens.emit('close');
+    };
+
+    lens.on('set-hostname', function(e, hostname) {
+      document.getElementById('hostname').innerHTML = hostname;
+    });
+
+    lens.emit('get-hostname');
+});
+</script>
+</body>
+</html>
+""")

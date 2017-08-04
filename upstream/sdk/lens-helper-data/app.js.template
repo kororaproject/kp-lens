@@ -1,0 +1,11 @@
+document.addEventListener("DOMContentLoaded", function(event) {
+  document.getElementById("closeBtn").onclick = function() {
+    lens.emit('close');
+  };
+
+  lens.on('set-hostname', function(e, hostname) {
+    document.getElementById('hostname').innerHTML = hostname;
+  });
+
+  lens.emit('get-hostname');
+});

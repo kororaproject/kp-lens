@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="lens://css/lens.css" rel="stylesheet">
+  <link href="app://cache/bundle.css" rel="stylesheet">
+</head>
+<body>
+  <div class="center-hv">
+    <h1>Lens. ${name}</h1>
+    <div class="description">
+      <p>Welcome to your very first Lens app, built via <code>lens generate ${name}</code>.</p>
+      <p>Hostname: <span id="hostname"></span></p>
+    </div>
+    <div class="text-center">
+      <button id="closeBtn">CLOSE</button>
+    </div>
+  </div>
+
+<script src="lens://js/lens.js"></script>
+<script src="app://cache/bundle.js"></script>
+</body>
+</html>

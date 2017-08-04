@@ -22,6 +22,7 @@ import logging
 import os
 import shutil
 import stat
+import string
 import subprocess
 import sys
 
@@ -34,6 +35,8 @@ subparsers = parser.add_subparsers(dest='command')
 parser_generate = subparsers.add_parser('generate')
 parser_generate.add_argument('-d', '--directory', dest='directory', help='destination path to create')
 parser_generate.add_argument('-f', '--force', action='store_true', dest='force', help='force overwriting existing project')
+parser_generate.add_argument('-p', '--lens-path', dest='lens_path', help='Use custom SDK lens path')
+parser_generate.add_argument('-l', '--lite', dest='lite', action='store_true', help='Generate a lite app')
 parser_generate.add_argument('name')
 
 parser_package = subparsers.add_parser('package')
@@ -45,7 +48,7 @@ parser_run.add_argument('name')
 parser_run.add_argument('-d', '--directory', dest='directory', help='destination path to create')
 parser_run.add_argument('-t', '--toolkit', dest='toolkit', choices=['gtk', 'gtk3', 'qt', 'qt5'], help='set the toolkit hint')
 parser_run.add_argument('-i', '--inspector', action='store_true', dest='inspector', help='force overwriting existing project')
-parser_run.add_argument('-l', '--lens-path', dest='lens_path', help='Use custom SDK lens path')
+parser_run.add_argument('-p', '--lens-path', dest='lens_path', help='Use custom SDK lens path')
 
 args = parser.parse_args()
 
@@ -82,104 +85,46 @@ if args.command == 'generate':
   logger.info('Building directories ...')
 
   os.mkdir(app_root)
-  os.mkdir(data_root)
-  os.mkdir(cache_root)
-  os.mkdir(css_root)
-  os.mkdir(os.path.join(data_root, 'img'))
-  os.mkdir(js_root)
-  os.mkdir(os.path.join(data_root, 'locales'))
+  if not args.lite:
+    os.mkdir(data_root)
+    os.mkdir(cache_root)
+    os.mkdir(css_root)
+    os.mkdir(os.path.join(data_root, 'img'))
+    os.mkdir(js_root)
+    os.mkdir(os.path.join(data_root, 'locales'))
 
-  logger.info('Writing app entry point: {0} ...'.format(app_core_main))
+  template_dir = '/usr/share/lens-helper'
+  if args.lens_path:
+    template_dir = os.path.join(args.lens_path, 'lens-helper-data')
 
-  with open(app_core_main, 'w') as f:
-    f.write(
-"""#!/usr/bin/python3
+  if args.lite:
+    template_dir = os.path.join(template_dir, 'lite')
 
-import platform
-from lens.app import App
+  if not os.path.exists(template_dir):
+    logger.error('Unable to find template directory: {0}'.format(template_dir))
+    sys.exit(1)
 
-class {0}App(App):
-  def __init__(self):
-    App.__init__(self, name="Lens. {0}")
+  logger.info('Sourcing app templates from: {0}'.format(template_dir))
 
-    self.namespaces = ['./data']
+  components = [
+    {'log': 'Writing app entry point: {0} ...', 'out_file': app_core_main, 'template': 'app.py.template', 'permissions': stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH},
+    {'log': 'Writing skeleton UI (HTML) ...', 'out_file': app_ui_main, 'template': 'app.html.template'},
+    {'log': 'Writing skeleton UI (CSS) ...', 'out_file': basic_css, 'template': 'app.css.template'},
+    {'log': 'Writing skeleton UI (JS) ...', 'out_file': basic_js, 'template': 'app.js.template'},
+  ]
 
-    self.on('close', self._close_app_cb)
-    self.on('get-hostname', self._get_hostname_cb)
+  for component in components:
+    logger.info(component['log'].format(component['out_file']))
 
-  def _close_app_cb(self, *args):
-    self.close()
+    template_file = os.path.join(template_dir, component['template'])
+    if os.path.exists(template_file):
+      with open(component['out_file'], 'w') as f:
+        t = string.Template(open(template_file).read())
+        f.write(t.substitute({'name': args.name}))
 
-  def _get_hostname_cb(self, *args):
-    self.emit('set-hostname', platform.node())
-
-app = {0}App()
-app.start()
-""".format(args.name)
-    )
-    f.close()
-
-  os.chmod(app_core_main, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
-
-  logger.info('Writing skeleton UI (HTML) ...')
-
-  with open(app_ui_main, 'w') as f:
-    f.write(
-"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <link href="lens://css/lens.css" rel="stylesheet">
-  <link href="app://cache/bundle.css" rel="stylesheet">
-</head>
-<body>
-  <div class="center-hv">
-    <h1>Lens. {0}</h1>
-    <div class="description">
-      <p>Welcome to your very first Lens app, built via <code>lens generate {0}</code>.</p>
-      <p>Hostname: <span id="hostname"></span></p>
-    </div>
-    <div class="text-center">
-      <button id="closeBtn">CLOSE</button>
-    </div>
-  </div>
-
-<script src="lens://js/lens.js"></script>
-<script src="app://cache/bundle.js"></script>
-</body>
-</html>
-""".format(args.name)
-    )
-    f.close()
-
-  logger.info('Writing skeleton UI (CSS) ...')
-
-  with open(basic_css, 'w') as f:
-    f.write(
-"""
-h1 { text-align: center; }
-.description { padding: 0 16px; }
-"""
-    )
-    f.close()
-
-  logger.info('Writing skeleton UI (JS) ...')
-
-  with open(basic_js, 'w') as f:
-    f.write(
-"""document.addEventListener("DOMContentLoaded", function(event) {
-  document.getElementById("closeBtn").onclick = function() {
-    lens.emit('close');
-  };
-
-  lens.on('set-hostname', function(e, hostname) {
-    document.getElementById('hostname').innerHTML = hostname;
-  });
-
-  lens.emit('get-hostname');
-});
-"""
-    )
-    f.close()
+      permissions = component.get('permissions', None)
+      if permissions:
+          os.chmod(component['out_file'], permissions)
 
 elif args.command == 'package':
   logger.info('Building skeleton Lens app: {0}'.format(args.name))

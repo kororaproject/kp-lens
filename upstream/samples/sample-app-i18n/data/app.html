@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="lens-app">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="lens://css/lens.css" rel="stylesheet">
+</head>
+<body ng-controller="AppCtrl">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <h1><b>Lens.</b>Internationalisation</h1>
+        <p style="color: #333">This sample demonstrates how the Lens translation system which leverages the existing gettext ecosystem.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-4">
+        <h4>English (EN)</h4>
+        <p data-translate-key="hello_world" data-translate-locale="en"></p>
+        <p data-translate-key="what_is_lens" data-translate-locale="en"></p>
+      </div>
+      <div class="col-xs-4">
+        <h4>Spanish (ES)</h4>
+        <p data-translate-key="hello_world" data-translate-locale="es"></p>
+        <p data-translate-key="what_is_lens" data-translate-locale="es"></p>
+      </div>
+      <div class="col-xs-4">
+        <h4>Japanese (JA)</h4>
+        <p data-translate-key="hello_world" data-translate-locale="ja"></p>
+        <p data-translate-key="what_is_lens" data-translate-locale="ja"></p>
+      </div>
+    </div>
+    <div class="row hidden">
+      <div class="col-sm-12 text-center">
+        <button ng-click="maximize()" class="btn btn-primary">{{maximizeButtonText}}</button>
+        <button ng-click="fullscreen()" class="btn btn-warning">{{fullscreenButtonText}}</button>
+        <button ng-click="closeApp()" class="btn btn-danger">Close App</button>
+      </div>
+    </div>
+  </div>
+  <script src="lens://js/lens-angular.min.js"></script>
+  <script src="lens://js/lens.js"></script>
+  <script src="app://js/app.js"></script>
+</body>
+</html>

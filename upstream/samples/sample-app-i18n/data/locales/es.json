@@ -1,0 +1,36 @@
+{
+  "values":{
+    "hello_world": "Hola Mundo!",
+    "what_is_lens": "Hola. Lens proporciona una serie de rutinas de ayuda de internacionalización en JavaScript para ayudar a traducir sus interfaces de usuario.",
+    "Yes": "Sí",
+    "No": "No",
+    "Ok": "De acuerdo",
+    "Cancel": "Cancelar"
+  },
+  "contexts":[
+    {
+      "matches":{
+        "gender":"male"
+      },
+      "values":{
+        "%{name} uploaded %n photos to their %{album} album":[
+          [0, 0, "%{name} no ha subido ninguna foto a su álbum %{album}."],
+          [1, 1, "%{name} subió %n foto en su álbum %{album}."],
+          [2, null, "%{name} subió %n fotos en su álbum %{album}."]
+        ]
+      }
+    },
+    {
+      "matches":{
+        "gender":"female"
+      },
+      "values":{
+        "%{name} uploaded %n photos to their %{album} album":[
+          [0, 0, "%{name} no ha subido ninguna foto a sus álbum %{album}."],
+          [1, 1, "%{name} subió %n foto en sus álbum %{album}."],
+          [2, null, "%{name} subió %n fotos en sus álbum %{album}."]
+        ]
+      }
+    }
+  ]
+}

@@ -384,6 +384,9 @@ class App():
           self._lv._run()
           sys.exit(0)
 
+        else:
+          logger.debug('URI entry point does not exist: {0}'.format(_uri))
+
     logger.error('Unable to load app.')
     exit(1)
 

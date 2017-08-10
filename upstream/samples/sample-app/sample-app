@@ -26,7 +26,7 @@ class MyApp(App):
   def __init__(self):
     App.__init__(self, name="Lens. Widgets", inspector=True)
 
-    self.namespaces = ['./sample-data/app']
+    self.namespaces = ['./data']
 
     self.on('close', self._close_app_cb)
     self.on('get-hostname', self._get_hostname_cb)

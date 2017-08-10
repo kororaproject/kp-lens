@@ -33,10 +33,12 @@ parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(dest='command')
 
 parser_generate = subparsers.add_parser('generate')
-parser_generate.add_argument('-d', '--directory', dest='directory', help='destination path to create')
-parser_generate.add_argument('-f', '--force', action='store_true', dest='force', help='force overwriting existing project')
+parser_generate.add_argument('-d', '--directory', dest='directory', help='Destination path to create')
+parser_generate.add_argument('-f', '--force', action='store_true', dest='force', help='Force overwriting existing project')
 parser_generate.add_argument('-p', '--lens-path', dest='lens_path', help='Use custom SDK lens path')
 parser_generate.add_argument('-l', '--lite', dest='lite', action='store_true', help='Generate a lite app')
+parser_generate.add_argument('--js-vanilla', dest='js_vanilla', help='Use Lens VanillaJS extensions')
+parser_generate.add_argument('--js-angular', dest='js_angular', help='Use Lens AngularJS extensions')
 parser_generate.add_argument('name')
 
 parser_package = subparsers.add_parser('package')
@@ -45,17 +47,21 @@ parser_package.add_argument('name')
 
 parser_run = subparsers.add_parser('run')
 parser_run.add_argument('name')
-parser_run.add_argument('-d', '--directory', dest='directory', help='destination path to create')
-parser_run.add_argument('-t', '--toolkit', dest='toolkit', choices=['gtk', 'gtk3', 'qt', 'qt5'], help='set the toolkit hint')
-parser_run.add_argument('-i', '--inspector', action='store_true', dest='inspector', help='force overwriting existing project')
+parser_run.add_argument('-d', '--directory', dest='directory', help='Destination path to create')
+parser_run.add_argument('-t', '--toolkit', dest='toolkit', choices=['gtk', 'gtk3', 'qt', 'qt5'], help='Set the toolkit hint')
+parser_run.add_argument('-i', '--inspector', action='store_true', dest='inspector', help='Force overwriting existing project')
 parser_run.add_argument('-p', '--lens-path', dest='lens_path', help='Use custom SDK lens path')
 
 args = parser.parse_args()
 
+if args.command is None:
+    parser.print_help()
+    sys.exit(1)
+
 if args.directory is None:
   args.directory = os.getcwd()
 
-app_root      = os.path.join(args.directory, args.name)
+app_root      = os.path.abspath(os.path.join(args.directory, args.name))
 data_root     = os.path.join(app_root, 'data')
 css_root      = os.path.join(data_root, 'css')
 js_root       = os.path.join(data_root, 'js')
@@ -135,6 +141,7 @@ elif args.command == 'run':
     logger.error('Unable to find app {0}, path does not exist: {1})'.format(args.name, app_root))
     sys.exit(1)
 
+  # copy environment so we can customise
   env = os.environ.copy()
 
   # enable debugging
@@ -151,7 +158,7 @@ elif args.command == 'run':
     env['PYTHONPATH'] = os.path.abspath(args.lens_path)
 
   # rebuild CSS cache if it exists
-  if os.path.exists(css_root):
+  if os.path.exists(css_root) and os.path.exists(app_css_cache):
     logger.info('Rebuilding CSS cache ...')
 
     css_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(css_root) for f in filenames if f.endswith('.css')]
@@ -163,7 +170,7 @@ elif args.command == 'run':
             outfile.write(line)
 
   # rebuild JS cache if it exists
-  if os.path.exists(js_root):
+  if os.path.exists(js_root) and os.path.exists(app_js_cache):
     logger.info('Rebuilding JS cache ...')
 
     js_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(js_root) for f in filenames if f.endswith('.js')]

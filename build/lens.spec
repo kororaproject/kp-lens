@@ -1,5 +1,7 @@
+%global debug_package %{nil}
+
 Name:           lens
-Version:        0.14.0
+Version:        0.14.1
 Release:        1%{?dist}.1
 Summary:        Simple desktop environment agnostic SDK
 
@@ -7,10 +9,10 @@ License:        LGPLv3+
 URL:            https://github.com/kororaproject/kp-lens.git
 Source0:        %{name}-%{version}.tar.gz
 
-BuildArch:      noarch
 BuildRequires:  python2-devel python3-devel
 Requires:       adobe-source-sans-pro-fonts
 Requires:       google-roboto-condensed-fonts
+Requires:       python3
 
 
 %description
@@ -26,13 +28,16 @@ Lightweight, ENvironment-agnostic SDK (LENS) for building graphical UIs.
 %install
 mkdir -p %{buildroot}%{python3_sitelib}/lens
 mkdir -p %{buildroot}%{_datadir}/%{name}
+mkdir -p %{buildroot}%{_bindir}
+
+install -m 0644 COPYING.md %{buildroot}%{_datadir}/%{name}/
+install -m 0755 lens %{buildroot}%{_bindir}/
 
 cd sdk
 
 ./build-bundles.sh
 
 cp -a lens-data/*  %{buildroot}%{_datadir}/%{name}/
-install -m 0644 COPYING.md %{buildroot}%{_datadir}/%{name}/
 
 for f in __init__.py app.py appgtk3.py appqt4.py appqt5webengine.py system.py thread.py view.py
 do
@@ -112,6 +117,7 @@ Python 3 API for constructing LENS applications on Qt5 systems
 %files
 %doc COPYING.md
 %{_datadir}/%{name}/
+%{_bindir}/lens
 
 
 %changelog

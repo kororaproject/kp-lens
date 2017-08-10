@@ -1,0 +1,32 @@
+{
+  "values":{
+    "hello_world": "「こんにちは世界」",
+    "what_is_lens": "こんにちは。 LensはJavaScriptでいくつかの国際化ヘルパールーチンを提供し、ユーザインタフェースの翻訳を支援します。",
+    "Yes": "はい",
+    "No": "いいえ",
+    "Ok": "Ok",
+    "Cancel": "キャンセル"
+  },
+  "contexts":[
+    {
+      "matches":{
+        "gender":"male"
+      },
+      "values":{
+        "%{name} uploaded %n photos to their %{album} album":[
+          [0, 0, "%{name}は彼の%{album}アルバムに写真%n枚をアップロードしました"]
+        ]
+      }
+    },
+    {
+      "matches":{
+        "gender":"female"
+      },
+      "values":{
+        "%{name} uploaded %n photos to their %{album} album":[
+          [0, 0, "%{name}は彼女の%{album}アルバムに写真%n枚をアップロードしました"]
+        ]
+      }
+    }
+  ]
+}

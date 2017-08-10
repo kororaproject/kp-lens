@@ -20,10 +20,10 @@ import platform
 
 from lens.app import App
 
-app = App()
+app = App(name='Lens. Internationalisation')
 
 # load the app entry page
-app.namespaces.append('./sample-data/app-dbus')
+app.namespaces.append('./data')
 
 @app.bind('close')
 def _close_app_cb(*args):
@@ -45,13 +45,4 @@ def _maximize_cb(*args):
 def _fullscreen_cb(*args):
   app.toggle_window_fullscreen()
 
-@app.bind('dbus.list-names')
-def _list_names(error, names):
-    for name in names:
-        print(name)
-
-daemon = app.dbus_system_interface('org.freedesktop.DBus', '/org/freedesktop/DBus')
-app.dbus_async_call('list-names', daemon.ListNames)
-
 app.start()
-

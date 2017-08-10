@@ -7,11 +7,11 @@ app = App(name="Lens. ${name}")
 
 @app.bind('close')
 def _close_app_cb(*args):
-  app.close()
+    app.close()
 
 @app.bind('get-hostname')
 def _get_hostname_cb(*args):
-  app.emit('set-hostname', platform.node())
+    app.emit('set-hostname', platform.node())
 
 app.start("""
 <!DOCTYPE html>

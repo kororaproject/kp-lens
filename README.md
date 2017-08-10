@@ -12,8 +12,8 @@ A typical Lens app is composed of two phases, there's the backend which is
 written in python and the frontend which is composed of HTML5/CSS3/JS similar
 to web development.
 
-A bridge exists between the Python and WebKit components that can be traversed 
-through signal/slot calls. For example Python slots can be reached via WebKit 
+A bridge exists between the Python and WebKit components that can be traversed
+through signal/slot calls. For example Python slots can be reached via WebKit
 signals and conversely Webkit slots can be reached via Python signals.
 
 A simple app is shown below.
@@ -27,12 +27,12 @@ app = App()
 # bind to the 'close' signal
 @app.bind('close')
 def _close_app_cb(*args):
-  app.close()
+    app.close()
 
 # bind to the 'get-hostname' signal
 @app.bind('get-hostname')
 def _get_hostname_cb(*args):
-  app.emit('update-hostname', platform.node())
+    app.emit('update-hostname', platform.node())
 
 # start the app event loop
 app.start("""

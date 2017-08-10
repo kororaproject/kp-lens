@@ -21,15 +21,15 @@ import logging
 from lens.app import App
 
 class MyApp(App):
-  def __init__(self):
-    App.__init__(self, name="Lens. 3D", inspector=True)
+    def __init__(self):
+        App.__init__(self, name="Lens. 3D", inspector=True)
 
-    self.namespaces = ['./data']
+        self.namespaces = ['./data']
 
-    self.on('close', self._close_app_cb)
+        self.on('close', self._close_app_cb)
 
-  def _close_app_cb(self, *args):
-    self.close()
+    def _close_app_cb(self, *args):
+        self.close()
 
 logging.basicConfig(level=logging.DEBUG)
 

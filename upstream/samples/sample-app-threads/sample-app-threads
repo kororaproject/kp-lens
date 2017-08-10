@@ -25,54 +25,54 @@ from lens.app import App
 from lens.thread import Thread
 
 class LongTask(Thread):
-  def __init__(self):
-    Thread.__init__(self, daemon=True)
+    def __init__(self):
+        Thread.__init__(self, daemon=True)
 
-  def run(self):
-    delta = random.uniform(0.05, 0.5)
+    def run(self):
+        delta = random.uniform(0.05, 0.5)
 
-    self.emit('started', self.uuid, time.time())
+        self.emit('started', self.uuid, time.time())
 
-    for i in range(100):
-      time.sleep(delta)
-      self.emit('progress', self.uuid, i)
+        for i in range(100):
+            time.sleep(delta)
+            self.emit('progress', self.uuid, i)
 
-    self.emit('complete', self.uuid, time.time())
+        self.emit('complete', self.uuid, time.time())
 
 def _longtask_progress_cb(thread, *args):
-  app.emit('long-task-progress', *args)
+    app.emit('long-task-progress', *args)
 
 def _longtask_complete_cb(thread, *args):
-  app.emit('long-task-complete', *args)
+    app.emit('long-task-complete', *args)
 
 
 if __name__ == '__main__':
-  app = App(name="Lens. Threads")
+    app = App(name="Lens. Threads")
 
-  # load the app entry page
-  app.namespaces.append('./data')
+    # load the app entry page
+    app.namespaces.append('./data')
 
-  @app.bind('close')
-  def _close_app_cb(*args):
-    app.close()
+    @app.bind('close')
+    def _close_app_cb(*args):
+        app.close()
 
-  @app.bind('get-hostname')
-  def _get_hostname_cb(*args):
-    app.emit('update-config', platform.node())
+    @app.bind('get-hostname')
+    def _get_hostname_cb(*args):
+        app.emit('update-config', platform.node())
 
-  @app.bind('update-hostname')
-  def _update_hostname_cb(message):
-    pp = pprint.PrettyPrinter(indent=2)
-    pp.pprint(message)
+    @app.bind('update-hostname')
+    def _update_hostname_cb(message):
+        pp = pprint.PrettyPrinter(indent=2)
+        pp.pprint(message)
 
-  @app.bind('start-long-task')
-  def _long_task_cb():
-    t = LongTask()
-    app.threads.add(t)
-    app.threads.on(t, 'progress', _longtask_progress_cb)
-    app.threads.on(t, 'complete', _longtask_complete_cb)
+    @app.bind('start-long-task')
+    def _long_task_cb():
+        t = LongTask()
+        app.threads.add(t)
+        app.threads.on(t, 'progress', _longtask_progress_cb)
+        app.threads.on(t, 'complete', _longtask_complete_cb)
 
 
 
-  app.start()
+    app.start()
 

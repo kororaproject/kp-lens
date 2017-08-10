@@ -24,46 +24,46 @@ from lens.app import App
 from lens.thread import Thread
 
 class ProcTask(Thread):
-  def __init__(self):
-    Thread.__init__(self)
+    def __init__(self):
+        Thread.__init__(self)
 
-  def run(self):
-    while 1:
-      pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+    def run(self):
+        while 1:
+            pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
 
-      loadavg = open('/proc/loadavg', 'r').read().strip().split(' ')
-      meminfo = [x.split()[1] for x in open('/proc/meminfo', 'r').read().strip().split('\n')]
+            loadavg = open('/proc/loadavg', 'r').read().strip().split(' ')
+            meminfo = [x.split()[1] for x in open('/proc/meminfo', 'r').read().strip().split('\n')]
 
-      proc = []
+            proc = []
 
-      for pid in pids:
-        try:
-          stats = open(os.path.join('/proc', pid, 'stat'), 'r').read().strip().split(' ')
-          statm = open(os.path.join('/proc', pid, 'statm'), 'r').read().strip().split(' ')
-          cmdline = open(os.path.join('/proc', pid, 'cmdline'), 'r').read()
+            for pid in pids:
+                try:
+                    stats = open(os.path.join('/proc', pid, 'stat'), 'r').read().strip().split(' ')
+                    statm = open(os.path.join('/proc', pid, 'statm'), 'r').read().strip().split(' ')
+                    cmdline = open(os.path.join('/proc', pid, 'cmdline'), 'r').read()
 
-          proc.append({
-            'cmdline': cmdline,
-            'pid': int(stats[0]),
-            'comm': stats[1],
-            'state': stats[2],
-            'ppid': int(stats[3]),
-            'priority': int(stats[17]),
-            'nice': int(stats[18]),
-            'vsize': int(stats[22]),
-            'mem_size': int(statm[0]),
-            'mem_resident': int(statm[1]),
-            'mem_shared': int(statm[2]),
-            'mem_percentage': round(int(statm[1]) * 100.0 / int(meminfo[0]), 2)
-          })
+                    proc.append({
+                        'cmdline': cmdline,
+                        'pid': int(stats[0]),
+                        'comm': stats[1],
+                        'state': stats[2],
+                        'ppid': int(stats[3]),
+                        'priority': int(stats[17]),
+                        'nice': int(stats[18]),
+                        'vsize': int(stats[22]),
+                        'mem_size': int(statm[0]),
+                        'mem_resident': int(statm[1]),
+                        'mem_shared': int(statm[2]),
+                        'mem_percentage': round(int(statm[1]) * 100.0 / int(meminfo[0]), 2)
+                    })
 
-        except:
-          # proc has already terminated
-          continue
+                except:
+                    # proc has already terminated
+                    continue
 
-      self.emit('proc-update', proc)
+            self.emit('proc-update', proc)
 
-      time.sleep(5)
+            time.sleep(5)
 
 
 app = App(inspector=True, name='LensTop')
@@ -73,16 +73,16 @@ app.namespaces.append('./sample-data/app-top')
 
 @app.bind('close')
 def _close_app_cb(*args):
-  app.close()
+    app.close()
 
 @app.bind('start-proc-watch')
 def _start_proc_watch_cb(*args):
-  t = ProcTask()
-  t.daemon = True
-  app.threads.add(t)
-  app.threads.on(t, 'proc-update', _proctask_update_cb)
+    t = ProcTask()
+    t.daemon = True
+    app.threads.add(t)
+    app.threads.on(t, 'proc-update', _proctask_update_cb)
 
 def _proctask_update_cb(thread, proc):
-  app.emit('update-proc', proc)
+    app.emit('update-proc', proc)
 
 app.start()

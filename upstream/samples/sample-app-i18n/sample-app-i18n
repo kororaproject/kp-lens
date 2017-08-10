@@ -27,22 +27,22 @@ app.namespaces.append('./data')
 
 @app.bind('close')
 def _close_app_cb(*args):
-  app.close()
+    app.close()
 
 @app.bind('get-hostname')
 def _get_hostname_cb(*args):
-  app.emit('update-config', platform.node())
+    app.emit('update-config', platform.node())
 
 @app.bind('update-hostname')
 def _update_hostname_cb(message):
-  print(message)
+    print(message)
 
 @app.bind('toggle-window-maximize')
 def _maximize_cb(*args):
-  app.toggle_window_maximize()
+    app.toggle_window_maximize()
 
 @app.bind('toggle-window-fullscreen')
 def _fullscreen_cb(*args):
-  app.toggle_window_fullscreen()
+    app.toggle_window_fullscreen()
 
 app.start()

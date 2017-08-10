@@ -24,174 +24,174 @@ from lens.view import EventEmitter
 
 __counter = 0
 def _new_name():
-  global __counter
-  __counter += 1
-  return "LensThread-{}-{}".format(__counter, time.time())
+    global __counter
+    __counter += 1
+    return "LensThread-{}-{}".format(__counter, time.time())
 
 
 
 class Thread(EventEmitter):
-  def __init__(self, daemon=False):
-    EventEmitter.__init__(self)
+    def __init__(self, daemon=False):
+        EventEmitter.__init__(self)
 
-    self._daemon = daemon
+        self._daemon = daemon
 
-    # the ID won't change when the name changes
-    self._uuid = _new_name()
+        # the ID won't change when the name changes
+        self._uuid = _new_name()
 
 
-  @property
-  def daemon(self):
-    return self._daemon
+    @property
+    def daemon(self):
+        return self._daemon
 
-  @daemon.setter
-  def daemon(self, state):
-    self._daemon = bool(state)
+    @daemon.setter
+    def daemon(self, state):
+        self._daemon = bool(state)
 
-  @property
-  def uuid(self):
-    return self._uuid
+    @property
+    def uuid(self):
+        return self._uuid
 
-  def run(self):
-    pass
+    def run(self):
+        pass
 
 
 
 class ThreadProcess(multiprocessing.Process):
-  def __init__(self, thread, pipe_in, queue_out):
-    multiprocessing.Process.__init__(self)
+    def __init__(self, thread, pipe_in, queue_out):
+        multiprocessing.Process.__init__(self)
 
-    self._thread = thread
-    self._uuid = thread.uuid
-    self.daemon = thread.daemon
+        self._thread = thread
+        self._uuid = thread.uuid
+        self.daemon = thread.daemon
 
-    self._thread.on_any(self._thread_signal_cb)
+        self._thread.on_any(self._thread_signal_cb)
 
-    self._pipe_in = pipe_in
-    self._queue_out = queue_out
+        self._pipe_in = pipe_in
+        self._queue_out = queue_out
 
-  def _thread_signal_cb(self, name, *args):
-    self._queue_out.put({
-      'uuid': self.uuid,
-      'name': name,
-      'args': list(args)
-    })
+    def _thread_signal_cb(self, name, *args):
+        self._queue_out.put({
+            'uuid': self.uuid,
+            'name': name,
+            'args': list(args)
+        })
 
-  @property
-  def uuid(self):
-    return self._uuid
+    @property
+    def uuid(self):
+        return self._uuid
 
-  def run(self):
+    def run(self):
 
-    self._thread.run()
+        self._thread.run()
 
-    self._queue_out.put({
-      'uuid': self.uuid,
-      'name': '__completed'
-    })
+        self._queue_out.put({
+            'uuid': self.uuid,
+            'name': '__completed'
+        })
 
 
 
 class ThreadManager(EventEmitter):
-  """
-  Manages many LensThreads. This involves starting and stopping
-  said threads, and respecting a maximum num of concurrent threads limit
-  """
-  def __init__(self, maxConcurrentThreads=5):
-    EventEmitter.__init__(self)
-
-    self._logger = logging.getLogger('Lens.ThreadManager')
-
-    #stores all threads, running or stopped
-    self.threads = {}
-    self.pendingThreadArgs = []
-    self.maxConcurrentThreads = maxConcurrentThreads
-
-    self.queue_in = multiprocessing.Queue()
-
-
-  def _thread_completed(self, thread):
     """
-    Decrements the count of concurrent threads and starts any
-    pending threads if there is space
+    Manages many LensThreads. This involves starting and stopping
+    said threads, and respecting a maximum num of concurrent threads limit
     """
+    def __init__(self, maxConcurrentThreads=5):
+        EventEmitter.__init__(self)
 
-    #: unsubscribe all signals to the thread
-    if self.threads[thread.uuid]['u']:
-      self.unsubscribe_like('__thread_%s_' % (thread.uuid))
+        self._logger = logging.getLogger('Lens.ThreadManager')
 
-    del(self.threads[thread.uuid])
-    running = len(self.threads) - len(self.pendingThreadArgs)
+        #stores all threads, running or stopped
+        self.threads = {}
+        self.pendingThreadArgs = []
+        self.maxConcurrentThreads = maxConcurrentThreads
 
-    self._logger.debug("%s completed. %s running, %s pending" % (thread, running, len(self.pendingThreadArgs)))
+        self.queue_in = multiprocessing.Queue()
 
-    if running < self.maxConcurrentThreads:
-      try:
-        uuid = self.pendingThreadArgs.pop()
 
-        self._logger.debug("Starting pending %s" % self.threads[uuid])
-        self.threads[uuid]['t'].start()
-        self.emit('__thread_%s_started' % (uuid), self.threads[uuid])
-        self.emit('__thread_%s_state' % (uuid), self.threads[uuid], 'started')
+    def _thread_completed(self, thread):
+        """
+        Decrements the count of concurrent threads and starts any
+        pending threads if there is space
+        """
 
-      except IndexError:
+        #: unsubscribe all signals to the thread
+        if self.threads[thread.uuid]['u']:
+            self.unsubscribe_like('__thread_%s_' % (thread.uuid))
+
+        del(self.threads[thread.uuid])
+        running = len(self.threads) - len(self.pendingThreadArgs)
+
+        self._logger.debug("%s completed. %s running, %s pending" % (thread, running, len(self.pendingThreadArgs)))
+
+        if running < self.maxConcurrentThreads:
+            try:
+                uuid = self.pendingThreadArgs.pop()
+
+                self._logger.debug("Starting pending %s" % self.threads[uuid])
+                self.threads[uuid]['t'].start()
+                self.emit('__thread_%s_started' % (uuid), self.threads[uuid])
+                self.emit('__thread_%s_state' % (uuid), self.threads[uuid], 'started')
+
+            except IndexError:
+                pass
+
+            except:
+                self._logger.warn('Caught exception!\n%s', traceback.format_exc())
+
+    def _register_thread_signals(self, thread, *args):
         pass
 
-      except:
-        self._logger.warn('Caught exception!\n%s', traceback.format_exc())
+    def add(self, thread, unsubscribe=True):
+        # TODO: be nicer
+        if not isinstance(thread, Thread):
+            raise TypeError("not a LensThread stupiD!")
 
-  def _register_thread_signals(self, thread, *args):
-    pass
+        running = len(self.threads) - len(self.pendingThreadArgs)
 
-  def add(self, thread, unsubscribe=True):
-    # TODO: be nicer
-    if not isinstance(thread, Thread):
-      raise TypeError("not a LensThread stupiD!")
+        _pipe = None
+        _thread = ThreadProcess(thread, _pipe, self.queue_in)
 
-    running = len(self.threads) - len(self.pendingThreadArgs)
+        uuid = _thread.uuid
 
-    _pipe = None
-    _thread = ThreadProcess(thread, _pipe, self.queue_in)
+        if uuid not in self.threads:
+            self.threads[uuid] = {
+                't': _thread,
+                'p': _pipe,
+                'u': unsubscribe
+            }
 
-    uuid = _thread.uuid
+            self._register_thread_signals(_thread)
 
-    if uuid not in self.threads:
-      self.threads[uuid] = {
-        't': _thread,
-        'p': _pipe,
-        'u': unsubscribe
-      }
+            state = 'added'
 
-      self._register_thread_signals(_thread)
+            if running < self.maxConcurrentThreads:
+                self._logger.debug("Starting %s" % _thread)
+                self.threads[uuid]['t'].start()
+                state = 'started'
+                self.emit('__thread_%s_started' % (uuid), thread)
 
-      state = 'added'
+            else:
+                self._logger.debug("Queing %s" % thread)
+                self.pendingThreadArgs.append(uuid)
+                state = 'queued'
+                self.emit('__thread_%s_queued' % (uuid), thread)
 
-      if running < self.maxConcurrentThreads:
-        self._logger.debug("Starting %s" % _thread)
-        self.threads[uuid]['t'].start()
-        state = 'started'
-        self.emit('__thread_%s_started' % (uuid), thread)
+            self.emit('__thread_%s_state' % (uuid), thread, state)
 
-      else:
-        self._logger.debug("Queing %s" % thread)
-        self.pendingThreadArgs.append(uuid)
-        state = 'queued'
-        self.emit('__thread_%s_queued' % (uuid), thread)
+    # DEPRECATE:
+    # use add() method instead, remove in reference in 1.0.0
+    def add_thread(self, thread, unsubscribe=True):
+        self._logger.warn('The "add_thread()" method is deprecated, use "add()" instead.')
+        self.add(thread, unsubscribe)
 
-      self.emit('__thread_%s_state' % (uuid), thread, state)
+    def on(self, thread, name, callback):
+        EventEmitter.on(self, '__thread_%s_%s' % (thread.uuid, name), callback)
 
-  # DEPRECATE:
-  # use add() method instead, remove in reference in 1.0.0
-  def add_thread(self, thread, unsubscribe=True):
-    self._logger.warn('The "add_thread()" method is deprecated, use "add()" instead.')
-    self.add(thread, unsubscribe)
-
-  def on(self, thread, name, callback):
-    EventEmitter.on(self, '__thread_%s_%s' % (thread.uuid, name), callback)
-
-  # DEPRECATE:
-  # use on() method instead, remove in 1.0.0
-  def on_thread(self, thread, name, callback):
-    self._logger.warn('The "on_thread()" method is deprecated, use "on()" instead.')
-    self.on(thread, name, callback)
+    # DEPRECATE:
+    # use on() method instead, remove in 1.0.0
+    def on_thread(self, thread, name, callback):
+        self._logger.warn('The "on_thread()" method is deprecated, use "on()" instead.')
+        self.on(thread, name, callback)
 

@@ -19,59 +19,59 @@ import gettext
 import os
 
 class Lang():
-  def __init__(self, app):
+    def __init__(self, app):
 
-    self._app = None
-    self._languages = []
-    self._locale_dir = None
+        self._app = None
+        self._languages = []
+        self._locale_dir = None
 
-    if app is not None:
-      self.bind(app)
+        if app is not None:
+            self.bind(app)
 
-    self._translations = {'raw': {}}
+        self._translations = {'raw': {}}
 
-  def bind(self, app):
-    for ns in app.namespaces:
-      path = os.path.join(ns, 'locales')
+    def bind(self, app):
+        for ns in app.namespaces:
+            path = os.path.join(ns, 'locales')
 
-      if os.path.exists(path):
-        self._locale_dir = path
-        return
+            if os.path.exists(path):
+                self._locale_dir = path
+                return
 
-  def add_string(self, id, *args):
-    self._translations['raw'][id] = list(args)
+    def add_string(self, id, *args):
+        self._translations['raw'][id] = list(args)
 
-  def add_language(self, id):
-    if id in self._translations:
-      return
+    def add_language(self, id):
+        if id in self._translations:
+            return
 
-    self._translations[id] = {}
-    self._languages.append(id)
+        self._translations[id] = {}
+        self._languages.append(id)
 
-  def get(self, id, lang='raw'):
-    s = self._translations.get(lang, self._translations['raw']).get(id, '');
+    def get(self, id, lang='raw'):
+        s = self._translations.get(lang, self._translations['raw']).get(id, '');
 
-    return s
+        return s
 
-  def nget(self, id, count, lang='raw'):
-    s = self._translations.get(lang, self._translations['raw']).get(id, '');
+    def nget(self, id, count, lang='raw'):
+        s = self._translations.get(lang, self._translations['raw']).get(id, '');
 
-    return s
+        return s
 
-  def resolve(self):
-    print('RESOLVING')
+    def resolve(self):
+        print('RESOLVING')
 
-    for l in self._languages:
-      print(l)
-      ll = gettext.translation('sample-app-i18n', localedir=self._locale_dir, languages=[l])
+        for l in self._languages:
+            print(l)
+            ll = gettext.translation('sample-app-i18n', localedir=self._locale_dir, languages=[l])
 
-      for k in self._translations['raw']:
-        print("Key: {0}".format(k))
+            for k in self._translations['raw']:
+                print("Key: {0}".format(k))
 
-        self._translations[l][k] = [ll.gettext(v) for v in self._translations['raw'][k]]
+                self._translations[l][k] = [ll.gettext(v) for v in self._translations['raw'][k]]
 
 
 
-    print(self._translations)
+        print(self._translations)
 
 

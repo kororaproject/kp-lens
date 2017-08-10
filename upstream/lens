@@ -55,11 +55,11 @@ parser_run.add_argument('-p', '--lens-path', dest='lens_path', help='Use custom 
 args = parser.parse_args()
 
 if args.command is None:
-    parser.print_help()
-    sys.exit(1)
+        parser.print_help()
+        sys.exit(1)
 
 if args.directory is None:
-  args.directory = os.getcwd()
+    args.directory = os.getcwd()
 
 app_root      = os.path.abspath(os.path.join(args.directory, args.name))
 data_root     = os.path.join(app_root, 'data')
@@ -77,112 +77,112 @@ basic_css     = os.path.join(css_root, 'app.css')
 basic_js      = os.path.join(js_root, 'app.js')
 
 if args.command == 'generate':
-  if os.path.exists(app_root):
-    if args.force:
-      logger.info('Cleaning up existing project as requested ...')
-      shutil.rmtree(app_root)
+    if os.path.exists(app_root):
+        if args.force:
+            logger.info('Cleaning up existing project as requested ...')
+            shutil.rmtree(app_root)
 
-    else:
-      logger.error('Path already exists: {0})'.format(app_root))
-      sys.exit(1)
+        else:
+            logger.error('Path already exists: {0})'.format(app_root))
+            sys.exit(1)
 
-  logger.info('Building skeleton Lens app: {0} ({1})'.format(args.name, app_root))
+    logger.info('Building skeleton Lens app: {0} ({1})'.format(args.name, app_root))
 
-  logger.info('Building directories ...')
+    logger.info('Building directories ...')
 
-  os.mkdir(app_root)
-  if not args.lite:
-    os.mkdir(data_root)
-    os.mkdir(cache_root)
-    os.mkdir(css_root)
-    os.mkdir(os.path.join(data_root, 'img'))
-    os.mkdir(js_root)
-    os.mkdir(os.path.join(data_root, 'locales'))
+    os.mkdir(app_root)
+    if not args.lite:
+        os.mkdir(data_root)
+        os.mkdir(cache_root)
+        os.mkdir(css_root)
+        os.mkdir(os.path.join(data_root, 'img'))
+        os.mkdir(js_root)
+        os.mkdir(os.path.join(data_root, 'locales'))
 
-  template_dir = '/usr/share/lens-helper'
-  if args.lens_path:
-    template_dir = os.path.join(args.lens_path, 'lens-helper-data')
+    template_dir = '/usr/share/lens-helper'
+    if args.lens_path:
+        template_dir = os.path.join(args.lens_path, 'lens-helper-data')
 
-  if args.lite:
-    template_dir = os.path.join(template_dir, 'lite')
+    if args.lite:
+        template_dir = os.path.join(template_dir, 'lite')
 
-  if not os.path.exists(template_dir):
-    logger.error('Unable to find template directory: {0}'.format(template_dir))
-    sys.exit(1)
+    if not os.path.exists(template_dir):
+        logger.error('Unable to find template directory: {0}'.format(template_dir))
+        sys.exit(1)
 
-  logger.info('Sourcing app templates from: {0}'.format(template_dir))
+    logger.info('Sourcing app templates from: {0}'.format(template_dir))
 
-  components = [
-    {'log': 'Writing app entry point: {0} ...', 'out_file': app_core_main, 'template': 'app.py.template', 'permissions': stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH},
-    {'log': 'Writing skeleton UI (HTML) ...', 'out_file': app_ui_main, 'template': 'app.html.template'},
-    {'log': 'Writing skeleton UI (CSS) ...', 'out_file': basic_css, 'template': 'app.css.template'},
-    {'log': 'Writing skeleton UI (JS) ...', 'out_file': basic_js, 'template': 'app.js.template'},
-  ]
+    components = [
+        {'log': 'Writing app entry point: {0} ...', 'out_file': app_core_main, 'template': 'app.py.template', 'permissions': stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH},
+        {'log': 'Writing skeleton UI (HTML) ...', 'out_file': app_ui_main, 'template': 'app.html.template'},
+        {'log': 'Writing skeleton UI (CSS) ...', 'out_file': basic_css, 'template': 'app.css.template'},
+        {'log': 'Writing skeleton UI (JS) ...', 'out_file': basic_js, 'template': 'app.js.template'},
+    ]
 
-  for component in components:
-    logger.info(component['log'].format(component['out_file']))
+    for component in components:
+        logger.info(component['log'].format(component['out_file']))
 
-    template_file = os.path.join(template_dir, component['template'])
-    if os.path.exists(template_file):
-      with open(component['out_file'], 'w') as f:
-        t = string.Template(open(template_file).read())
-        f.write(t.substitute({'name': args.name}))
+        template_file = os.path.join(template_dir, component['template'])
+        if os.path.exists(template_file):
+            with open(component['out_file'], 'w') as f:
+                t = string.Template(open(template_file).read())
+                f.write(t.substitute({'name': args.name}))
 
-      permissions = component.get('permissions', None)
-      if permissions:
-          os.chmod(component['out_file'], permissions)
+            permissions = component.get('permissions', None)
+            if permissions:
+                    os.chmod(component['out_file'], permissions)
 
 elif args.command == 'package':
-  logger.info('Building skeleton Lens app: {0}'.format(args.name))
+    logger.info('Building skeleton Lens app: {0}'.format(args.name))
 
 
 elif args.command == 'run':
-  if not os.path.exists(app_core_main):
-    logger.error('Unable to find app {0}, path does not exist: {1})'.format(args.name, app_root))
-    sys.exit(1)
+    if not os.path.exists(app_core_main):
+        logger.error('Unable to find app {0}, path does not exist: {1})'.format(args.name, app_root))
+        sys.exit(1)
 
-  # copy environment so we can customise
-  env = os.environ.copy()
+    # copy environment so we can customise
+    env = os.environ.copy()
 
-  # enable debugging
-  env['LENS_DEBUG'] = '1'
+    # enable debugging
+    env['LENS_DEBUG'] = '1'
 
-  # enable inspector as directed
-  if args.inspector:
-    env['LENS_INSPECTOR'] = '1'
+    # enable inspector as directed
+    if args.inspector:
+        env['LENS_INSPECTOR'] = '1'
 
-  if args.toolkit is not None:
-    env['LENS_TOOLKIT'] = args.toolkit
+    if args.toolkit is not None:
+        env['LENS_TOOLKIT'] = args.toolkit
 
-  if args.lens_path is not None:
-    env['PYTHONPATH'] = os.path.abspath(args.lens_path)
+    if args.lens_path is not None:
+        env['PYTHONPATH'] = os.path.abspath(args.lens_path)
 
-  # rebuild CSS cache if it exists
-  if os.path.exists(css_root) and os.path.exists(app_css_cache):
-    logger.info('Rebuilding CSS cache ...')
+    # rebuild CSS cache if it exists
+    if os.path.exists(css_root) and os.path.exists(app_css_cache):
+        logger.info('Rebuilding CSS cache ...')
 
-    css_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(css_root) for f in filenames if f.endswith('.css')]
+        css_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(css_root) for f in filenames if f.endswith('.css')]
 
-    with open(app_css_cache, 'w') as outfile:
-      for css_file in css_files:
-        with open(css_file) as infile:
-          for line in infile:
-            outfile.write(line)
+        with open(app_css_cache, 'w') as outfile:
+            for css_file in css_files:
+                with open(css_file) as infile:
+                    for line in infile:
+                        outfile.write(line)
 
-  # rebuild JS cache if it exists
-  if os.path.exists(js_root) and os.path.exists(app_js_cache):
-    logger.info('Rebuilding JS cache ...')
+    # rebuild JS cache if it exists
+    if os.path.exists(js_root) and os.path.exists(app_js_cache):
+        logger.info('Rebuilding JS cache ...')
 
-    js_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(js_root) for f in filenames if f.endswith('.js')]
+        js_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(js_root) for f in filenames if f.endswith('.js')]
 
-    with open(app_js_cache, 'w') as outfile:
-      for js_file in js_files:
-        with open(js_file) as infile:
-          for line in infile:
-            outfile.write(line)
+        with open(app_js_cache, 'w') as outfile:
+            for js_file in js_files:
+                with open(js_file) as infile:
+                    for line in infile:
+                        outfile.write(line)
 
-  logger.info('Starting Lens app: {0}'.format(args.name))
+    logger.info('Starting Lens app: {0}'.format(args.name))
 
-  # switch path and run
-  os.chdir(app_root)
-  subprocess.run([app_core_main], env=env)
+    # switch path and run
+    os.chdir(app_root)
+    subprocess.run([app_core_main], env=env)

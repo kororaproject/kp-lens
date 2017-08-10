@@ -24,7 +24,7 @@ class MyApp(App):
   def __init__(self):
     App.__init__(self, name="Lens. 3D", inspector=True)
 
-    self.namespaces = ['./sample-data/app-3d']
+    self.namespaces = ['./data']
 
     self.on('close', self._close_app_cb)
 

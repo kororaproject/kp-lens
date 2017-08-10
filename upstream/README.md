@@ -1,8 +1,8 @@
 # Lens SDK
 
-## Running local samples from the repo
+## Running local samples from the repo via the `lens` helper
 
 ```
-$ cd samples
-$ PYTHONPATH=../sdk ./sample-app.py
+$ ./lens run -p sdk/ -d samples/ sample-app
+$ ./lens run -p sdk/ -d samples/ sample-app-3d
 ```

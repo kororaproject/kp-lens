@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="lens-app">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: monospace; font-size: 10px }
+    table { max-width: 100%; border:solid 1px red; table-layout: fixed; }
+    table th { cursor: pointer; }
+    table td {
+      max-width: 256px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 48px;
+    }
+
+    .pid,
+    .ppid {
+      text-align: right;
+    }
+
+    .nice,
+    .priority {
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="unselectable" ng-controller="AppCtrl">
+  <table>
+    <thead>
+      <tr>
+        <th ng-repeat="row in headers" ng-class="selectedClass(row.key)" ng-click="changeSorting(row.key)">{{row.label}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="row in proc|orderBy:sort.column:sort.descending">
+        <td class="{{col.key}}" ng-repeat="col in headers">{{row[col.key]}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script src="lens://js/lens-angular.min.js"></script>
+  <script src="app://js/app-top.js"></script>
+</body>
+</html>

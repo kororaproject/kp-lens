@@ -69,7 +69,7 @@ class ProcTask(Thread):
 app = App(inspector=True, name='LensTop')
 
 # load the app entry page
-app.namespaces.append('./sample-data/app-top')
+app.namespaces.append('./data')
 
 @app.bind('close')
 def _close_app_cb(*args):

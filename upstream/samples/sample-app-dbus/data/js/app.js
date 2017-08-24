@@ -1,5 +1,9 @@
 var app = angular.module('lens-app', ['lens.bridge', 'lens.ui']);
 
+angular.element(document).ready(function () {
+  angular.bootstrap(document, ['lens-app']);
+});
+
 app.controller('AppCtrl', function($scope, $timeout) {
   $scope.hostname = 'unknown';
   $scope.foo = true;

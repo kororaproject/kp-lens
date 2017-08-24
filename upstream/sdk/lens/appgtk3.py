@@ -74,14 +74,18 @@ class _WebView(WebKit2.WebView):
         self.connect('load-changed', self._load_changed_cb)
         self.connect('notify::title', self._title_changed_cb)
 
-        # register custom uri schemes for app:// and lens://
+        # register custom uri schemes for app://, lens://, tmp:// and user://
         context = WebKit2.WebContext.get_default()
-        context.register_uri_scheme('app', self._uri_resource_app_cb)
+        context.register_uri_scheme('app',  self._uri_resource_app_cb)
         context.register_uri_scheme('lens', self._uri_resource_lens_cb)
+        context.register_uri_scheme('tmp',  self._uri_resource_tmp_cb)
+        context.register_uri_scheme('user', self._uri_resource_user_cb)
 
         sm = context.get_security_manager()
         sm.register_uri_scheme_as_cors_enabled('app')
         sm.register_uri_scheme_as_cors_enabled('lens')
+        sm.register_uri_scheme_as_cors_enabled('tmp')
+        sm.register_uri_scheme_as_cors_enabled('user')
 
         #: don't need access to the context menu when not inspecting the app
         if not inspector:
@@ -169,6 +173,30 @@ class _WebView(WebKit2.WebView):
 
         else:
             raise Exception('Lens resource path not found: {0}'.format(path))
+
+    def _uri_resource_tmp_cb(self, request):
+        path = o = request.get_uri().split('?')[0]
+        path = path.replace('tmp://', self._uri_lens_base)
+
+        logger.debug('Loading tmp resource: {0} ({1})'.format(o, path))
+
+        if os.path.exists(path):
+            request.finish(Gio.File.new_for_path(path).read(None), -1, Gio.content_type_guess(path, None)[0])
+
+        else:
+            raise Exception('TMP resource path not found: {0}'.format(path))
+
+    def _uri_resource_user_cb(self, request):
+        path = o = request.get_uri().split('?')[0]
+        path = path.replace('user://', self._uri_lens_base)
+
+        logger.debug('Loading user resource: {0} ({1})'.format(o, path))
+
+        if os.path.exists(path):
+            request.finish(Gio.File.new_for_path(path).read(None), -1, Gio.content_type_guess(path, None)[0])
+
+        else:
+            raise Exception('User resource path not found: {0}'.format(path))
 
     def set_inspector(self, state):
         if state == self.__inspector:
@@ -284,6 +312,14 @@ class ViewGtk3(View):
 
     def set_uri_lens_base(self, uri):
         self._lensview._uri_lens_base = uri
+
+    def timer(self, interval, callback, once=False):
+
+        def _timer_stub():
+            callback()
+            return not once
+
+        return GObject.timeout_add(interval, _timer_stub)
 
     def toggle_window_maximize(self):
         if self._window_state.get("maximized", False):

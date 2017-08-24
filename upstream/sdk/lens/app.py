@@ -90,8 +90,11 @@ class App():
 
         self.__load_toolkit(toolkit, toolkit_hint)
 
-        #: manage directory namespaces for local app data
+        #: manage directory namespaces for app data
         self.namespaces = []
+
+        #: manage directory dataspaces for storing app data
+        self.dataspaces = []
 
     def __get_desktop_hint(self, hint="gnome"):
         def __is_running(process):
@@ -171,8 +174,8 @@ class App():
             'gtk3':         ['lens.appgtk3',         'ViewGtk3'],
             'gtk':          ['lens.appgtk3',         'ViewGtk3'],
             'qt4':          ['lens.appqt4',          'ViewQt4'],
-            'qt':           ['lens.appqt5webengine', 'ViewQt5WebEngine'],
-            'qt5':          ['lens.appqt5webengine', 'ViewQt5WebEngine'],
+            'qt':           ['lens.appqt5webkit',    'ViewQt5WebKit'],
+            'qt5':          ['lens.appqt5webkit',    'ViewQt5WebKit'],
             'qt5webengine': ['lens.appqt5webengine', 'ViewQt5WebEngine'],
             'qt5webkit':    ['lens.appqt5webkit',    'ViewQt5WebKit']
         }
@@ -217,8 +220,8 @@ class App():
             toolkit = self.__get_desktop_toolkit_hint(toolkit_hint.lower())
 
         # attempt to load the preferred
+        logger.debug('Loading {0} toolkit'.format(toolkit.lower()))
         toolkit_klass = App.__get_toolkit(toolkit.lower(), self.custom_toolkits)
-        logger.debug('Using {0} toolkit'.format(toolkit.lower()))
 
         self._lv = toolkit_klass(name=self._app_name, width=self._app_width, height=self._app_height, inspector=self._inspector, start_maximized=self._start_maximized)
 
@@ -389,6 +392,9 @@ class App():
 
         logger.error('Unable to load app.')
         exit(1)
+
+    def timer(self, interval, callback, once=False):
+        self._lv.timer(interval, callback, once=once)
 
     def toggle_window_maximize(self):
         self._lv.toggle_window_maximize()

@@ -18,6 +18,7 @@
 import json
 import logging
 import os
+import pathlib
 import signal
 
 from lens.view import View
@@ -77,8 +78,8 @@ class ThreadManagerQt5(ThreadManager):
 class CustomNetworkAccessManager(QNetworkAccessManager):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self._uri_app_base = ''
-        self._uri_lens_base = ''
+        self._uri_app_base = '/'
+        self._uri_lens_base = '/'
 
     def createRequest(self, operation, request, device):
         path = o = request.url().toString()
@@ -240,6 +241,10 @@ class ViewQt5WebKit(View):
     def emit_js(self, name, *args):
         self._frame.evaluateJavaScript(QString(self._javascript % json.dumps([name] + list(args))))
 
+    def load_string(self, data):
+        index_uri = pathlib.Path(self._cnam._uri_app_base).as_uri()
+        self._lensview.setHtml(data, QUrl(index_uri))
+
     def load_uri(self, uri):
         uri_base = os.path.dirname(uri) + '/'
         self.set_uri_app_base(uri_base)
@@ -266,6 +271,14 @@ class ViewQt5WebKit(View):
 
     def set_uri_lens_base(self, uri):
         self._cnam._uri_lens_base = uri
+
+    def timer(self, interval, callback, once=False):
+        q = QTimer(parent=self._lensview)
+
+        q.timeout.connect(callback)
+        q.start(interval)
+
+        return q.timerId
 
     def toggle_window_maximize(self):
         if self._lensview.windowState() & Qt.WindowMaximized:

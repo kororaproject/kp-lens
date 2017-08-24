@@ -48,7 +48,7 @@ parser_package.add_argument('name')
 parser_run = subparsers.add_parser('run')
 parser_run.add_argument('name')
 parser_run.add_argument('-d', '--directory', dest='directory', help='Destination path to create')
-parser_run.add_argument('-t', '--toolkit', dest='toolkit', choices=['gtk', 'gtk3', 'qt', 'qt5'], help='Set the toolkit hint')
+parser_run.add_argument('-t', '--toolkit', dest='toolkit', choices=['gtk', 'gtk3', 'qt', 'qt5', 'qt5webkit', 'qt5webengine'], help='Set the toolkit hint')
 parser_run.add_argument('-i', '--inspector', action='store_true', dest='inspector', help='Force overwriting existing project')
 parser_run.add_argument('-p', '--lens-path', dest='lens_path', help='Use custom SDK lens path')
 

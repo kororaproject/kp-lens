@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:           lens
-Version:        0.14.1
+Version:        0.15.0
 Release:        1%{?dist}.1
 Summary:        Simple desktop environment agnostic SDK
 
@@ -103,8 +103,8 @@ Group:          Applications/System
 Provides:       python3-%{name}-backend
 Requires:       python3-%{name} = %{version}-%{release}
 Requires:       python3-qt5
-Requires:       python3-qt5-webengine
-Requires:       qt5-qtwebchannel
+Requires:       python3-qt5-webengine python3-qt5-webkit
+Requires:       qt5-qtwebchannel qt5-qtwebkit
 Obsoletes:      python3-%{name}-qt
 
 %description -n python3-%{name}-qt5
@@ -121,6 +121,9 @@ Python 3 API for constructing LENS applications on Qt5 systems
 
 
 %changelog
+* Tue Aug 22 2017 Ian Firns <firnsy@kororaproject.org> 0.15.0-1
+- Updated core libs and use qt5webkit by default due to bug in qt5 webengine.
+
 * Wed Aug  2 2017 Ian Firns <firnsy@kororaproject.org> 0.14.0-1
 - Initial lens helper and folder re-org.
 

@@ -300,6 +300,14 @@ class ViewQt5WebEngine(View, QObject):
     def set_uri_lens_base(self, uri):
         self._lens_scheme_handler._uri_lens_base = pathlib.Path(uri).as_uri() + "/"
 
+    def timer(self, interval, callback, once=False):
+        q = QTimer(parent=self._lensview)
+
+        q.timeout.connect(callback)
+        q.start(interval)
+
+        return q.timerId
+
     def toggle_window_maximize(self):
         if self._lensview.windowState() & Qt.WindowMaximized:
             self._lensview.setWindowState(self._lensview.windowState() ^ Qt.WindowMaximized)

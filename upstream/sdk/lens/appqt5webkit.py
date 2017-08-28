@@ -78,8 +78,6 @@ class ThreadManagerQt5(ThreadManager):
 class CustomNetworkAccessManager(QNetworkAccessManager):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self._uri_app_base = '/'
-        self._uri_lens_base = '/'
 
     def createRequest(self, operation, request, device):
         path = o = request.url().toString().split('?')[0]
@@ -117,6 +115,8 @@ class CustomNetworkAccessManager(QNetworkAccessManager):
 
         elif path.startswith('file://'):
             path = path.replace('file://', '')
+
+            logger.debug('Loading resource: {0} ({1})'.format(o, path))
 
         if not os.path.exists(path):
             raise Exception('Resource path not found: {0}'.format(path))

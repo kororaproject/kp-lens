@@ -77,39 +77,43 @@ class ThreadManagerQt5(ThreadManager):
         return True
 
 
+class RequestInterceptor(QWebEngineUrlRequestInterceptor):
+    def interceptRequest(self, info):
+        pass
+
+
 class AppSchemeHandler(QWebEngineUrlSchemeHandler):
     def __init__(self,):
         super().__init__()
-        self._uri_app_base = '/'
 
     def requestStarted(self, request):
         path = o = request.requestUrl().toString()
         if path == 'app:///':
             path = self._uri_app_base + 'app.html'
-            logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
         elif path.startswith('app://'):
             path = path.replace('app://', self._uri_app_base)
-            logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
             # variable substitution
             path = path.replace('$backend', 'qt5')
 
+        logger.debug('Loading app resource: {0} ({1})'.format(o, path))
+
         request.redirect(QUrl(QString(path)))
+
 
 class LensSchemeHandler(QWebEngineUrlSchemeHandler):
     def __init__(self):
         super().__init__()
-        self._uri_lens_base = '/'
 
     def requestStarted(self, request):
         path = o = request.requestUrl().toString()
         path = path.replace('lens://', self._uri_lens_base)
 
+        # make lens.css backend specific
         path = path.replace('lens.css', 'lens-qt5webengine.css')
 
         logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
-
 
         request.redirect(QUrl(QString(path)))
 
@@ -186,8 +190,10 @@ class ViewQt5WebEngine(View, QObject):
 
         # build webchannel script and inject
         qwebchannel_js = QFile(':/qtwebchannel/qwebchannel.js')
+
         if not qwebchannel_js.open(QIODevice.ReadOnly):
-                raise SystemExit('Failed to load qwebchannel.js with error: %s' % qwebchannel_js.errorString())
+            raise SystemExit('Failed to load qwebchannel.js with error: %s' % qwebchannel_js.errorString())
+
         qwebchannel_js = bytes(qwebchannel_js.readAll()).decode('utf-8')
 
         script = QWebEngineScript()
@@ -221,9 +227,13 @@ class ViewQt5WebEngine(View, QObject):
         self._app_scheme_handler = AppSchemeHandler()
         self._lens_scheme_handler = LensSchemeHandler()
 
+        self._interceptor = RequestInterceptor()
+
         self._profile = QWebEngineProfile().defaultProfile()
         self._profile.installUrlSchemeHandler('app'.encode(), self._app_scheme_handler)
         self._profile.installUrlSchemeHandler('lens'.encode(), self._lens_scheme_handler)
+
+        self._profile.setRequestInterceptor(self._interceptor)
 
         # connect to Lens signals
         self.on('__close_app', self._close_cb)
@@ -279,7 +289,7 @@ class ViewQt5WebEngine(View, QObject):
         stream = QFile(path)
         if stream.open(QFile.ReadOnly):
             data = str(stream.readAll(), 'utf-8')
-            index_uri = pathlib.Path(uri_base).as_uri()
+            index_uri = pathlib.Path(uri_base).as_uri() + os.sep
             logger.debug('Using {0} as index URI'.format(index_uri))
             self._lensview.setHtml(data, QUrl(index_uri))
 

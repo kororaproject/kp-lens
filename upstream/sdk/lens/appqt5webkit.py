@@ -82,29 +82,46 @@ class CustomNetworkAccessManager(QNetworkAccessManager):
         self._uri_lens_base = '/'
 
     def createRequest(self, operation, request, device):
-        path = o = request.url().toString()
+        path = o = request.url().toString().split('?')[0]
 
-        if path.startswith('app://') or path.startswith('lens://'):
+        if path.startswith('app://'):
             if path == 'app:///':
-                path = 'file://' + self._uri_app_base + 'app.html'
-                logger.debug('Loading app resource: {0} ({1})'.format(o, path))
+                path = self._uri_app_base + 'app.html'
 
-            elif path.startswith('app://'):
-                path = path.replace('app://', 'file://' + self._uri_app_base)
+            else:
+                path = path.replace('app://', self._uri_app_base)
                 logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
                 # variable substitution
                 path = path.replace('$backend', 'qt5')
 
-            elif path.startswith('lens://'):
-                path = path.replace('lens://', 'file://' + self._uri_lens_base)
-                logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
+            logger.debug('Loading app resource: {0} ({1})'.format(o, path))
 
-                # make lens.css backend specific
-                path = path.replace('lens.css', 'lens-qt5.css')
+        elif path.startswith('lens://'):
+            path = path.replace('lens://', self._uri_lens_base)
 
-            request.setUrl(QUrl(QString(path)))
+            # make lens.css backend specific
+            path = path.replace('lens.css', 'lens-qt5.css')
 
+            logger.debug('Loading lens resource: {0} ({1})'.format(o, path))
+
+        elif path.startswith('tmp://'):
+            path = path.replace('tmp://', self._uri_lens_base)
+
+            logger.debug('Loading tmp resource: {0} ({1})'.format(o, path))
+
+        elif path.startswith('user://'):
+            path = path.replace('user://', self._uri_lens_base)
+
+            logger.debug('Loading tmp resource: {0} ({1})'.format(o, path))
+
+        elif path.startswith('file://'):
+            path = path.replace('file://', '')
+
+        if not os.path.exists(path):
+            raise Exception('Resource path not found: {0}'.format(path))
+
+        request.setUrl(QUrl(QString('file://' + path)))
         return QNetworkAccessManager.createRequest(self, operation, request, device)
 
 

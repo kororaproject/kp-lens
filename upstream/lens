@@ -157,8 +157,14 @@ elif args.command == 'run':
     if args.lens_path is not None:
         env['PYTHONPATH'] = os.path.abspath(args.lens_path)
 
+    # show paths being used
+    print("CSS root:  {}".format(css_root))
+    print("CSS cache: {}".format(app_css_cache))
+    print("JS root:   {}".format(css_root))
+    print("JS cache:  {}".format(app_js_cache))
+
     # rebuild CSS cache if it exists
-    if os.path.exists(css_root) and os.path.exists(app_css_cache):
+    if os.path.exists(css_root):
         logger.info('Rebuilding CSS cache ...')
 
         css_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(css_root) for f in filenames if f.endswith('.css')]
@@ -170,7 +176,7 @@ elif args.command == 'run':
                         outfile.write(line)
 
     # rebuild JS cache if it exists
-    if os.path.exists(js_root) and os.path.exists(app_js_cache):
+    if os.path.exists(js_root):
         logger.info('Rebuilding JS cache ...')
 
         js_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(js_root) for f in filenames if f.endswith('.js')]

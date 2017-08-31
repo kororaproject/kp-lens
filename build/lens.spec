@@ -1,8 +1,8 @@
 %global debug_package %{nil}
 
 Name:           lens
-Version:        0.15.0
-Release:        1%{?dist}.1
+Version:        0.15.2
+Release:        1%{?dist}
 Summary:        Simple desktop environment agnostic SDK
 
 License:        LGPLv3+
@@ -39,7 +39,7 @@ cd sdk
 
 cp -a lens-data/*  %{buildroot}%{_datadir}/%{name}/
 
-for f in __init__.py app.py appgtk3.py appqt4.py appqt5webengine.py system.py thread.py view.py
+for f in __init__.py app.py appgtk3.py appqt4.py appqt5webkit.py appqt5webengine.py system.py thread.py view.py
 do
   install -m 0644 lens/${f} %{buildroot}%{python3_sitelib}/lens/${f}
 done
@@ -111,6 +111,8 @@ Obsoletes:      python3-%{name}-qt
 Python 3 API for constructing LENS applications on Qt5 systems
 
 %files -n python3-%{name}-qt5
+%{python3_sitelib}/lens/appqt5webkit.py
+%{python3_sitelib}/lens/__pycache__/appqt5webkit.*.py*
 %{python3_sitelib}/lens/appqt5webengine.py
 %{python3_sitelib}/lens/__pycache__/appqt5webengine.*.py*
 
@@ -121,6 +123,9 @@ Python 3 API for constructing LENS applications on Qt5 systems
 
 
 %changelog
+* Thu Aug 31 2017 Ian Firns <firnsy@kororaproject.org> 0.15.2-1
+- Switch to webkit by default on Qt.
+
 * Tue Aug 22 2017 Ian Firns <firnsy@kororaproject.org> 0.15.0-1
 - Updated core libs and use qt5webkit by default due to bug in qt5 webengine.
 

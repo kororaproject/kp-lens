@@ -180,18 +180,5 @@ class ThreadManager(EventEmitter):
 
             self.emit('__thread_%s_state' % (uuid), thread, state)
 
-    # DEPRECATE:
-    # use add() method instead, remove in reference in 1.0.0
-    def add_thread(self, thread, unsubscribe=True):
-        self._logger.warn('The "add_thread()" method is deprecated, use "add()" instead.')
-        self.add(thread, unsubscribe)
-
     def on(self, thread, name, callback):
         EventEmitter.on(self, '__thread_%s_%s' % (thread.uuid, name), callback)
-
-    # DEPRECATE:
-    # use on() method instead, remove in 1.0.0
-    def on_thread(self, thread, name, callback):
-        self._logger.warn('The "on_thread()" method is deprecated, use "on()" instead.')
-        self.on(thread, name, callback)
-

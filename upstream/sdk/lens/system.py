@@ -18,6 +18,8 @@
 import locale
 import os
 import re
+import configparser
+import itertools
 
 class System():
     def __init__(self):
@@ -52,7 +54,7 @@ class System():
             'codename': 'Unknown',
             'desktop':  'Unknown',
             'version':  'Unknown',
-            'live':     (os.getenv('LOGNAME') == 'liveuser'),
+            'live':     (os.getenv('LOGNAME') in ['liveuser', 'linux']),
         }
         self._build_dist_info()
 
@@ -106,22 +108,22 @@ class System():
 
     def _build_dist_info(self):
         try:
-            p = open('/etc/redhat-release', 'r')
-            distinfo = p.read()
-            p.close()
-            m = re.search('(.+) release (\d+) \((.*)\)', distinfo)
-            if m:
-                self._distribution['name'] =     m.group(1)
-                self._distribution['codename'] = m.group(3)
-                self._distribution['version'] =  m.group(2)
+            with open("/etc/os-release") as os_release_file:
+               conf = configparser.ConfigParser()
+               conf.read_file(itertools.chain(["[os-release]"], os_release_file))
+               os_release = conf["os-release"]
+            self._distribution['name'] = os_release.get("NAME")
+            self._distribution['codename'] = os_release.get("CODENAME")
+            self._distribution['version'] = os_release.get("PRETTY_NAME").replace('"', '').strip()
 
-            # store desktop session
+             #store desktop session
             if 'DESKTOP_SESSION' in os.environ and not 'default' in os.environ['DESKTOP_SESSION'].lower():
                 if 'plasma' in os.environ['DESKTOP_SESSION'].lower():
-                    self._distribution['desktop'] = 'KDE PLASMA'
-
+                    self._distribution['desktop'] = 'KDE Plasma'
+                elif os.environ['DESKTOP_SESSION'].lower().startswith("gnome"):
+                    self._distribution['desktop'] = 'Gnome'
                 else:
-                    self._distribution['desktop'] = os.environ['DESKTOP_SESSION'].upper()
+                    self._distribution['desktop'] = os.environ['DESKTOP_SESSION'].capitalize()
 
             elif 'GDMSESSION' in os.environ and not 'default' in os.environ['GDMSESSION']:
                 self._distribution['desktop'] = os.environ['GDMSESSION'].upper()
@@ -129,8 +131,8 @@ class System():
             elif 'XDG_CURRENT_DESKTOP' in os.environ and not 'default' in os.environ['XDG_CURRENT_DESKTOP']:
                 self._distribution['desktop'] = os.environ['XDG_CURRENT_DESKTOP'].upper()
 
-            # store we are a live CD session
-            self._distribution['live'] = (os.getlogin() == 'liveuser')
+           # store we are a live CD session
+            self._distribution['live'] = (os.getlogin() in ['liveuser', 'linux'])
 
         except:
             pass
